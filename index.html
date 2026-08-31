@@ -75,6 +75,11 @@
         <option value="sightseeing">Sightseeing</option>
         <option value="dining">Dining</option>
         <option value="outdoors">Outdoors</option>
+        <option value="skyscrapers">Skyscrapers</option>
+        <option value="museums-culture">Museums & Culture</option>
+        <option value="entertainment-nightlife">Entertainment & Nightlife</option>
+        <option value="shopping">Shopping</option>
+        <option value="viewpoints-photography">Viewpoints & Photography</option>
       </select>
     </div>
     <div class="field">
@@ -87,8 +92,21 @@
       <input type="text" id="placeAddress" placeholder="Street, city">
     </div>
     <div class="field">
-      <label for="placeTime">Time</label>
-      <input type="text" id="placeTime" placeholder="e.g. 9:00 AM">
+      <label for="placeTimeFrom">Hours</label>
+      <div class="time-range-row">
+        <input type="time" id="placeTimeFrom" aria-label="Opening time">
+        <span class="time-range-sep">–</span>
+        <input type="time" id="placeTimeTo" aria-label="Closing time">
+      </div>
+      <label class="checkbox-inline">
+        <input type="checkbox" id="placeAllDay" onchange="handleAllDayToggle()">
+        Open 24 hours / no fixed closing time
+      </label>
+      <label class="checkbox-inline">
+        <input type="checkbox" id="placeHoursVary" onchange="handleHoursVaryToggle()">
+        Hours vary by day / closed some days
+      </label>
+      <div class="day-hours-editor" id="dayHoursEditor" style="display:none;"></div>
     </div>
     <div class="field">
       <label for="placeCost">Cost ($)</label>
@@ -108,9 +126,9 @@
       <input type="text" id="placeTravelNext" placeholder="e.g. ~15 min drive">
     </div>
     <div class="field half-width">
-      <label for="placeImage">Cover photo URL <span class="hint">(optional)</span></label>
+      <label for="placeImage">Cover photo <span class="hint">(optional — paste an image URL)</span></label>
       <div class="image-input-row">
-        <input type="text" id="placeImage" placeholder="e.g. images/lighthouse.jpg or https://..." oninput="handleImageUrlInput()">
+        <input type="text" id="placeImage" placeholder="https://..." oninput="handleImageUrlInput()">
         <div class="image-preview-wrap">
           <img id="imagePreview" class="image-preview" alt="Preview" onerror="this.style.display='none'">
         </div>
@@ -142,6 +160,11 @@
         <button class="pill-btn" data-filter="sightseeing">Sightseeing</button>
         <button class="pill-btn" data-filter="dining">Dining</button>
         <button class="pill-btn" data-filter="outdoors">Outdoors</button>
+        <button class="pill-btn" data-filter="skyscrapers">Skyscrapers</button>
+        <button class="pill-btn" data-filter="museums-culture">Museums & Culture</button>
+        <button class="pill-btn" data-filter="entertainment-nightlife">Entertainment & Nightlife</button>
+        <button class="pill-btn" data-filter="shopping">Shopping</button>
+        <button class="pill-btn" data-filter="viewpoints-photography">Viewpoints & Photography</button>
       </div>
     </div>
     <div class="toolbar-right">

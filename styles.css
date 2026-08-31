@@ -23,6 +23,16 @@
     --tag-sightseeing-soft:#eaf0fe;
     --tag-outdoors:#16a34a;
     --tag-outdoors-soft:#eaf7ef;
+    --tag-skyscrapers:#64748b;
+    --tag-skyscrapers-soft:#eef1f4;
+    --tag-museums:#7c3aed;
+    --tag-museums-soft:#f3ecfd;
+    --tag-entertainment:#db2777;
+    --tag-entertainment-soft:#fceaf3;
+    --tag-shopping:#ca8a04;
+    --tag-shopping-soft:#fdf8e1;
+    --tag-viewpoints:#0891b2;
+    --tag-viewpoints-soft:#e6f6f9;
 
     --radius-lg:18px;
     --radius-md:12px;
@@ -252,14 +262,32 @@
   .full-width{ grid-column:1/-1; }
   .half-width{ grid-column:span 2; }
 
-  .image-input-row{ display:flex; align-items:center; gap:0.75rem; }
-  input[type="file"]{ padding:0.5rem 0.6rem; font-size:0.85rem; cursor:pointer; }
-  input[type="file"]::file-selector-button{
-    background-color:var(--surface); color:var(--text-main); border:1px solid var(--border);
-    border-radius:6px; padding:0.4rem 0.7rem; font-family:'Inter',sans-serif; font-size:0.82rem;
-    font-weight:600; margin-right:0.7rem; cursor:pointer;
+  .time-range-row{ display:flex; align-items:center; gap:0.4rem; }
+  .time-range-row input[type="time"]{ min-width:0; flex:1 1 0; }
+  .time-range-sep{ color:var(--text-faint); font-weight:600; flex-shrink:0; }
+
+  .checkbox-inline{
+    display:flex; align-items:center; gap:0.4rem; margin-top:0.15rem;
+    font-size:0.76rem; color:var(--text-muted); font-weight:500; cursor:pointer; user-select:none;
   }
-  input[type="file"]::file-selector-button:hover{ background-color:var(--surface-alt); }
+  .checkbox-inline input{ width:auto; accent-color:var(--accent); cursor:pointer; }
+
+  .day-hours-editor{
+    display:flex; flex-direction:column; gap:0.4rem; margin-top:0.5rem;
+    padding:0.65rem 0.7rem; background:var(--surface-alt); border:1px solid var(--border); border-radius:var(--radius-sm);
+  }
+  .day-hours-row{ display:flex; align-items:center; gap:0.5rem; }
+  .day-hours-row .day-hours-label{ width:2.4rem; flex-shrink:0; font-size:0.78rem; font-weight:700; color:var(--text-muted); }
+  .day-hours-row .checkbox-inline{ margin-top:0; flex-shrink:0; }
+  .day-hours-row input[type="time"]{ flex:1 1 0; min-width:0; padding:0.4rem 0.5rem; font-size:0.82rem; }
+  .day-hours-row .day-hours-sep{ color:var(--text-faint); font-weight:600; flex-shrink:0; font-size:0.8rem; }
+  .day-hours-row input[type="time"]:disabled{ opacity:0.5; }
+
+  .card-meta-line.hours-detail{ color:var(--text-muted); font-size:0.78rem; line-height:1.5; }
+  .route-cost.hours-detail{ font-weight:500; color:var(--text-muted); font-size:0.78rem; }
+
+  .image-input-row{ display:flex; align-items:center; gap:0.75rem; }
+  .image-input-row input[type="text"]{ flex:1 1 auto; }
 
   .image-preview-wrap{ position:relative; width:42px; height:42px; flex-shrink:0; }
   .image-preview{ width:42px; height:42px; border-radius:8px; object-fit:cover; border:1px solid var(--border); display:none; background-color:var(--surface-alt); }
@@ -297,7 +325,7 @@
   #searchInput{ width:200px; padding-left:2.1rem; background:var(--surface); }
 
   .filter-group, .view-toggle{
-    display:inline-flex; background:var(--surface); border:1px solid var(--border);
+    display:inline-flex; flex-wrap:wrap; background:var(--surface); border:1px solid var(--border);
     border-radius:999px; padding:0.25rem; gap:0.2rem;
   }
   .pill-btn{
@@ -425,6 +453,11 @@
   .tag-dining{ background-color:var(--tag-dining-soft); color:var(--tag-dining); }
   .tag-sightseeing{ background-color:var(--tag-sightseeing-soft); color:var(--tag-sightseeing); }
   .tag-outdoors{ background-color:var(--tag-outdoors-soft); color:var(--tag-outdoors); }
+  .tag-skyscrapers{ background-color:var(--tag-skyscrapers-soft); color:var(--tag-skyscrapers); }
+  .tag-museums-culture{ background-color:var(--tag-museums-soft); color:var(--tag-museums); }
+  .tag-entertainment-nightlife{ background-color:var(--tag-entertainment-soft); color:var(--tag-entertainment); }
+  .tag-shopping{ background-color:var(--tag-shopping-soft); color:var(--tag-shopping); }
+  .tag-viewpoints-photography{ background-color:var(--tag-viewpoints-soft); color:var(--tag-viewpoints); }
 
   /* Category tag lives on the image now, not squeezed into the header row
      next to the time — so it never crowds or clips the stop time. */

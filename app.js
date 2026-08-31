@@ -305,11 +305,190 @@
   // (or returning it unchanged) if it isn't a two-part range.
   function formatTimeDisplay(raw) {
     if (!raw) return '';
+    if (/^24h$/i.test(raw.trim())) return 'Open 24 hours';
     const parts = raw.split(/\s*(?:–|—|-|\bto\b)\s*/i).filter(Boolean);
     if (parts.length === 2) {
       return `${formatClockTime(parts[0])} – ${formatClockTime(parts[1])}`;
     }
     return formatClockTime(raw);
+  }
+
+  // Converts a single time string ("9:30am", "21:00", "9:30 PM", already
+  // 24-hour "HH:MM", etc.) into the "HH:MM" 24-hour form <input type="time">
+  // expects. Returns '' if it isn't recognizable as a time.
+  function toInputTime(raw) {
+    const s = (raw || '').trim();
+    let m = s.match(/^(\d{1,2}):(\d{2})$/);
+    if (m) {
+      const h = parseInt(m[1], 10);
+      if (h >= 0 && h <= 23) return `${String(h).padStart(2, '0')}:${m[2]}`;
+    }
+    m = s.match(/^(\d{1,2})(?::(\d{2}))?\s*([ap]\.?m\.?)$/i);
+    if (m) {
+      let h = parseInt(m[1], 10) % 12;
+      if (m[3].toLowerCase().startsWith('p')) h += 12;
+      return `${String(h).padStart(2, '0')}:${(m[2] || '00').padStart(2, '0')}`;
+    }
+    return '';
+  }
+
+  // Reads whatever is currently stored in place.time — our own
+  // standardized "24h" / "HH:MM" / "HH:MM-HH:MM", or older free-text like
+  // "9:00 to 12:00" or "24 hours a day" — and splits it back into the
+  // { allDay, from, to } shape the edit form's fields use.
+  function parseStoredTime(raw) {
+    const result = { allDay: false, from: '', to: '' };
+    const t = (raw || '').trim();
+    if (!t) return result;
+    if (/^24h$/i.test(t) || /24\s*hours?(\s*a\s*day)?/i.test(t)) { result.allDay = true; return result; }
+    const parts = t.split(/\s*(?:–|—|-|\bto\b)\s*/i).filter(Boolean);
+    if (parts.length >= 2) {
+      result.from = toInputTime(parts[0]);
+      result.to = toInputTime(parts[1]);
+    } else if (parts.length === 1) {
+      result.from = toInputTime(parts[0]);
+    }
+    return result;
+  }
+
+  /* ============ Hours that vary by day (some days closed, different times) ============ */
+  const DAY_ORDER = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+  const DAY_LABELS = { mon: 'Mon', tue: 'Tue', wed: 'Wed', thu: 'Thu', fri: 'Fri', sat: 'Sat', sun: 'Sun' };
+
+  function daySignature(entry) {
+    if (!entry || entry.closed || (!entry.from && !entry.to)) return 'closed';
+    return `${entry.from || ''}|${entry.to || ''}`;
+  }
+
+  // Turns { mon:{from,to}, tue:{closed:true}, ... } into a compact string
+  // like "Mon–Fri 9:00 AM – 5:00 PM, Sat–Sun Closed", grouping consecutive
+  // days that share the same hours (or are both closed) into one range.
+  function formatHoursByDay(hoursByDay) {
+    if (!hoursByDay) return '';
+    const groups = [];
+    DAY_ORDER.forEach(day => {
+      const sig = daySignature(hoursByDay[day]);
+      const last = groups[groups.length - 1];
+      if (last && last.sig === sig) last.days.push(day);
+      else groups.push({ sig, days: [day] });
+    });
+    return groups.map(g => {
+      const label = g.days.length > 1 ? `${DAY_LABELS[g.days[0]]}–${DAY_LABELS[g.days[g.days.length - 1]]}` : DAY_LABELS[g.days[0]];
+      let hoursText = 'Closed';
+      if (g.sig !== 'closed') {
+        const [from, to] = g.sig.split('|');
+        hoursText = from && to ? `${formatClockTime(from)} – ${formatClockTime(to)}` : formatClockTime(from || to);
+      }
+      return `${label} ${hoursText}`;
+    }).join(', ');
+  }
+
+  // Builds the 7 day rows (checkbox + from/to) inside #dayHoursEditor. Only
+  // needs to run once — rows are read/written directly afterward.
+  function buildDayHoursRows() {
+    const container = document.getElementById('dayHoursEditor');
+    if (!container || container.dataset.built) return;
+    container.innerHTML = DAY_ORDER.map(day => `
+      <div class="day-hours-row" data-day="${day}">
+        <span class="day-hours-label">${DAY_LABELS[day]}</span>
+        <label class="checkbox-inline">
+          <input type="checkbox" class="day-closed-cb" onchange="handleDayClosedToggle('${day}')">
+          Closed
+        </label>
+        <input type="time" class="day-from-input" aria-label="${DAY_LABELS[day]} opening time">
+        <span class="day-hours-sep">–</span>
+        <input type="time" class="day-to-input" aria-label="${DAY_LABELS[day]} closing time">
+      </div>
+    `).join('');
+    container.dataset.built = '1';
+  }
+
+  function handleDayClosedToggle(day) {
+    const row = document.querySelector(`.day-hours-row[data-day="${day}"]`);
+    if (!row) return;
+    const closed = row.querySelector('.day-closed-cb').checked;
+    const from = row.querySelector('.day-from-input');
+    const to = row.querySelector('.day-to-input');
+    from.disabled = closed; to.disabled = closed;
+    if (closed) { from.value = ''; to.value = ''; }
+  }
+
+  function handleHoursVaryToggle() {
+    buildDayHoursRows();
+    const varies = document.getElementById('placeHoursVary').checked;
+    document.getElementById('dayHoursEditor').style.display = varies ? 'flex' : 'none';
+    document.getElementById('placeTimeFrom').disabled = varies || document.getElementById('placeAllDay').checked;
+    document.getElementById('placeTimeTo').disabled = varies || document.getElementById('placeAllDay').checked;
+    document.getElementById('placeAllDay').disabled = varies;
+    if (varies) {
+      document.getElementById('placeTimeFrom').value = '';
+      document.getElementById('placeTimeTo').value = '';
+    }
+  }
+
+  // Reads the 7 day rows into { mon:{from,to}|{closed:true}, ... }, or null
+  // if the "varies by day" checkbox isn't checked.
+  function readHoursByDayFromForm() {
+    if (!document.getElementById('placeHoursVary').checked) return null;
+    const result = {};
+    DAY_ORDER.forEach(day => {
+      const row = document.querySelector(`.day-hours-row[data-day="${day}"]`);
+      if (!row) return;
+      const closed = row.querySelector('.day-closed-cb').checked;
+      if (closed) { result[day] = { closed: true }; return; }
+      const from = row.querySelector('.day-from-input').value;
+      const to = row.querySelector('.day-to-input').value;
+      result[day] = { from, to };
+    });
+    return result;
+  }
+
+  // Populates the checkbox + 7 rows from a stored hoursByDay object (or
+  // clears/hides them when hoursByDay is null).
+  function setHoursByDayForm(hoursByDay) {
+    buildDayHoursRows();
+    const varyCb = document.getElementById('placeHoursVary');
+    varyCb.checked = !!hoursByDay;
+    document.getElementById('dayHoursEditor').style.display = hoursByDay ? 'flex' : 'none';
+    document.getElementById('placeAllDay').disabled = !!hoursByDay;
+    if (hoursByDay) {
+      document.getElementById('placeTimeFrom').disabled = true;
+      document.getElementById('placeTimeTo').disabled = true;
+    }
+    DAY_ORDER.forEach(day => {
+      const row = document.querySelector(`.day-hours-row[data-day="${day}"]`);
+      if (!row) return;
+      const entry = hoursByDay ? hoursByDay[day] : null;
+      const closed = !!(entry && entry.closed);
+      row.querySelector('.day-closed-cb').checked = closed;
+      const from = row.querySelector('.day-from-input');
+      const to = row.querySelector('.day-to-input');
+      from.value = (entry && !closed) ? (entry.from || '') : '';
+      to.value = (entry && !closed) ? (entry.to || '') : '';
+      from.disabled = closed; to.disabled = closed;
+    });
+  }
+
+  function handleAllDayToggle() {
+    const allDay = document.getElementById('placeAllDay').checked;
+    const from = document.getElementById('placeTimeFrom');
+    const to = document.getElementById('placeTimeTo');
+    from.disabled = allDay;
+    to.disabled = allDay;
+    if (allDay) { from.value = ''; to.value = ''; }
+  }
+
+  // Builds the standardized stored value from the current form fields:
+  // '24h' for all-day, 'HH:MM-HH:MM' for a range, a single 'HH:MM' if only
+  // one side was set, or '' if the hours were left blank entirely.
+  function readTimeFromForm() {
+    if (document.getElementById('placeAllDay').checked) return '24h';
+    const from = document.getElementById('placeTimeFrom').value;
+    const to = document.getElementById('placeTimeTo').value;
+    if (from && to) return `${from}-${to}`;
+    if (from) return from;
+    if (to) return to;
+    return '';
   }
 
   function getVisiblePlaces() {
@@ -474,7 +653,7 @@
     }
   }
 
-  /* ============ Image handling (plain URL, no base64) ============ */
+  /* ============ Image handling (URL, or a picked file downscaled to a data URL) ============ */
   function handleImageUrlInput() {
     const url = document.getElementById('placeImage').value.trim();
     const preview = document.getElementById('imagePreview');
@@ -488,7 +667,7 @@
     const name = document.getElementById('placeName').value.trim();
     const category = document.getElementById('placeCategory').value;
     const day = document.getElementById('placeDay').value.trim();
-    const time = document.getElementById('placeTime').value.trim();
+    const time = readTimeFromForm();
     const address = document.getElementById('placeAddress').value.trim();
     const image = document.getElementById('placeImage').value.trim();
     const cost = document.getElementById('placeCost').value;
@@ -496,6 +675,7 @@
     const desc = document.getElementById('placeDesc').value.trim();
     const packageSel = document.getElementById('placePackage').value;
     const packageId = (packageSel && packageSel !== '__new__') ? packageSel : null;
+    const hoursByDay = readHoursByDayFromForm();
 
     if (!name) return alert('Name is required.');
 
@@ -510,12 +690,14 @@
         p.cost = packageId ? null : (cost === '' ? null : parseFloat(cost));
         p.travelNext = travelNext;
         p.packageId = packageId;
+        p.hoursByDay = hoursByDay;
       }
       showToast('Stop updated');
     } else {
       places.push({
         id: Date.now().toString(), name, category, day, time, address, desc,
-        image: image || null, cost: packageId ? null : (cost === '' ? null : parseFloat(cost)), travelNext, packageId
+        image: image || null, cost: packageId ? null : (cost === '' ? null : parseFloat(cost)), travelNext, packageId,
+        hoursByDay
       });
       showToast('Stop added');
     }
@@ -529,7 +711,13 @@
     document.getElementById('placeName').value = '';
     document.getElementById('placeCategory').value = 'sightseeing';
     document.getElementById('placeDay').value = '';
-    document.getElementById('placeTime').value = '';
+    document.getElementById('placeTimeFrom').value = '';
+    document.getElementById('placeTimeTo').value = '';
+    document.getElementById('placeTimeFrom').disabled = false;
+    document.getElementById('placeTimeTo').disabled = false;
+    document.getElementById('placeAllDay').checked = false;
+    document.getElementById('placeAllDay').disabled = false;
+    setHoursByDayForm(null);
     document.getElementById('placeAddress').value = '';
     document.getElementById('placeCost').value = '';
     document.getElementById('placeTravelNext').value = '';
@@ -554,7 +742,13 @@
     document.getElementById('placeName').value = p.name;
     document.getElementById('placeCategory').value = p.category;
     document.getElementById('placeDay').value = p.day || '';
-    document.getElementById('placeTime').value = p.time || '';
+    const parsedTime = parseStoredTime(p.time || '');
+    document.getElementById('placeAllDay').checked = parsedTime.allDay;
+    document.getElementById('placeTimeFrom').value = parsedTime.allDay ? '' : parsedTime.from;
+    document.getElementById('placeTimeTo').value = parsedTime.allDay ? '' : parsedTime.to;
+    document.getElementById('placeTimeFrom').disabled = parsedTime.allDay;
+    document.getElementById('placeTimeTo').disabled = parsedTime.allDay;
+    setHoursByDayForm(p.hoursByDay || null);
     document.getElementById('placeAddress').value = p.address || '';
     document.getElementById('placeCost').value = p.cost != null ? p.cost : '';
     populatePackageSelect(p.packageId || '');
@@ -885,12 +1079,13 @@
     const lines = visible.map((p, i) => {
       const parts = [`${i + 1}. ${p.name}`];
       if (p.day) parts.push(`[${p.day}]`);
-      if (p.time) parts.push(`@ ${p.time}`);
-      parts.push(`(${p.category})`);
+      if (p.hoursByDay) parts.push(`@ ${formatHoursByDay(p.hoursByDay)}`);
+      else if (p.time) parts.push(`@ ${p.time}`);
+      parts.push(`(${categoryLabel(p.category)})`);
       if (p.packageId) {
         const pkg = packages.find(pk => pk.id === p.packageId);
         parts.push(`- part of "${pkg ? pkg.name : 'package'}"${pkg ? ` ($${(parseFloat(pkg.cost) || 0).toFixed(2)} total)` : ''}`);
-      } else if (p.cost) parts.push(`- $${parseFloat(p.cost).toFixed(2)}`);
+      } else if (p.cost != null && p.cost !== '') parts.push(p.cost == 0 ? '- Free' : `- $${parseFloat(p.cost).toFixed(2)}`);
       let line = parts.join(' ');
       if (p.address) line += `\n   ${p.address}`;
       if (p.desc) line += `\n   ${p.desc}`;
@@ -906,8 +1101,29 @@
   }
 
   /* ============ Rendering ============ */
+  const CATEGORY_LABELS = {
+    sightseeing: 'Sightseeing',
+    dining: 'Dining',
+    outdoors: 'Outdoors',
+    skyscrapers: 'Skyscrapers',
+    'museums-culture': 'Museums & Culture',
+    'entertainment-nightlife': 'Entertainment & Nightlife',
+    shopping: 'Shopping',
+    'viewpoints-photography': 'Viewpoints & Photography'
+  };
+  function categoryLabel(category) { return CATEGORY_LABELS[category] || category; }
+
   function categoryDotColor(category) {
-    return { dining: 'var(--tag-dining)', sightseeing: 'var(--tag-sightseeing)', outdoors: 'var(--tag-outdoors)' }[category];
+    return {
+      dining: 'var(--tag-dining)',
+      sightseeing: 'var(--tag-sightseeing)',
+      outdoors: 'var(--tag-outdoors)',
+      skyscrapers: 'var(--tag-skyscrapers)',
+      'museums-culture': 'var(--tag-museums)',
+      'entertainment-nightlife': 'var(--tag-entertainment)',
+      shopping: 'var(--tag-shopping)',
+      'viewpoints-photography': 'var(--tag-viewpoints)'
+    }[category];
   }
 
   function buildCardEl(place, globalIndex, visible) {
@@ -931,7 +1147,7 @@
     const isLast = idxInVisible === visible.length - 1;
     const isConfirming = confirmingDeleteId === place.id;
 
-    const categoryBadge = `<span class="category-tag card-badge tag-${place.category}">${place.category}</span>`;
+    const categoryBadge = `<span class="category-tag card-badge tag-${place.category}">${categoryLabel(place.category)}</span>`;
     const imageMarkup = (place.image
       ? `<img class="card-image" src="${place.image}" alt="${escapeHtml(place.name)}" draggable="false">`
       : `<div class="card-image-placeholder" draggable="false">
@@ -942,7 +1158,9 @@
     const placePkg = place.packageId ? packages.find(pk => pk.id === place.packageId) : null;
     const costLineHtml = placePkg
       ? `<div class="card-meta-line packaged-line"><span class="included-pill">${escapeHtml(placePkg.name)}</span><span class="package-price">$${(parseFloat(placePkg.cost) || 0).toFixed(2)} <span class="price-note">total</span></span></div>`
-      : (place.cost ? `<div class="card-meta-line cost">$${parseFloat(place.cost).toFixed(2)}</div>` : '');
+      : (place.cost != null && place.cost !== '' ? `<div class="card-meta-line cost">${parseFloat(place.cost) === 0 ? 'Free' : '$' + parseFloat(place.cost).toFixed(2)}</div>` : '');
+    const hoursSummary = place.hoursByDay ? formatHoursByDay(place.hoursByDay) : '';
+    const hoursLineHtml = hoursSummary ? `<div class="card-meta-line hours-detail" title="${escapeHtml(hoursSummary)}">${escapeHtml(hoursSummary)}</div>` : '';
 
     card.innerHTML = `
       ${imageMarkup}
@@ -953,12 +1171,13 @@
               <div class="drag-handle" title="Drag to reorder" aria-hidden="true">
                 <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="5" cy="3" r="1.2" fill="currentColor"/><circle cx="11" cy="3" r="1.2" fill="currentColor"/><circle cx="5" cy="8" r="1.2" fill="currentColor"/><circle cx="11" cy="8" r="1.2" fill="currentColor"/><circle cx="5" cy="13" r="1.2" fill="currentColor"/><circle cx="11" cy="13" r="1.2" fill="currentColor"/></svg>
               </div>
-              <span class="stop-index">${globalIndex + 1}</span>${place.time ? `<span class="stop-time" title="${escapeHtml(place.time)}">${escapeHtml(formatTimeDisplay(place.time))}</span>` : ''}
+              <span class="stop-index">${globalIndex + 1}</span>${hoursSummary ? `<span class="stop-time" title="${escapeHtml(hoursSummary)}">Hours vary by day</span>` : (place.time ? `<span class="stop-time" title="${escapeHtml(place.time)}">${escapeHtml(formatTimeDisplay(place.time))}</span>` : '')}
             </div>
           </div>
           <h3 class="card-title" title="${escapeHtml(place.name)}">${escapeHtml(place.name)}</h3>
         </div>
         <p class="card-desc"${place.desc ? ` title="${escapeHtml(place.desc)}"` : ''}>${escapeHtml(place.desc) || 'No notes added.'}</p>
+        ${hoursLineHtml}
         ${costLineHtml}
         ${mapsUrl ? `<a class="card-address" href="${mapsUrl}" target="_blank" rel="noopener" title="Open in Google Maps">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M12 21s7-7.5 7-12a7 7 0 1 0-14 0c0 4.5 7 12 7 12z" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="9" r="2.2" stroke="currentColor" stroke-width="1.8"/></svg>
@@ -1057,7 +1276,9 @@
       const placePkg = place.packageId ? packages.find(pk => pk.id === place.packageId) : null;
       const costLineHtml = placePkg
         ? `<div class="route-cost packaged-line"><span class="included-pill">${escapeHtml(placePkg.name)}</span><span class="package-price">$${(parseFloat(placePkg.cost) || 0).toFixed(2)} <span class="price-note">total</span></span></div>`
-        : (place.cost ? `<div class="route-cost">$${parseFloat(place.cost).toFixed(2)}</div>` : '');
+        : (place.cost != null && place.cost !== '' ? `<div class="route-cost">${parseFloat(place.cost) === 0 ? 'Free' : '$' + parseFloat(place.cost).toFixed(2)}</div>` : '');
+      const hoursSummary = place.hoursByDay ? formatHoursByDay(place.hoursByDay) : '';
+      const hoursLineHtml = hoursSummary ? `<div class="route-cost hours-detail" title="${escapeHtml(hoursSummary)}">${escapeHtml(hoursSummary)}</div>` : '';
       const item = document.createElement('div');
       item.className = 'route-item';
       item.dataset.id = place.id;
@@ -1075,12 +1296,13 @@
         <div class="route-content">
           <div class="route-meta">
             <span class="stop-index">${gi + 1}</span>
-            <span class="category-tag tag-${place.category}">${place.category}</span>
+            <span class="category-tag tag-${place.category}">${categoryLabel(place.category)}</span>
             ${place.day ? `<span class="stop-time">${escapeHtml(place.day)}</span>` : ''}
-            ${place.time ? `<span class="stop-time" title="${escapeHtml(place.time)}">${escapeHtml(formatTimeDisplay(place.time))}</span>` : ''}
+            ${hoursSummary ? `<span class="stop-time" title="${escapeHtml(hoursSummary)}">Hours vary by day</span>` : (place.time ? `<span class="stop-time" title="${escapeHtml(place.time)}">${escapeHtml(formatTimeDisplay(place.time))}</span>` : '')}
           </div>
           <h4 class="route-title" title="${escapeHtml(place.name)}">${escapeHtml(place.name)}</h4>
           <p class="route-desc"${place.desc ? ` title="${escapeHtml(place.desc)}"` : ''}>${escapeHtml(place.desc) || (place.address ? escapeHtml(place.address) : '')}</p>
+          ${hoursLineHtml}
           ${costLineHtml}
         </div>
       `;
