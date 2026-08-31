@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Itinerary Planner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="page">
+
+  <div class="topbar">
+    <div class="logo-mark">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2L4 7v10l8 5 8-5V7l-8-5z" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/>
+        <path d="M12 2v20M4 7l8 5 8-5" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="topbar-text">
+      <span class="brand">Waypoint</span>
+      <span class="brand-sub">Trip planning</span>
+    </div>
+    <div class="save-indicator" id="saveIndicator"><span class="dot"></span><span id="saveText">Saved</span></div>
+  </div>
+
+  <div class="header">
+    <h1 id="tripHeading">Trip itinerary</h1>
+    <p>Add the places you want to visit, then drag cards by the handle (or use the arrows) to set your route.</p>
+  </div>
+
+  <div class="trip-bar">
+    <div class="trip-select-wrap">
+      <select id="tripSelect" aria-label="Select trip"></select>
+      <button class="icon-text-btn" onclick="createTrip()" title="New trip">+ New</button>
+      <button class="icon-text-btn" onclick="renameTrip()" title="Rename trip">Rename</button>
+      <button class="icon-text-btn danger" onclick="deleteTrip()" title="Delete trip">Delete</button>
+    </div>
+    <label class="shared-toggle">
+      <input type="checkbox" id="sharedToggle" onchange="toggleShared()">
+      Shared trip
+    </label>
+    <span class="shared-badge" id="sharedBadge">Visible to all users</span>
+    <span class="budget-total" id="budgetTotal"><span>Est. total</span>$0</span>
+    <div class="trip-bar-right">
+      <button class="icon-text-btn" onclick="exportJson()">Export JSON</button>
+      <button class="icon-text-btn" onclick="document.getElementById('importInput').click()">Import JSON</button>
+      <input type="file" id="importInput" accept="application/json" style="display:none;" onchange="importJson(event)">
+      <button class="icon-text-btn" onclick="resetToSample()">Reset to sample</button>
+      <button class="icon-text-btn danger" onclick="clearAllStops()">Clear all</button>
+    </div>
+  </div>
+
+  <div class="packages-bar" id="packagesBar" style="display:none;">
+    <span class="packages-label">Packages</span>
+    <div class="packages-list" id="packagesList"></div>
+    <button class="icon-text-btn" onclick="createPackage()" title="Create a new package">+ New package</button>
+  </div>
+
+  <div class="control-panel" id="controlPanel">
+    <div class="control-panel-title">
+      <h2 id="formTitle">Add a stop</h2>
+      <span class="edit-badge" id="editBadge" style="display:none;">Editing</span>
+    </div>
+
+    <div class="field half-width">
+      <label for="placeName">Attraction name</label>
+      <input type="text" id="placeName" placeholder="e.g. Montauk Point Lighthouse" required>
+    </div>
+    <div class="field">
+      <label for="placeCategory">Category</label>
+      <select id="placeCategory">
+        <option value="sightseeing">Sightseeing</option>
+        <option value="dining">Dining</option>
+        <option value="outdoors">Outdoors</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="placeDay">Day</label>
+      <input type="text" id="placeDay" placeholder="e.g. Day 1">
+    </div>
+
+    <div class="field half-width">
+      <label for="placeAddress">Address</label>
+      <input type="text" id="placeAddress" placeholder="Street, city">
+    </div>
+    <div class="field">
+      <label for="placeTime">Time</label>
+      <input type="text" id="placeTime" placeholder="e.g. 9:00 AM">
+    </div>
+    <div class="field">
+      <label for="placeCost">Cost ($)</label>
+      <input type="number" id="placeCost" placeholder="0" min="0" step="0.01">
+    </div>
+    <div class="field full-width">
+      <label for="placePackage">Package <span class="hint">(optional — group stops that share one price)</span></label>
+      <select id="placePackage" onchange="handlePackageSelectChange()">
+        <option value="">No package — pay individually</option>
+        <option value="__new__">+ New package…</option>
+      </select>
+      <p class="package-hint" id="packagePriceHint" style="display:none;"></p>
+    </div>
+
+    <div class="field half-width">
+      <label for="placeTravelNext">Travel to next stop <span class="hint">(optional)</span></label>
+      <input type="text" id="placeTravelNext" placeholder="e.g. ~15 min drive">
+    </div>
+    <div class="field half-width">
+      <label for="placeImage">Cover photo (optional)</label>
+      <div class="image-input-row">
+        <input type="file" id="placeImage" accept="image/*" onchange="handleImageSelect(event)">
+        <div class="image-preview-wrap">
+          <div class="image-preview-spinner" id="imageSpinner">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#98a1ad" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="40 20"/></svg>
+          </div>
+          <img id="imagePreview" class="image-preview" alt="Preview">
+        </div>
+      </div>
+    </div>
+
+    <div class="field full-width">
+      <label for="placeDesc">Notes</label>
+      <textarea id="placeDesc" rows="2" placeholder="Reservation details, tips..."></textarea>
+    </div>
+
+    <div class="form-actions">
+      <button class="cancel-btn" id="cancelBtn" style="display:none;" onclick="cancelEdit()">Cancel</button>
+      <button class="add-btn" id="submitBtn" onclick="submitForm()">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>
+        Add stop
+      </button>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <div class="search-input-wrap">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <input type="text" id="searchInput" placeholder="Search stops..." oninput="renderPlaces()">
+      </div>
+      <div class="filter-group" role="group" aria-label="Filter by category" id="filterGroup">
+        <button class="pill-btn active" data-filter="all">All</button>
+        <button class="pill-btn" data-filter="sightseeing">Sightseeing</button>
+        <button class="pill-btn" data-filter="dining">Dining</button>
+        <button class="pill-btn" data-filter="outdoors">Outdoors</button>
+      </div>
+    </div>
+    <div class="toolbar-right">
+      <label class="switch-label"><input type="checkbox" id="groupByDayToggle" onchange="renderPlaces()"> Group by day</label>
+      <div class="view-toggle" role="group" aria-label="Change view" id="viewToggle">
+        <button class="pill-btn active" data-view="grid">Grid</button>
+        <button class="pill-btn" data-view="route">Route</button>
+      </div>
+      <button class="toolbar-btn" onclick="copyItinerary()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="8" y="8" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M4 16V6a2 2 0 0 1 2-2h10" stroke="currentColor" stroke-width="1.6"/></svg>
+        Copy list
+      </button>
+      <button class="toolbar-btn" onclick="window.print()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9V3h12v6M6 18H4a1 1 0 0 1-1-1v-5a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1h-2M6 14h12v7H6v-7z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        Print
+      </button>
+    </div>
+  </div>
+
+  <div id="viewContainer" style="width:100%; display:flex; flex-direction:column; align-items:center; gap:1.5rem;">
+    <!-- Rendered by JS -->
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <div class="sr-only" aria-live="polite" id="liveRegion"></div>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
