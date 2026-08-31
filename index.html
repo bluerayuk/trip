@@ -108,14 +108,11 @@
       <input type="text" id="placeTravelNext" placeholder="e.g. ~15 min drive">
     </div>
     <div class="field half-width">
-      <label for="placeImage">Cover photo (optional)</label>
+      <label for="placeImage">Cover photo URL <span class="hint">(optional)</span></label>
       <div class="image-input-row">
-        <input type="file" id="placeImage" accept="image/*" onchange="handleImageSelect(event)">
+        <input type="text" id="placeImage" placeholder="e.g. images/lighthouse.jpg or https://..." oninput="handleImageUrlInput()">
         <div class="image-preview-wrap">
-          <div class="image-preview-spinner" id="imageSpinner">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#98a1ad" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="40 20"/></svg>
-          </div>
-          <img id="imagePreview" class="image-preview" alt="Preview">
+          <img id="imagePreview" class="image-preview" alt="Preview" onerror="this.style.display='none'">
         </div>
       </div>
     </div>

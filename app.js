@@ -35,7 +35,6 @@
   let currentView = 'grid';
   let editingId = null;
   let confirmingDeleteId = null;
-  let pendingImage = null;
   let draggedId = null;
   let dragOverEl = null;
   let dragStartSnapshot = null; // places order when the drag began, for cancel/undo
@@ -50,9 +49,15 @@
   const UNSCHEDULED_KEY = 'Unscheduled'; // group key used for stops with no "day" set
 
   const SAMPLE_PLACES = [
-    { id: 's1', name: "The Met Cloisters", category: "sightseeing", day: "Day 1", time: "10:00 AM", address: "99 Margaret Corbin Dr, New York, NY", desc: "Medieval architecture and art in Upper Manhattan.", image: null, cost: 30, travelNext: "~40 min drive" },
-    { id: 's2', name: "L'Artusi", category: "dining", day: "Day 1", time: "7:00 PM", address: "228 W 10th St, New York, NY", desc: "Elevated Italian dining, wild mushroom pasta, West Village.", image: null, cost: 85, travelNext: "" },
-    { id: 's3', name: "Viking Fleet Fishing", category: "outdoors", day: "Day 2", time: "6:00 AM", address: "462 W Lake Dr, Montauk, NY", desc: "Offshore charter in Montauk for striped bass.", image: null, cost: 150, travelNext: "" }
+    { id: "s2", name: "Statue of Liberty", category: "sightseeing", day: "", time: "09:00–18:30", address: "Liberty Island, New York, NY 10004", desc: "Statue of Liberty takes about 4 to 5 hours to complete the full tour, including travel and security.", image: "images/1.jpg", cost: null, travelNext: "", packageId: "pkg-1788129485954n4a8xunrpce" },
+    { id: "s3", name: "New York Crown", category: "sightseeing", day: "", time: "09:00–18:30", address: "Liberty Island, New York, NY 10004", desc: "Access to the interior (pedestal or crown) requires specialized tickets that often sell out 4 to 6 months in advance.", image: "images/2.jpg", cost: 0.3, travelNext: "", packageId: null },
+    { id: "1788127853367", name: "Ellis Island National Museum of Immigration", category: "sightseeing", day: "", time: "8:30 to 6:30", address: "Ellis Island, New York, NY 10004", desc: "General admission includes the museum and the documentary film. If you want a unique experience, look into booking the 90-minute Hard Hat Tour of the abandoned immigrant hospital complex. You can also search for family arrival records at the American Family Immigration History Center.", image: "images/3.jpg", cost: null, travelNext: "", packageId: "pkg-1788129485954n4a8xunrpce" },
+    { id: "s1", name: "Empire State Building", category: "sightseeing", day: "", time: "9:00 to 12:00", address: "20 W 34th St., New York, NY 10001", desc: "There are multiple ticket tiers. The standard ticket gets you to the 86th-floor open-air observatory. It is highly recommended to buy tickets in advance to skip the standard ticket purchasing line. Plan for about 1.5 to 2 hours for the visit.", image: "images/4.jpg", cost: 44, travelNext: "", packageId: null },
+    { id: "1788179669671", name: "Times Square", category: "outdoors", day: "", time: "24 hours a day", address: "Manhattan, NY 10036", desc: "Visiting after dark is a must to really experience the famous glowing billboards and neon lights. It is an incredible environment to bring your Sony α6600 out for some dynamic, high-contrast night photography. Expect heavy crowds, costumed street performers, and a very fast-paced atmosphere.", image: "images/5.jpg", cost: 0, travelNext: "", packageId: null }
+  ];
+
+  const SAMPLE_PACKAGES = [
+    { id: "pkg-1788129485954n4a8xunrpce", name: "Statue City Cruises", cost: 26 }
   ];
 
   /* ============ Storage: trips index ============ */
@@ -88,12 +93,12 @@
         else { places = Array.isArray(parsed.places) ? parsed.places : []; packages = Array.isArray(parsed.packages) ? parsed.packages : []; }
       } else {
         places = trip.id === 'trip-default' ? JSON.parse(JSON.stringify(SAMPLE_PLACES)) : [];
-        packages = [];
+        packages = trip.id === 'trip-default' ? JSON.parse(JSON.stringify(SAMPLE_PACKAGES)) : [];
         await persistPlaces();
       }
     } catch (e) {
       places = trip.id === 'trip-default' ? JSON.parse(JSON.stringify(SAMPLE_PLACES)) : [];
-      packages = [];
+      packages = trip.id === 'trip-default' ? JSON.parse(JSON.stringify(SAMPLE_PACKAGES)) : [];
       await persistPlaces();
     }
     isLoading = false;
@@ -202,7 +207,7 @@
     undoSnapshot = JSON.stringify(places);
     undoPackagesSnapshot = JSON.stringify(packages);
     places = JSON.parse(JSON.stringify(SAMPLE_PLACES)).map(p => ({ ...p, id: Date.now().toString() + Math.random().toString(36).slice(2) }));
-    packages = [];
+    packages = JSON.parse(JSON.stringify(SAMPLE_PACKAGES));
     renderPlaces();
     await persistPlaces();
     showUndoToast('Reset to sample trip');
@@ -469,42 +474,13 @@
     }
   }
 
-  /* ============ Image handling (with client-side compression) ============ */
-  function compressImage(dataUrl, maxDim, quality) {
-    return new Promise((resolve) => {
-      const img = new Image();
-      img.onload = () => {
-        let { width, height } = img;
-        if (width > maxDim || height > maxDim) {
-          if (width > height) { height = Math.round(height * (maxDim / width)); width = maxDim; }
-          else { width = Math.round(width * (maxDim / height)); height = maxDim; }
-        }
-        const canvas = document.createElement('canvas');
-        canvas.width = width; canvas.height = height;
-        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-        resolve(canvas.toDataURL('image/jpeg', quality));
-      };
-      img.onerror = () => resolve(dataUrl);
-      img.src = dataUrl;
-    });
-  }
-
-  function handleImageSelect(event) {
-    const file = event.target.files[0];
+  /* ============ Image handling (plain URL, no base64) ============ */
+  function handleImageUrlInput() {
+    const url = document.getElementById('placeImage').value.trim();
     const preview = document.getElementById('imagePreview');
-    const spinner = document.getElementById('imageSpinner');
-    if (!file) { pendingImage = null; preview.style.display = 'none'; spinner.style.display = 'none'; return; }
-    preview.style.display = 'none';
-    spinner.style.display = 'flex';
-    const reader = new FileReader();
-    reader.onload = async () => {
-      const compressed = await compressImage(reader.result, 900, 0.72);
-      pendingImage = compressed;
-      preview.src = compressed;
-      spinner.style.display = 'none';
-      preview.style.display = 'block';
-    };
-    reader.readAsDataURL(file);
+    if (!url) { preview.style.display = 'none'; preview.removeAttribute('src'); return; }
+    preview.src = url;
+    preview.style.display = 'block';
   }
 
   /* ============ Form (add / edit) ============ */
@@ -514,6 +490,7 @@
     const day = document.getElementById('placeDay').value.trim();
     const time = document.getElementById('placeTime').value.trim();
     const address = document.getElementById('placeAddress').value.trim();
+    const image = document.getElementById('placeImage').value.trim();
     const cost = document.getElementById('placeCost').value;
     const travelNext = document.getElementById('placeTravelNext').value.trim();
     const desc = document.getElementById('placeDesc').value.trim();
@@ -529,7 +506,7 @@
       const p = places.find(pl => pl.id === editingId);
       if (p) {
         p.name = name; p.category = category; p.day = day; p.time = time;
-        p.address = address; p.desc = desc; p.image = pendingImage;
+        p.address = address; p.desc = desc; p.image = image || null;
         p.cost = packageId ? null : (cost === '' ? null : parseFloat(cost));
         p.travelNext = travelNext;
         p.packageId = packageId;
@@ -538,7 +515,7 @@
     } else {
       places.push({
         id: Date.now().toString(), name, category, day, time, address, desc,
-        image: pendingImage, cost: packageId ? null : (cost === '' ? null : parseFloat(cost)), travelNext, packageId
+        image: image || null, cost: packageId ? null : (cost === '' ? null : parseFloat(cost)), travelNext, packageId
       });
       showToast('Stop added');
     }
@@ -558,10 +535,10 @@
     document.getElementById('placeTravelNext').value = '';
     document.getElementById('placeDesc').value = '';
     document.getElementById('placeImage').value = '';
-    document.getElementById('imagePreview').style.display = 'none';
-    document.getElementById('imageSpinner').style.display = 'none';
+    const preview = document.getElementById('imagePreview');
+    preview.style.display = 'none';
+    preview.removeAttribute('src');
     populatePackageSelect('');
-    pendingImage = null;
     editingId = null;
     document.getElementById('formTitle').textContent = 'Add a stop';
     document.getElementById('editBadge').style.display = 'none';
@@ -583,9 +560,9 @@
     populatePackageSelect(p.packageId || '');
     document.getElementById('placeTravelNext').value = p.travelNext || '';
     document.getElementById('placeDesc').value = p.desc || '';
-    pendingImage = p.image || null;
+    document.getElementById('placeImage').value = p.image || '';
     const preview = document.getElementById('imagePreview');
-    if (p.image) { preview.src = p.image; preview.style.display = 'block'; } else { preview.style.display = 'none'; }
+    if (p.image) { preview.src = p.image; preview.style.display = 'block'; } else { preview.style.display = 'none'; preview.removeAttribute('src'); }
 
     document.getElementById('formTitle').textContent = 'Edit stop';
     document.getElementById('editBadge').style.display = 'inline-block';
@@ -954,11 +931,12 @@
     const isLast = idxInVisible === visible.length - 1;
     const isConfirming = confirmingDeleteId === place.id;
 
-    const imageMarkup = place.image
+    const categoryBadge = `<span class="category-tag card-badge tag-${place.category}">${place.category}</span>`;
+    const imageMarkup = (place.image
       ? `<img class="card-image" src="${place.image}" alt="${escapeHtml(place.name)}" draggable="false">`
       : `<div class="card-image-placeholder" draggable="false">
            <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><circle cx="8.5" cy="10" r="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M21 15l-5-4-4 3-3-2-6 5" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
-         </div>`;
+         </div>`) + categoryBadge;
 
     const mapsUrl = place.address ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.address)}` : null;
     const placePkg = place.packageId ? packages.find(pk => pk.id === place.packageId) : null;
@@ -977,7 +955,6 @@
               </div>
               <span class="stop-index">${globalIndex + 1}</span>${place.time ? `<span class="stop-time" title="${escapeHtml(place.time)}">${escapeHtml(formatTimeDisplay(place.time))}</span>` : ''}
             </div>
-            <span class="category-tag tag-${place.category}">${place.category}</span>
           </div>
           <h3 class="card-title" title="${escapeHtml(place.name)}">${escapeHtml(place.name)}</h3>
         </div>
