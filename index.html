@@ -89,24 +89,11 @@
 
     <div class="field half-width">
       <label for="placeAddress">Address</label>
-      <input type="text" id="placeAddress" placeholder="Street, city">
+      <input type="text" id="placeAddress" placeholder="Street, city — or paste a Google Maps link for an exact pin" onpaste="setTimeout(handleAddressPaste, 0)">
     </div>
-    <div class="field">
-      <label for="placeTimeFrom">Hours</label>
-      <div class="time-range-row">
-        <input type="time" id="placeTimeFrom" aria-label="Opening time">
-        <span class="time-range-sep">–</span>
-        <input type="time" id="placeTimeTo" aria-label="Closing time">
-      </div>
-      <label class="checkbox-inline">
-        <input type="checkbox" id="placeAllDay" onchange="handleAllDayToggle()">
-        Open 24 hours / no fixed closing time
-      </label>
-      <label class="checkbox-inline">
-        <input type="checkbox" id="placeHoursVary" onchange="handleHoursVaryToggle()">
-        Hours vary by day / closed some days
-      </label>
-      <div class="day-hours-editor" id="dayHoursEditor" style="display:none;"></div>
+    <div class="field half-width">
+      <label for="placeWebsite">Official website <span class="hint">(optional — for opening times, tickets, etc.)</span></label>
+      <input type="url" id="placeWebsite" placeholder="https://...">
     </div>
     <div class="field">
       <label for="placeCost">Cost ($)</label>
@@ -121,11 +108,7 @@
       <p class="package-hint" id="packagePriceHint" style="display:none;"></p>
     </div>
 
-    <div class="field half-width">
-      <label for="placeTravelNext">Travel to next stop <span class="hint">(optional)</span></label>
-      <input type="text" id="placeTravelNext" placeholder="e.g. ~15 min drive">
-    </div>
-    <div class="field half-width">
+    <div class="field full-width">
       <label for="placeImage">Cover photo <span class="hint">(optional — paste an image URL)</span></label>
       <div class="image-input-row">
         <input type="text" id="placeImage" placeholder="https://..." oninput="handleImageUrlInput()">

@@ -262,30 +262,6 @@
   .full-width{ grid-column:1/-1; }
   .half-width{ grid-column:span 2; }
 
-  .time-range-row{ display:flex; align-items:center; gap:0.4rem; }
-  .time-range-row input[type="time"]{ min-width:0; flex:1 1 0; }
-  .time-range-sep{ color:var(--text-faint); font-weight:600; flex-shrink:0; }
-
-  .checkbox-inline{
-    display:flex; align-items:center; gap:0.4rem; margin-top:0.15rem;
-    font-size:0.76rem; color:var(--text-muted); font-weight:500; cursor:pointer; user-select:none;
-  }
-  .checkbox-inline input{ width:auto; accent-color:var(--accent); cursor:pointer; }
-
-  .day-hours-editor{
-    display:flex; flex-direction:column; gap:0.4rem; margin-top:0.5rem;
-    padding:0.65rem 0.7rem; background:var(--surface-alt); border:1px solid var(--border); border-radius:var(--radius-sm);
-  }
-  .day-hours-row{ display:flex; align-items:center; gap:0.5rem; }
-  .day-hours-row .day-hours-label{ width:2.4rem; flex-shrink:0; font-size:0.78rem; font-weight:700; color:var(--text-muted); }
-  .day-hours-row .checkbox-inline{ margin-top:0; flex-shrink:0; }
-  .day-hours-row input[type="time"]{ flex:1 1 0; min-width:0; padding:0.4rem 0.5rem; font-size:0.82rem; }
-  .day-hours-row .day-hours-sep{ color:var(--text-faint); font-weight:600; flex-shrink:0; font-size:0.8rem; }
-  .day-hours-row input[type="time"]:disabled{ opacity:0.5; }
-
-  .card-meta-line.hours-detail{ color:var(--text-muted); font-size:0.78rem; line-height:1.5; }
-  .route-cost.hours-detail{ font-weight:500; color:var(--text-muted); font-size:0.78rem; }
-
   .image-input-row{ display:flex; align-items:center; gap:0.75rem; }
   .image-input-row input[type="text"]{ flex:1 1 auto; }
 
@@ -421,7 +397,7 @@
   .card-body{ padding:1.1rem 1.15rem; display:flex; flex-direction:column; flex-grow:1; }
   .card-header{ display:flex; flex-direction:column; gap:0.5rem; margin-bottom:0.6rem; }
   .card-header-top{ display:flex; align-items:center; gap:0.6rem; }
-  .card-header-left{ display:flex; align-items:center; gap:0.5rem; min-width:0; flex:1 1 auto; overflow:hidden; }
+  .card-header-left{ display:flex; align-items:center; flex-wrap:wrap; gap:0.35rem 0.5rem; min-width:0; flex:1 1 auto; }
 
   .drag-handle{
     flex-shrink:0; width:1.9rem; height:1.9rem; border-radius:7px; display:flex; align-items:center;
@@ -437,7 +413,7 @@
     padding:0 0.35rem; border-radius:7px; background:var(--surface-alt); color:var(--text-muted);
     font-size:0.72rem; font-weight:700; font-family:'Manrope',sans-serif; flex-shrink:0;
   }
-  .stop-time{ font-size:0.72rem; font-weight:600; color:var(--text-faint); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
+  .stop-time{ font-size:0.72rem; font-weight:600; color:var(--text-faint); white-space:normal; overflow-wrap:break-word; min-width:0; }
 
   .card-title{
     margin:0; font-family:'Manrope',sans-serif; font-weight:700; font-size:1.05rem;
@@ -468,6 +444,10 @@
 
   .card-desc{ color:var(--text-muted); font-size:0.9rem; line-height:1.55; margin:0 0 0.7rem 0; flex-grow:1; }
 
+  .desc-list{ margin:0; padding-left:1.15rem; display:flex; flex-direction:column; gap:0.3rem; }
+  .desc-list li{ line-height:1.5; }
+  .desc-list li::marker{ color:var(--text-faint); }
+
   .card-meta-line{
     display:flex; align-items:center; gap:0.3rem; font-size:0.8rem; color:var(--text-muted); margin-bottom:0.5rem;
   }
@@ -484,12 +464,28 @@
   .original-cost{ color:var(--text-faint); text-decoration:line-through; font-size:0.8rem; font-weight:500; }
   .route-cost.packaged-line{ margin-top:0.35rem; }
 
+  .directions-links{ display:flex; flex-wrap:wrap; align-items:center; gap:0.3rem 0.9rem; margin-bottom:0.6rem; }
+
   .card-address{
     display:inline-flex; align-items:flex-start; gap:0.3rem; font-size:0.8rem; color:var(--accent-dark);
-    text-decoration:none; font-weight:600; margin-bottom:0.6rem; line-height:1.35;
+    text-decoration:none; font-weight:600; line-height:1.35;
   }
   .card-address svg{ flex-shrink:0; margin-top:0.18rem; }
   .card-address:hover{ text-decoration:underline; }
+
+  .card-citymapper{
+    display:inline-flex; align-items:center; gap:0.3rem; font-size:0.8rem; color:var(--accent-dark);
+    text-decoration:none; font-weight:600; line-height:1.35;
+  }
+  .card-citymapper svg{ flex-shrink:0; }
+  .card-citymapper:hover{ text-decoration:underline; }
+
+  .card-website{
+    display:inline-flex; align-items:center; gap:0.3rem; font-size:0.8rem; color:var(--accent-dark);
+    text-decoration:none; font-weight:600; margin:0.35rem 0 0.6rem; line-height:1.35;
+  }
+  .card-website svg{ flex-shrink:0; }
+  .card-website:hover{ text-decoration:underline; }
 
   .card-footer{
     display:flex; justify-content:space-between; align-items:center; gap:0.5rem;
@@ -521,7 +517,6 @@
   .route-line-wrap{ display:flex; flex-direction:column; align-items:center; flex-shrink:0; width:2.5rem; }
   .route-dot{ width:12px; height:12px; border-radius:50%; margin-top:0.35rem; flex-shrink:0; border:2px solid var(--surface); box-shadow:0 0 0 1px var(--border); }
   .route-connector{ width:2px; flex-grow:1; background:var(--border); min-height:1.5rem; }
-  .route-connector-label{ font-size:0.68rem; color:var(--text-faint); text-align:center; padding:0.2rem 0; white-space:nowrap; }
   .route-content{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-md); padding:0.9rem 1.05rem; margin-bottom:0.25rem; flex-grow:1; box-shadow:var(--shadow-card); }
   .route-meta{ display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap; margin-bottom:0.3rem; }
   .route-title{
