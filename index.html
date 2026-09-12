@@ -12,24 +12,7 @@
 <body>
 <div class="page">
 
-  <div class="topbar">
-    <div class="logo-mark">
-      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 2L4 7v10l8 5 8-5V7l-8-5z" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/>
-        <path d="M12 2v20M4 7l8 5 8-5" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/>
-      </svg>
-    </div>
-    <div class="topbar-text">
-      <span class="brand">Waypoint</span>
-      <span class="brand-sub">Trip planning</span>
-    </div>
-    <div class="save-indicator" id="saveIndicator"><span class="dot"></span><span id="saveText">Saved</span></div>
-  </div>
-
-  <div class="header">
-    <h1 id="tripHeading">Trip itinerary</h1>
-    <p>Add the places you want to visit, then drag cards by the handle (or use the arrows) to set your route.</p>
-  </div>
+  <h1 id="tripHeading" class="sr-only">Trip itinerary</h1>
 
   <div class="trip-bar">
     <div class="trip-select-wrap">
@@ -43,6 +26,7 @@
       Shared trip
     </label>
     <span class="shared-badge" id="sharedBadge">Visible to all users</span>
+    <span class="save-indicator" id="saveIndicator"><span class="dot"></span><span id="saveText">Saved</span></span>
     <span class="budget-total" id="budgetTotal"><span>Est. total</span>$0</span>
     <div class="trip-bar-right">
       <button class="icon-text-btn" onclick="exportJson()">Export JSON</button>
@@ -59,6 +43,7 @@
     <button class="icon-text-btn" onclick="createPackage()" title="Create a new package">+ New package</button>
   </div>
 
+  <div class="control-panel-wrap" id="controlPanelWrap">
   <div class="control-panel" id="controlPanel">
     <div class="control-panel-title">
       <h2 id="formTitle">Add a stop</h2>
@@ -72,19 +57,25 @@
     <div class="field">
       <label for="placeCategory">Category</label>
       <select id="placeCategory">
-        <option value="sightseeing">Sightseeing</option>
-        <option value="dining">Dining</option>
-        <option value="outdoors">Outdoors</option>
-        <option value="skyscrapers">Skyscrapers</option>
-        <option value="museums-culture">Museums & Culture</option>
+        <option value="sightseeing">Attractions</option>
+        <option value="dining">Food & Drink</option>
+        <option value="outdoors">Outdoors & Nature</option>
+        <option value="skyscrapers">City & Architecture</option>
+        <option value="museums-culture">Culture & Museums</option>
         <option value="entertainment-nightlife">Entertainment & Nightlife</option>
         <option value="shopping">Shopping</option>
-        <option value="viewpoints-photography">Viewpoints & Photography</option>
+        <option value="viewpoints-photography">Views & Photography</option>
       </select>
     </div>
     <div class="field">
       <label for="placeDay">Day</label>
       <input type="text" id="placeDay" placeholder="e.g. Day 1">
+    </div>
+
+    <div class="field full-width">
+      <label for="placeSummary">Short description <span class="hint">(shown on the card — what the place IS, not tips — 150 characters max)</span></label>
+      <textarea id="placeSummary" rows="2" maxlength="150" placeholder="e.g. A 305-foot copper statue on Liberty Island, one of America's most iconic landmarks." oninput="updateSummaryCharCount()"></textarea>
+      <span class="char-count" id="summaryCharCount">0/150</span>
     </div>
 
     <div class="field half-width">
@@ -98,6 +89,10 @@
     <div class="field">
       <label for="placeCost">Cost ($)</label>
       <input type="number" id="placeCost" placeholder="0" min="0" step="0.01">
+    </div>
+    <div class="field">
+      <label for="placeRating">Rating <span class="hint">(optional — or click the stars on the card once it's added)</span></label>
+      <input type="number" id="placeRating" placeholder="4.7" min="0" max="5" step="0.1">
     </div>
     <div class="field full-width">
       <label for="placePackage">Package <span class="hint">(optional — group stops that share one price)</span></label>
@@ -119,8 +114,17 @@
     </div>
 
     <div class="field full-width">
-      <label for="placeDesc">Notes</label>
-      <textarea id="placeDesc" rows="2" placeholder="Reservation details, tips..."></textarea>
+      <label for="galleryUrlInput">Gallery photos <span class="hint">(optional — extra photos people can browse in the detail view)</span></label>
+      <div class="gallery-add-row">
+        <textarea id="galleryUrlInput" rows="2" placeholder="Paste one or more image URLs here (one per line, or comma-separated), then click Add" onkeydown="handleGalleryInputKeydown(event)"></textarea>
+        <button type="button" class="icon-text-btn" onclick="addGalleryUrls()">+ Add photo(s)</button>
+      </div>
+      <div class="gallery-input-list" id="galleryInputList"></div>
+    </div>
+
+    <div class="field full-width">
+      <label for="placeDesc">Tips &amp; tricks <span class="hint">(only shown when someone taps "View insider tips" on the card)</span></label>
+      <textarea id="placeDesc" rows="2" placeholder="Reservation details, insider tips, what to bring..."></textarea>
     </div>
 
     <div class="form-actions">
@@ -131,23 +135,28 @@
       </button>
     </div>
   </div>
+  </div>
 
   <div class="toolbar">
     <div class="toolbar-left">
+      <button class="add-stop-toggle-btn" id="addStopToggleBtn" onclick="toggleAddPanel()" aria-expanded="false" aria-controls="controlPanelWrap">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" id="addStopToggleIcon"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <span id="addStopToggleLabel">Add a stop</span>
+      </button>
       <div class="search-input-wrap">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
         <input type="text" id="searchInput" placeholder="Search stops..." oninput="renderPlaces()">
       </div>
       <div class="filter-group" role="group" aria-label="Filter by category" id="filterGroup">
         <button class="pill-btn active" data-filter="all">All</button>
-        <button class="pill-btn" data-filter="sightseeing">Sightseeing</button>
-        <button class="pill-btn" data-filter="dining">Dining</button>
-        <button class="pill-btn" data-filter="outdoors">Outdoors</button>
-        <button class="pill-btn" data-filter="skyscrapers">Skyscrapers</button>
-        <button class="pill-btn" data-filter="museums-culture">Museums & Culture</button>
+        <button class="pill-btn" data-filter="sightseeing">Attractions</button>
+        <button class="pill-btn" data-filter="dining">Food & Drink</button>
+        <button class="pill-btn" data-filter="outdoors">Outdoors & Nature</button>
+        <button class="pill-btn" data-filter="skyscrapers">City & Architecture</button>
+        <button class="pill-btn" data-filter="museums-culture">Culture & Museums</button>
         <button class="pill-btn" data-filter="entertainment-nightlife">Entertainment & Nightlife</button>
         <button class="pill-btn" data-filter="shopping">Shopping</button>
-        <button class="pill-btn" data-filter="viewpoints-photography">Viewpoints & Photography</button>
+        <button class="pill-btn" data-filter="viewpoints-photography">Views & Photography</button>
       </div>
     </div>
     <div class="toolbar-right">
@@ -169,6 +178,27 @@
 
   <div id="viewContainer" style="width:100%; display:flex; flex-direction:column; align-items:center; gap:1.5rem;">
     <!-- Rendered by JS -->
+  </div>
+
+  <div class="detail-modal-overlay" id="detailModalOverlay" onmousedown="if(event.target===this) closeDetailModal()">
+    <div class="detail-modal" role="dialog" aria-modal="true" aria-labelledby="detailModalTitle">
+      <button class="detail-modal-close" id="detailModalCloseBtn" onclick="closeDetailModal()" aria-label="Close details">×</button>
+      <div id="detailModalBody"><!-- filled by JS --></div>
+    </div>
+  </div>
+
+  <div class="lightbox-overlay" id="lightboxOverlay" onmousedown="if(event.target===this) closeLightbox()">
+    <button class="lightbox-close" id="lightboxCloseBtn" onclick="closeLightbox()" aria-label="Close gallery">×</button>
+    <button class="lightbox-nav lightbox-prev" onclick="lightboxStep(-1)" aria-label="Previous photo">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M15 4l-8 8 8 8" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <div class="lightbox-stage">
+      <img id="lightboxImage" src="" alt="">
+      <div class="lightbox-counter" id="lightboxCounter"></div>
+    </div>
+    <button class="lightbox-nav lightbox-next" onclick="lightboxStep(1)" aria-label="Next photo">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M9 4l8 8-8 8" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
   </div>
 
   <div class="toast" id="toast"></div>
