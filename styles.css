@@ -376,10 +376,10 @@
 
   /* ---------- Card ---------- */
   .card{
-    background-color:var(--surface); border:1px solid var(--border-soft); border-radius:var(--radius-md);
+    background-color:var(--surface); border:1px solid #f3f4f6; border-radius:var(--radius-md);
     padding:0; display:flex; flex-direction:column; height:100%; position:relative;
     transition:transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
-    box-shadow:var(--shadow-card); overflow:hidden;
+    box-shadow:0 4px 20px -2px rgba(0,0,0,0.05); overflow:hidden;
   }
   .card:hover{ transform:translateY(-2px); border-color:rgba(20,24,32,0.12); box-shadow:0 1px 2px rgba(20,24,32,0.04), 0 18px 30px -16px rgba(20,24,32,0.16); }
   .card:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
@@ -416,13 +416,15 @@
 
   .route-list .end-drop-zone{ grid-column:auto; margin-left:2.5rem; }
 
-  .card-image{ width:100%; height:150px; object-fit:cover; display:block; background-color:var(--surface-alt); -webkit-user-drag:none; user-select:none; }
+  .card-image-wrap{ position:relative; }
+  .card-image{ width:100%; aspect-ratio:16/9; height:auto; object-fit:cover; object-position:center 35%; display:block; background-color:var(--surface-alt); -webkit-user-drag:none; user-select:none; }
   .card-image-placeholder{
-    width:100%; height:150px; display:flex; align-items:center; justify-content:center;
+    width:100%; aspect-ratio:16/9; display:flex; align-items:center; justify-content:center;
     background-color:var(--surface-alt); color:var(--text-faint); -webkit-user-drag:none; user-select:none;
   }
 
-  .card-body{ padding:1.1rem 1.15rem; display:flex; flex-direction:column; flex-grow:1; }
+  .card-body{ padding:1.5rem; display:flex; flex-direction:column; flex-grow:1; }
+  .card-main{ display:flex; flex-direction:column; flex:1 1 auto; min-height:0; }
   .card-header{ display:flex; flex-direction:column; gap:0.5rem; margin-bottom:0.6rem; }
 
   .stop-index{
@@ -430,11 +432,11 @@
     padding:0 0.35rem; border-radius:7px; background:var(--surface-alt); color:var(--text-muted);
     font-size:0.72rem; font-weight:700; font-family:'Manrope',sans-serif; flex-shrink:0; margin-top:0.2rem;
   }
-  .stop-time{ font-size:0.72rem; font-weight:600; color:var(--text-faint); white-space:normal; overflow-wrap:break-word; min-width:0; }
+  .stop-time{ font-size:0.8125rem; font-weight:600; color:#6b7280; white-space:normal; overflow-wrap:break-word; min-width:0; }
 
   .card-title{
     margin:0; font-family:'Manrope',sans-serif; font-weight:700; font-size:1.05rem;
-    line-height:1.3; letter-spacing:-0.01em; min-width:0;
+    line-height:1.3; letter-spacing:-0.01em; min-width:0; color:#111827;
     overflow-wrap:break-word; word-break:normal; hyphens:auto;
   }
 
@@ -459,19 +461,20 @@
      badge on the other side of the image. */
   .category-tag.card-badge{
     position:absolute; top:0.7rem; left:0.7rem; z-index:2;
-    background:rgba(20,24,32,0.55); color:#fff;
-    -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px);
-    box-shadow:0 1px 2px rgba(20,24,32,0.12), 0 4px 10px -4px rgba(20,24,32,0.25);
+    background:rgba(255,255,255,0.6); color:var(--text-main);
+    -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
+    box-shadow:0 1px 2px rgba(20,24,32,0.1), 0 4px 10px -4px rgba(20,24,32,0.2);
   }
 
   /* Price is the number people actually scan for, so it gets top billing:
      a high-contrast pill on the image itself, opposite the category tag. */
   .price-badge{
     position:absolute; top:0.7rem; right:0.7rem; z-index:2;
-    background:rgba(255,255,255,0.95); color:var(--text-main);
+    background:rgba(255,255,255,0.6); color:var(--text-main);
+    -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
     font-family:'Manrope',sans-serif; font-weight:800; font-size:0.82rem;
     padding:0.28rem 0.6rem; border-radius:999px; letter-spacing:-0.01em;
-    box-shadow:0 1px 2px rgba(20,24,32,0.12), 0 4px 10px -4px rgba(20,24,32,0.3);
+    box-shadow:0 1px 2px rgba(20,24,32,0.1), 0 4px 10px -4px rgba(20,24,32,0.25);
   }
   .price-badge.free{ color:var(--accent-dark); }
 
@@ -489,7 +492,7 @@
   .route-content .card-star-row{ margin-top:0.5rem; }
   .card-star-buttons{ display:flex; flex-direction:row-reverse; gap:0.05rem; }
   .card-star-btn{
-    background:none; border:none; cursor:pointer; color:var(--border);
+    background:none; border:none; cursor:pointer; color:#e5e7eb;
     padding:0.1rem; line-height:0; border-radius:4px;
     transition:color 0.1s ease, transform 0.1s ease;
   }
@@ -502,20 +505,33 @@
   .card-star-buttons .card-star-btn:hover,
   .card-star-buttons .card-star-btn:hover ~ .card-star-btn{ color:var(--rating-star); }
   .card-star-value{ font-size:0.78rem; font-weight:700; color:var(--text-muted); }
-  .card-star-value.muted{ color:var(--text-faint); font-weight:600; }
+  .card-star-value.muted{
+    color:var(--text-faint); font-weight:600; background:var(--surface-alt);
+    padding:0.18rem 0.55rem; border-radius:999px;
+  }
 
-  .card-desc-wrap{ position:relative; margin:0 0 0.7rem 0; }
+  .card-desc-wrap{ position:relative; margin:0 0 0.4rem 0; min-height:2.9rem; }
   .card-desc{
-    color:var(--text-muted); font-size:0.9rem; line-height:1.55; margin:0;
+    color:#4b5563; font-size:0.9375rem; line-height:1.55; margin:0;
   }
 
   .card.has-desc{ cursor:pointer; }
 
-  .card-readmore-inline{
-    margin-top:0.15rem; text-align:right;
-    font-weight:700; font-size:0.78rem; color:var(--accent-dark);
+  .card-bottom-block{ margin-top:auto; display:flex; flex-direction:column; }
+  .card-bottom-block.has-content{
+    padding-top:0.75rem; border-top:1px solid var(--border);
   }
-  .card:hover .card-readmore-inline, .route-item:hover .card-readmore-inline{ text-decoration:underline; }
+  .card-cta{ display:flex; flex-direction:column; }
+  .card-readmore-inline{
+    width:100%; margin:0; box-sizing:border-box;
+    display:flex; align-items:center; justify-content:center; gap:0.35rem;
+    font-weight:700; font-size:0.78rem; color:var(--accent-dark);
+    background:var(--accent-soft); padding:0.55rem 0.9rem; border-radius:var(--radius-sm);
+    transition:background-color 0.15s ease;
+  }
+  .card-readmore-inline svg{ flex-shrink:0; transition:transform 0.15s ease; }
+  .card:hover .card-readmore-inline, .route-item:hover .card-readmore-inline{ background:#d3ece8; text-decoration:underline; }
+  .card:hover .card-readmore-inline svg, .route-item:hover .card-readmore-inline svg{ transform:translateX(2px); }
 
   .tip-cards{
     display:grid; grid-template-columns:repeat(3, 1fr); grid-auto-rows:minmax(0, auto); gap:1rem;
@@ -617,11 +633,11 @@
   }
 
   .card-meta-line{
-    display:flex; align-items:center; gap:0.3rem; font-size:0.8rem; color:var(--text-muted); margin-bottom:0.5rem;
+    display:flex; align-items:center; gap:0.3rem; font-size:0.8125rem; color:#6b7280; margin-bottom:0.5rem;
   }
   .card-meta-line.cost{ font-weight:700; color:var(--text-main); }
 
-  .provider-tag-placeholder{ height:24px; margin-bottom:8px; }
+  .provider-tag-placeholder{ height:18px; margin-bottom:4px; }
 
   .packaged-line{ display:flex; align-items:center; gap:0.45rem; flex-wrap:wrap; }
   .package-price{ font-weight:700; color:var(--text-main); font-size:0.85rem; display:inline-flex; align-items:baseline; gap:0.3rem; }
@@ -636,45 +652,50 @@
   .directions-links{ display:flex; flex-wrap:wrap; align-items:center; gap:0.3rem 0.9rem; margin-bottom:0.6rem; }
 
   .card-address{
-    display:inline-flex; align-items:flex-start; gap:0.3rem; font-size:0.76rem; color:var(--text-muted);
+    display:inline-flex; align-items:center; gap:0.3rem; font-size:0.8125rem; color:#6b7280;
     text-decoration:none; font-weight:500; line-height:1.35;
   }
+  .card-address-text{ white-space:nowrap; }
+  .card-address svg{ color:#4b5563; }
   .card-address svg *,
   .card-citymapper svg *,
   .card-website svg *{
     stroke-width:1.6;
   }
-  .card-address svg{ flex-shrink:0; margin-top:0.18rem; margin-right:0.15rem; }
+  .card-address svg{ flex-shrink:0; margin-right:0.15rem; }
   .card-address:hover{ color:var(--accent-dark); text-decoration:underline; }
 
   .card-citymapper{
-    display:inline-flex; align-items:center; gap:0.3rem; font-size:0.76rem; color:var(--text-muted);
+    display:inline-flex; align-items:center; gap:0.3rem; font-size:0.8125rem; color:#6b7280;
     text-decoration:none; font-weight:500; line-height:1.35;
   }
   .card-citymapper svg{ flex-shrink:0; }
   .card-citymapper:hover{ color:var(--accent-dark); text-decoration:underline; }
 
   .card-website{
-    display:inline-flex; align-items:center; gap:0.3rem; font-size:0.76rem; color:var(--text-muted);
-    text-decoration:none; font-weight:500; margin:0.35rem 0 0.6rem; line-height:1.35;
+    display:inline-flex; align-items:center; gap:0.3rem; font-size:0.8125rem; color:var(--accent);
+    text-decoration:none; font-weight:600; margin:0.35rem 0 0.6rem; line-height:1.35;
   }
-  .card-website svg{ flex-shrink:0; margin-right:0.15rem; }
+  .card-website svg{ flex-shrink:0; margin-right:0.15rem; color:var(--accent); }
+  .card-website .link-arrow{ margin-left:0.1rem; }
   .card-website:hover{ color:var(--accent-dark); text-decoration:underline; }
+  .card-website:hover svg{ color:var(--accent-dark); }
 
   .card-footer{
     display:flex; justify-content:space-between; align-items:center; gap:0.5rem;
-    padding-top:0.8rem; border-top:1px solid var(--border); margin-top:auto;
+    padding-top:0.6rem; margin-top:auto;
   }
 
   .footer-actions{ display:flex; gap:0.4rem; }
   .icon-only-btn{
     width:1.9rem; height:1.9rem; border-radius:7px; display:flex; align-items:center; justify-content:center;
-    background:transparent; border:1px solid transparent; color:var(--text-muted); cursor:pointer;
-    padding:0; transition:background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    background:transparent; border:1px solid transparent; color:#374151; cursor:pointer;
+    padding:0; opacity:0.45; transition:background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
   }
+  .icon-only-btn:hover, .icon-only-btn:focus-visible{ opacity:1; }
   .icon-only-btn.edit-btn:hover{ background:var(--accent-soft); color:var(--accent-dark); border-color:var(--accent-soft); }
   .icon-only-btn.delete-btn:hover{ background:var(--danger-soft); color:var(--danger); border-color:var(--danger-soft); }
-  .icon-only-btn.delete-btn.confirming{ background:var(--danger); color:#fff; border-color:var(--danger); }
+  .icon-only-btn.delete-btn.confirming{ background:var(--danger); color:#fff; border-color:var(--danger); opacity:1; }
 
   /* ---------- Route view ---------- */
   .route-list{ width:100%; max-width:820px; display:flex; flex-direction:column; }
@@ -686,29 +707,30 @@
   .route-line-wrap{ display:flex; flex-direction:column; align-items:center; flex-shrink:0; width:2.5rem; }
   .route-dot{ width:12px; height:12px; border-radius:50%; margin-top:0.35rem; flex-shrink:0; border:2px solid var(--surface); box-shadow:0 0 0 1px var(--border); }
   .route-connector{ width:2px; flex-grow:1; background:var(--border); min-height:1.5rem; }
-  .route-content{ background:var(--surface); border:1px solid var(--border-soft); border-radius:var(--radius-md); padding:0.9rem 1.05rem; margin-bottom:0.25rem; flex-grow:1; box-shadow:var(--shadow-card); }
+  .route-content{ background:var(--surface); border:1px solid #f3f4f6; border-radius:var(--radius-md); padding:1.25rem 1.5rem; margin-bottom:0.25rem; flex-grow:1; box-shadow:0 4px 20px -2px rgba(0,0,0,0.05); }
   .route-meta{ display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap; margin-bottom:0.3rem; }
   .route-title{
     margin:0 0 0.25rem; font-family:'Manrope',sans-serif; font-weight:700; font-size:1rem;
-    line-height:1.3; overflow-wrap:break-word; word-break:normal; hyphens:auto;
+    line-height:1.3; overflow-wrap:break-word; word-break:normal; hyphens:auto; color:#111827;
   }
   .route-desc{
-    margin:0; color:var(--text-muted); font-size:0.88rem; line-height:1.5;
+    margin:0; color:#4b5563; font-size:0.9375rem; line-height:1.5;
   }
+  .route-item .card-desc-wrap{ min-height:2.8rem; }
   .route-cost{ font-size:0.8rem; font-weight:700; color:var(--text-main); margin-top:0.35rem; }
   .route-item.has-desc .route-content{ cursor:pointer; }
 
   /* ---------- Detail modal (full-screen: image + all tips/notes) ---------- */
   .detail-modal-overlay{
     position:fixed; inset:0; background:rgba(15,18,24,0.62); backdrop-filter:blur(2px);
-    display:none; align-items:center; justify-content:center; padding:0.75rem; z-index:100;
+    display:none; align-items:center; justify-content:center; padding:0.4rem; z-index:100;
   }
   .detail-modal-overlay.open{ display:flex; }
   body.modal-open{ overflow:hidden; }
 
   .detail-modal{
     background:var(--surface); border-radius:var(--radius-lg); width:100%; max-width:1536px;
-    height:95vh; max-height:95vh; overflow:hidden; position:relative; box-shadow:var(--shadow-panel);
+    height:98vh; max-height:98vh; overflow:hidden; position:relative; box-shadow:var(--shadow-panel);
     display:flex; flex-direction:column;
   }
   #detailModalBody{ display:flex; flex-direction:column; flex:1; min-height:0; }
@@ -721,9 +743,9 @@
   .detail-modal-close:hover{ background-color:rgba(0,0,0,0.6); }
   .detail-modal-close:focus-visible{ outline:2px solid #fff; outline-offset:2px; }
 
-  .detail-modal-image{ width:100%; height:259px; object-fit:cover; display:block; border-radius:var(--radius-lg) var(--radius-lg) 0 0; flex-shrink:0; }
+  .detail-modal-image{ width:100%; height:200px; object-fit:cover; display:block; border-radius:var(--radius-lg) var(--radius-lg) 0 0; flex-shrink:0; }
   .detail-modal-image-placeholder{
-    width:100%; height:256px; display:flex; align-items:center; justify-content:center;
+    width:100%; height:200px; display:flex; align-items:center; justify-content:center;
     background:var(--surface-alt); color:var(--text-faint); border-radius:var(--radius-lg) var(--radius-lg) 0 0; flex-shrink:0;
   }
   /* Used when a stop has no photo but still needs to host the white
@@ -758,7 +780,7 @@
      background — unfilled stars need to stay visible, and the "Rate it"
      label needs to read as light text, not muted gray. */
   .star-row-on-image .card-star-value{ color:#fff; }
-  .star-row-on-image .card-star-value.muted{ color:rgba(255,255,255,0.75); }
+  .star-row-on-image .card-star-value.muted{ color:rgba(255,255,255,0.75); background:rgba(255,255,255,0.18); }
   .star-row-on-image .card-star-btn{ color:rgba(255,255,255,0.4); }
   .star-row-on-image .card-star-btn.filled{ color:var(--rating-star); }
   .star-row-on-image .card-star-buttons .card-star-btn:hover,
@@ -894,7 +916,6 @@
 
     /* Cards: single column, taller preview image reads better on narrow screens */
     .grid-container{ grid-template-columns:1fr; }
-    .card-image, .card-image-placeholder{ height:170px; }
     .card-title{ font-size:1rem; }
 
     /* Route view: narrower connector column so content gets the space */

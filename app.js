@@ -2975,7 +2975,7 @@
     const formatted = place.rating != null ? formatRating(place.rating) : null;
     const valueLabel = formatted !== null
       ? `<span class="card-star-value">${formatted}</span>`
-      : `<span class="card-star-value muted">Rate it</span>`;
+      : `<span class="card-star-value muted">Unrated</span>`;
     return `<div class="card-star-row" role="radiogroup" aria-label="Your rating for ${escapeHtml(place.name)}"><div class="card-star-buttons">${buttons}</div>${valueLabel}</div>`;
   }
 
@@ -3037,6 +3037,7 @@
     const mapsUrl = p.address ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.address)}` : null;
     const citymapperUrl = buildCitymapperUrl(p);
     const websiteUrl = normalizeWebsiteUrl(p.website);
+    const placePkg = p.packageId ? packages.find(pk => pk.id === p.packageId) : null;
     const galleryPhotos = [p.image, ...((Array.isArray(p.gallery) ? p.gallery : []))].filter(Boolean);
     const imageMarkup = p.image
       ? `<img class="detail-modal-image" src="${p.image}" alt="${escapeHtml(p.name)}" style="cursor:zoom-in;" onclick="openLightbox('${p.id}', 0)">`
@@ -3055,7 +3056,7 @@
         ${imageMarkup}
         <div class="detail-modal-hero-scrim" aria-hidden="true"></div>
         <div class="detail-modal-hero-content">
-          <span class="detail-modal-hero-badge">${TIP_ICONS.pin}${escapeHtml(shortLocation(p.address) || categoryLabel(p.category))}</span>
+          ${placePkg ? `<span class="detail-modal-hero-badge">${TIP_ICONS.ticket}${escapeHtml(placePkg.name)} · $${(parseFloat(placePkg.cost) || 0).toFixed(2)} total</span>` : ''}
           <h2 class="detail-modal-hero-title" id="detailModalTitle">${escapeHtml(p.name)}</h2>
           ${p.day ? `<div class="detail-modal-hero-day">${escapeHtml(p.day)}</div>` : ''}
           <div class="detail-modal-star-row star-row-on-image">${buildStarRowHtml(p)}</div>
@@ -3173,39 +3174,32 @@
       : '';
 
     const categoryBadge = `<span class="category-tag card-badge tag-${place.category}">${categoryLabel(place.category)}</span>`;
-    const imageMarkup = (place.image
+    const imageMarkup = `<div class="card-image-wrap">${place.image
       ? `<img class="card-image" src="${place.image}" alt="${escapeHtml(place.name)}" draggable="false">`
       : `<div class="card-image-placeholder" draggable="false">
            <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><circle cx="8.5" cy="10" r="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M21 15l-5-4-4 3-3-2-6 5" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
-         </div>`) + categoryBadge + cardPriceBadgeHtml;
+         </div>`}${categoryBadge}${cardPriceBadgeHtml}</div>`;
 
     const mapsUrl = place.address ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.address)}` : null;
     const citymapperUrl = buildCitymapperUrl(place);
     const websiteUrl = normalizeWebsiteUrl(place.website);
-    // Always render this wrapper — even when there's no package — so it
-    // reserves the exact same strip of physical space on every card. The
-    // wrapper's own fixed height (not a min-height floor — see the lesson
-    // from the description/title fixes above) is what guarantees an empty
-    // placeholder can't collapse smaller than a real "Statue City Cruises"
-    // pill, which is what was pushing the address/website rows upward on
-    // cards with no provider data.
-    const costLineHtml = `<div class="card-meta-line packaged-line provider-tag-placeholder">${placePkg ? `<span class="included-pill">${escapeHtml(placePkg.name)}</span>` : ''}</div>`;
+    const hasBottomBlock = !!(mapsUrl || websiteUrl || place.desc);
 
     card.innerHTML = `
       ${imageMarkup}
       <div class="card-body">
+        <div class="card-main">
         <div class="card-header">
           <h3 class="card-title" title="${escapeHtml(place.name)}">${escapeHtml(place.name)}</h3>
         </div>
         <div class="card-desc-wrap">
           <div class="card-desc">${getCardBlurb(place) ? escapeHtml(getCardBlurb(place)) : 'No description added.'}</div>
-          ${place.desc ? `<div class="card-readmore-inline">View insider tips</div>` : ''}
         </div>
-        ${costLineHtml}
+        <div class="card-bottom-block${hasBottomBlock ? ' has-content' : ''}">
         ${mapsUrl ? `<div class="directions-links">
-          <a class="card-address" href="${mapsUrl}" target="_blank" rel="noopener" title="Open in Google Maps">
+          <a class="card-address" href="${mapsUrl}" target="_blank" rel="noopener" title="${escapeHtml(place.address)}">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M12 21s7-7.5 7-12a7 7 0 1 0-14 0c0 4.5 7 12 7 12z" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="9" r="2.2" stroke="currentColor" stroke-width="1.8"/></svg>
-            ${escapeHtml(place.address)}
+            <span class="card-address-text">View on map</span>
           </a>
           ${(citymapperUrl && isMobileDevice()) ? `<a class="card-citymapper" href="${citymapperUrl}" target="_blank" rel="noopener" title="Get directions in Citymapper">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M3 11l17-8-8 17-2.5-6.5L3 11z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/></svg>
@@ -3214,8 +3208,11 @@
         </div>` : ''}
         ${websiteUrl ? `<a class="card-website" href="${websiteUrl}" target="_blank" rel="noopener" title="Official website (opening times, tickets, etc.)">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9.2" stroke="currentColor" stroke-width="1.8"/><path d="M12 2.8c2.4 2.6 3.7 5.9 3.7 9.2s-1.3 6.6-3.7 9.2M12 2.8c-2.4 2.6-3.7 5.9-3.7 9.2s1.3 6.6 3.7 9.2M2.8 12h18.4" stroke="currentColor" stroke-width="1.4"/></svg>
-          Official website
+          Official website<span class="link-arrow">↗</span>
         </a>` : ''}
+        ${place.desc ? `<div class="card-cta"><div class="card-readmore-inline">View insider tips<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>` : ''}
+        </div>
+        </div>
         <div class="card-footer">
           ${buildStarRowHtml(place)}
           <div class="footer-actions">
@@ -3348,7 +3345,6 @@
           </div>
           <div class="card-desc-wrap">
             <div class="route-desc">${getCardBlurb(place) ? escapeHtml(getCardBlurb(place)) : (place.address ? escapeHtml(place.address) : 'No description added.')}</div>
-            ${place.desc ? `<div class="card-readmore-inline">View insider tips</div>` : ''}
           </div>
           ${routeMapsUrl ? `<div class="directions-links">
             <a class="card-address" href="${routeMapsUrl}" target="_blank" rel="noopener" title="Open in Google Maps">
@@ -3362,9 +3358,10 @@
           </div>` : ''}
           ${routeWebsiteUrl ? `<a class="card-website" href="${routeWebsiteUrl}" target="_blank" rel="noopener" title="Official website (opening times, tickets, etc.)">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9.2" stroke="currentColor" stroke-width="1.8"/><path d="M12 2.8c2.4 2.6 3.7 5.9 3.7 9.2s-1.3 6.6-3.7 9.2M12 2.8c-2.4 2.6-3.7 5.9-3.7 9.2s1.3 6.6 3.7 9.2M2.8 12h18.4" stroke="currentColor" stroke-width="1.4"/></svg>
-            Official website
+            Official website<span class="link-arrow">↗</span>
           </a>` : ''}
           ${costLineHtml}
+          ${place.desc ? `<div class="card-readmore-inline">View insider tips<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>` : ''}
           ${buildStarRowHtml(place)}
         </div>
       `;
