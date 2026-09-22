@@ -219,6 +219,9 @@
   .trip-status-row{ display:contents; } /* Saved + Est.total behave as if not wrapped at all */
   .trip-more-wrap{ display:none; position:relative; }
   .trip-more-btn{ border:1px solid var(--border); }
+  /* Desktop: no visual merging, trip-bar and packages-bar stay independent
+     bars exactly as before. */
+  .mobile-summary-card{ display:contents; }
   .trip-more-menu{
     display:none; position:absolute; right:0; top:calc(100% + 0.4rem); z-index:20;
     min-width:180px; background:var(--surface); border:1px solid var(--border);
@@ -940,6 +943,18 @@
        constantly (+ New). Rename/Delete/Export/Import/Reset/Clear are all
        occasional, so they collapse into the ⋮ overflow menu instead of
        six full-width buttons stacked before any real content appears. */
+    .mobile-summary-card{
+      display:block; width:100%; background:var(--surface); border:1px solid var(--border);
+      border-radius:var(--radius-lg); box-shadow:var(--shadow-card); margin-bottom:1.25rem;
+      overflow:hidden;
+    }
+    /* Packages, nested one level inside the same card, keeps its own
+       divider but loses its independent card chrome — one box, not two. */
+    .mobile-summary-card .trip-bar,
+    .mobile-summary-card .packages-bar{
+      border:none; border-radius:0; box-shadow:none; margin-bottom:0;
+    }
+    .mobile-summary-card .packages-bar{ border-top:1px solid var(--border); }
     .trip-bar{ flex-direction:column; align-items:stretch; padding:0.9rem 1rem; position:relative; }
     .trip-select-wrap{ flex-wrap:wrap; row-gap:0.5rem; padding-right:2.6rem; } /* room for the ⋮ button */
     select#tripSelect{ flex:1 1 100%; min-width:0; }
@@ -949,10 +964,12 @@
     .trip-more-menu{ right:0; left:auto; }
 
     /* Saved + Est. total share one row instead of two separate full-width
-       pills, since together they're one glance's worth of status. */
+       pills, since together they're one glance's worth of status. Left-
+       aligned rather than space-between, so "Saved" doesn't strand itself
+       across an empty gap from the pill next to it. */
     .trip-status-row{
-      display:flex !important; align-items:center; justify-content:space-between;
-      width:100%; gap:0.5rem;
+      display:flex !important; align-items:center; justify-content:flex-start;
+      width:100%; gap:0.6rem;
     }
     .budget-total{ align-self:auto; }
 
@@ -988,11 +1005,20 @@
        normal small radius on the container — every category stays visible
        with nothing scrolled off-screen, and each chip keeps its own pill
        shape from the base .pill-btn rule. */
+    /* The base .filter-group is itself a bordered/shadowed-adjacent box
+       (background + border), which reads as yet another card once it's
+       sitting under the merged trip card above. On mobile it goes flat —
+       no container chrome — and each button becomes its own light chip
+       instead, so the grouping still reads as "these go together"
+       without adding another boxed panel to the stack. */
     .filter-group{
       width:100%; flex-wrap:wrap; justify-content:flex-start;
-      border-radius:var(--radius-sm); row-gap:0.35rem;
+      background:transparent; border:none; border-radius:0; padding:0; gap:0.4rem;
     }
-    .filter-group .pill-btn{ flex:none; }
+    .filter-group .pill-btn{
+      flex:none; background:var(--surface); border:1px solid var(--border); padding:0.38rem 0.75rem;
+    }
+    .filter-group .pill-btn.active{ border-color:var(--text-main); }
     .toolbar-right{ width:100%; justify-content:space-between; }
     .view-toggle{ flex:1 1 auto; justify-content:space-between; }
     .view-toggle .pill-btn{ flex:1; text-align:center; }

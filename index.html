@@ -15,6 +15,11 @@
 
   <h1 id="tripHeading" class="sr-only">Trip itinerary</h1>
 
+  <!-- On mobile this wraps the trip bar and packages bar into one visual
+       card with an internal divider, instead of two separate stacked
+       cards (see .mobile-summary-card in styles.css). On desktop it's
+       display:contents, so trip-bar/packages-bar sit exactly as before. -->
+  <div class="mobile-summary-card">
   <div class="trip-bar">
     <div class="trip-select-wrap">
       <select id="tripSelect" aria-label="Select trip"></select>
@@ -67,6 +72,7 @@
     <span class="packages-label">Packages</span>
     <div class="packages-list" id="packagesList"></div>
     <button class="icon-text-btn" onclick="createPackage()" title="Create a new package">+ New package</button>
+  </div>
   </div>
 
   <div class="mylist-section" id="myListSection">
