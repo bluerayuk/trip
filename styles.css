@@ -950,7 +950,13 @@
     .filter-group{
       width:100%; flex-wrap:nowrap; overflow-x:auto; justify-content:flex-start;
       border-radius:var(--radius-sm); scrollbar-width:none; -webkit-overflow-scrolling:touch;
-      scroll-snap-type:x proximity;
+      scroll-snap-type:x proximity; padding-right:1.6rem;
+      /* Fades the right edge to transparent so a cut-off chip like
+         "Outdoors & Na…" reads as "scroll for more" instead of "broken
+         layout". Without this the row looked identical whether or not
+         there was more content to scroll to. */
+      -webkit-mask-image:linear-gradient(to right, #000 calc(100% - 2.2rem), transparent 100%);
+      mask-image:linear-gradient(to right, #000 calc(100% - 2.2rem), transparent 100%);
     }
     .filter-group::-webkit-scrollbar{ display:none; }
     .filter-group .pill-btn{ flex:none; scroll-snap-align:start; }
