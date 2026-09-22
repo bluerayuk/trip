@@ -213,6 +213,29 @@
 
   .trip-bar-right{ margin-left:auto; display:flex; flex-wrap:wrap; gap:0.5rem; }
 
+  /* Desktop/tablet default: the overflow menu markup exists in the DOM but
+     stays hidden, since there's room for the full button row above. */
+  .trip-admin-btns{ display:contents; } /* Rename/Delete behave as if not wrapped at all */
+  .trip-status-row{ display:contents; } /* Saved + Est.total behave as if not wrapped at all */
+  .trip-more-wrap{ display:none; position:relative; }
+  .trip-more-btn{ border:1px solid var(--border); }
+  .trip-more-menu{
+    display:none; position:absolute; right:0; top:calc(100% + 0.4rem); z-index:20;
+    min-width:180px; background:var(--surface); border:1px solid var(--border);
+    border-radius:var(--radius-sm); box-shadow:0 10px 30px -12px rgba(20,24,32,0.28);
+    padding:0.35rem; flex-direction:column; gap:0.1rem;
+  }
+  .trip-more-menu.open{ display:flex; }
+  .trip-more-item{
+    background:transparent; border:none; text-align:left; padding:0.55rem 0.6rem;
+    border-radius:calc(var(--radius-sm) - 2px); font-size:0.86rem; font-weight:600;
+    color:var(--text-main); cursor:pointer; font-family:'Inter',sans-serif;
+  }
+  .trip-more-item:hover{ background:var(--surface-alt); }
+  .trip-more-item.danger{ color:var(--danger); }
+  .trip-more-item.danger:hover{ background:var(--danger-soft); }
+  .trip-more-divider{ height:1px; background:var(--border); margin:0.3rem 0.2rem; }
+
   /* ---------- Add-stop toggle (lives inline in the toolbar) ---------- */
   .add-stop-toggle-btn{
     background-color:var(--accent); color:#fff; border:1px solid var(--accent);
@@ -913,18 +936,36 @@
   @media (max-width:640px){
     body{ padding:1.5rem 1rem 4rem; }
 
-    /* Trip bar: stack everything, full-width buttons that wrap in pairs */
-    .trip-bar{ flex-direction:column; align-items:stretch; padding:0.9rem 1rem; }
-    .trip-select-wrap{ flex-wrap:wrap; row-gap:0.5rem; }
+    /* Trip bar: lead with the trip picker and the one action people take
+       constantly (+ New). Rename/Delete/Export/Import/Reset/Clear are all
+       occasional, so they collapse into the ⋮ overflow menu instead of
+       six full-width buttons stacked before any real content appears. */
+    .trip-bar{ flex-direction:column; align-items:stretch; padding:0.9rem 1rem; position:relative; }
+    .trip-select-wrap{ flex-wrap:wrap; row-gap:0.5rem; padding-right:2.6rem; } /* room for the ⋮ button */
     select#tripSelect{ flex:1 1 100%; min-width:0; }
-    .budget-total{ align-self:flex-start; }
-    .trip-bar-right{ width:100%; }
-    .trip-bar-right .icon-text-btn{ flex:1 1 calc(50% - 0.25rem); justify-content:center; }
+    .trip-admin-btns{ display:none; }
+    .trip-bar-right{ display:none; }
+    .trip-more-wrap{ display:block; position:absolute; top:0.9rem; right:1rem; }
+    .trip-more-menu{ right:0; left:auto; }
+
+    /* Saved + Est. total share one row instead of two separate full-width
+       pills, since together they're one glance's worth of status. */
+    .trip-status-row{
+      display:flex !important; align-items:center; justify-content:space-between;
+      width:100%; gap:0.5rem;
+    }
+    .budget-total{ align-self:auto; }
 
     .packages-bar{ flex-direction:column; align-items:stretch; }
     .packages-list{ width:100%; }
 
     .mylist-section{ padding:1rem; }
+    /* An empty shortlist is just an empty white box with placeholder text
+       before your first "Add to my list" tap — on the narrow first screen
+       that's pure scroll with no payoff, so skip it until there's
+       something to show. (Desktop keeps it visible for discoverability,
+       where the extra box costs far less screen real estate.) */
+    .mylist-section.is-empty{ display:none; }
     .mylist-header{ flex-direction:column; align-items:flex-start; }
 
     /* Form: single column, full-width action buttons stacked */

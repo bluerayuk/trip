@@ -257,6 +257,25 @@
     showToast(trip.shared ? 'Trip is now shared' : 'Trip is now private');
   }
 
+  /* Mobile "⋮" overflow menu for the trip-admin actions (Rename, Delete,
+     Export, Import, Reset, Clear). Pass an explicit `open` to force a
+     state (e.g. always-close after an action); omit it to just toggle. */
+  function toggleTripMoreMenu(open) {
+    const menu = document.getElementById('tripMoreMenu');
+    const btn = document.getElementById('tripMoreBtn');
+    if (!menu || !btn) return;
+    const shouldOpen = open !== undefined ? open : !menu.classList.contains('open');
+    menu.classList.toggle('open', shouldOpen);
+    btn.setAttribute('aria-expanded', String(shouldOpen));
+  }
+  document.addEventListener('click', (e) => {
+    const wrap = document.querySelector('.trip-more-wrap');
+    if (wrap && !wrap.contains(e.target)) toggleTripMoreMenu(false);
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') toggleTripMoreMenu(false);
+  });
+
   async function clearAllStops() {
     if (places.length === 0) return;
     if (!window.confirm('Remove all stops from this trip?')) return;

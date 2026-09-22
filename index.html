@@ -19,22 +19,47 @@
     <div class="trip-select-wrap">
       <select id="tripSelect" aria-label="Select trip"></select>
       <button class="icon-text-btn" onclick="createTrip()" title="New trip">+ New</button>
-      <button class="icon-text-btn" onclick="renameTrip()" title="Rename trip">Rename</button>
-      <button class="icon-text-btn danger" onclick="deleteTrip()" title="Delete trip">Delete</button>
+      <div class="trip-admin-btns">
+        <button class="icon-text-btn" onclick="renameTrip()" title="Rename trip">Rename</button>
+        <button class="icon-text-btn danger" onclick="deleteTrip()" title="Delete trip">Delete</button>
+      </div>
     </div>
     <label class="shared-toggle">
       <input type="checkbox" id="sharedToggle" onchange="toggleShared()">
       Shared trip
     </label>
     <span class="shared-badge" id="sharedBadge">Visible to all users</span>
-    <span class="save-indicator" id="saveIndicator"><span class="dot"></span><span id="saveText">Saved</span></span>
-    <span class="budget-total" id="budgetTotal"><span>Est. total</span>$0</span>
+    <div class="trip-status-row">
+      <span class="save-indicator" id="saveIndicator"><span class="dot"></span><span id="saveText">Saved</span></span>
+      <span class="budget-total" id="budgetTotal"><span>Est. total</span>$0</span>
+    </div>
     <div class="trip-bar-right">
       <button class="icon-text-btn" onclick="exportJson()">Export JSON</button>
       <button class="icon-text-btn" onclick="document.getElementById('importInput').click()">Import JSON</button>
       <input type="file" id="importInput" accept="application/json" style="display:none;" onchange="importJson(event)">
       <button class="icon-text-btn" onclick="resetToSample()">Reset to sample</button>
       <button class="icon-text-btn danger" onclick="clearAllStops()">Clear all</button>
+    </div>
+
+    <!-- Mobile-only: the six admin/data actions above collapse into this
+         single overflow menu so the first screen leads with the trip
+         itself, not a wall of equally-weighted buttons. Calls the exact
+         same functions as their full-size counterparts above; nothing
+         about what these buttons DO has changed, only how they're
+         grouped on narrow screens (see .trip-more-wrap in styles.css). -->
+    <div class="trip-more-wrap">
+      <button type="button" class="icon-only-btn trip-more-btn" id="tripMoreBtn" onclick="toggleTripMoreMenu()" aria-haspopup="true" aria-expanded="false" title="More trip actions" aria-label="More trip actions">
+        <svg width="18" height="18" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="3" r="1.3" fill="currentColor"/><circle cx="8" cy="8" r="1.3" fill="currentColor"/><circle cx="8" cy="13" r="1.3" fill="currentColor"/></svg>
+      </button>
+      <div class="trip-more-menu" id="tripMoreMenu">
+        <button type="button" class="trip-more-item" onclick="renameTrip(); toggleTripMoreMenu(false)">Rename trip</button>
+        <button type="button" class="trip-more-item danger" onclick="deleteTrip(); toggleTripMoreMenu(false)">Delete trip</button>
+        <div class="trip-more-divider"></div>
+        <button type="button" class="trip-more-item" onclick="exportJson(); toggleTripMoreMenu(false)">Export JSON</button>
+        <button type="button" class="trip-more-item" onclick="document.getElementById('importInput').click(); toggleTripMoreMenu(false)">Import JSON</button>
+        <button type="button" class="trip-more-item" onclick="resetToSample(); toggleTripMoreMenu(false)">Reset to sample</button>
+        <button type="button" class="trip-more-item danger" onclick="clearAllStops(); toggleTripMoreMenu(false)">Clear all</button>
+      </div>
     </div>
   </div>
 

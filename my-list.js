@@ -71,6 +71,7 @@ function updateMyListBudgetTotal() {
 function renderMyList() {
   const grid = document.getElementById('myListGrid');
   const empty = document.getElementById('myListEmpty');
+  const section = document.getElementById('myListSection');
   if (!grid) return;
   updateMyListBudgetTotal();
   const myPlaces = getMyListPlaces();
@@ -78,10 +79,12 @@ function renderMyList() {
   if (myPlaces.length === 0) {
     grid.style.display = 'none';
     if (empty) empty.style.display = 'block';
+    if (section) section.classList.add('is-empty');
     return;
   }
   grid.style.display = 'grid';
   if (empty) empty.style.display = 'none';
+  if (section) section.classList.remove('is-empty');
   // Not draggable: reordering here would silently reorder the underlying
   // trip stop list too, which would be a confusing side effect of just
   // browsing a shortlist.
