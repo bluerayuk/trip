@@ -1018,7 +1018,11 @@
     .filter-group .pill-btn{
       flex:none; background:var(--surface); border:1px solid var(--border); padding:0.38rem 0.75rem;
     }
-    .filter-group .pill-btn.active{ border-color:var(--text-main); }
+    /* Must out-specify the flat chip rule above (3 classes vs 2), or the
+       selected chip's dark background gets overridden back to the flat
+       .surface color while its text stays white from the base .active
+       rule — invisible white-on-white text on the selected chip. */
+    .filter-group .pill-btn.active{ background:var(--text-main); color:#fff; border-color:var(--text-main); }
     .toolbar-right{ width:100%; justify-content:space-between; }
     .view-toggle{ flex:1 1 auto; justify-content:space-between; }
     .view-toggle .pill-btn{ flex:1; text-align:center; }
