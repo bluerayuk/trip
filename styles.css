@@ -941,25 +941,17 @@
     .search-input-wrap{ width:100%; }
     #searchInput{ width:100%; }
     /* The base .filter-group is a pill-shaped (border-radius:999px) wrapper
-       meant for a single row. With 8 category buttons forced to flex:1 and
-       wrapping onto several lines, that pill radius reads as one big
-       lopsided oval rather than a row of chips. On mobile we instead let it
-       scroll horizontally as one row — the standard pattern for a filter
-       list too long to fit — and drop the container radius down to match
-       individual chip corners instead of enclosing the whole wrapped block. */
+       meant for a single row. Forced onto multiple rows, that container
+       radius reads as one big lopsided oval rather than a row of chips.
+       On mobile it wraps onto as many rows as needed instead, with a
+       normal small radius on the container — every category stays visible
+       with nothing scrolled off-screen, and each chip keeps its own pill
+       shape from the base .pill-btn rule. */
     .filter-group{
-      width:100%; flex-wrap:nowrap; overflow-x:auto; justify-content:flex-start;
-      border-radius:var(--radius-sm); scrollbar-width:none; -webkit-overflow-scrolling:touch;
-      scroll-snap-type:x proximity; padding-right:1.6rem;
-      /* Fades the right edge to transparent so a cut-off chip like
-         "Outdoors & Na…" reads as "scroll for more" instead of "broken
-         layout". Without this the row looked identical whether or not
-         there was more content to scroll to. */
-      -webkit-mask-image:linear-gradient(to right, #000 calc(100% - 2.2rem), transparent 100%);
-      mask-image:linear-gradient(to right, #000 calc(100% - 2.2rem), transparent 100%);
+      width:100%; flex-wrap:wrap; justify-content:flex-start;
+      border-radius:var(--radius-sm); row-gap:0.35rem;
     }
-    .filter-group::-webkit-scrollbar{ display:none; }
-    .filter-group .pill-btn{ flex:none; scroll-snap-align:start; }
+    .filter-group .pill-btn{ flex:none; }
     .toolbar-right{ width:100%; justify-content:space-between; }
     .view-toggle{ flex:1 1 auto; justify-content:space-between; }
     .view-toggle .pill-btn{ flex:1; text-align:center; }
