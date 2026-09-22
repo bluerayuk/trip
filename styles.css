@@ -940,8 +940,20 @@
     .add-stop-toggle-btn{ justify-content:center; order:-1; }
     .search-input-wrap{ width:100%; }
     #searchInput{ width:100%; }
-    .filter-group{ width:100%; justify-content:space-between; }
-    .filter-group .pill-btn{ flex:1; text-align:center; }
+    /* The base .filter-group is a pill-shaped (border-radius:999px) wrapper
+       meant for a single row. With 8 category buttons forced to flex:1 and
+       wrapping onto several lines, that pill radius reads as one big
+       lopsided oval rather than a row of chips. On mobile we instead let it
+       scroll horizontally as one row — the standard pattern for a filter
+       list too long to fit — and drop the container radius down to match
+       individual chip corners instead of enclosing the whole wrapped block. */
+    .filter-group{
+      width:100%; flex-wrap:nowrap; overflow-x:auto; justify-content:flex-start;
+      border-radius:var(--radius-sm); scrollbar-width:none; -webkit-overflow-scrolling:touch;
+      scroll-snap-type:x proximity;
+    }
+    .filter-group::-webkit-scrollbar{ display:none; }
+    .filter-group .pill-btn{ flex:none; scroll-snap-align:start; }
     .toolbar-right{ width:100%; justify-content:space-between; }
     .view-toggle{ flex:1 1 auto; justify-content:space-between; }
     .view-toggle .pill-btn{ flex:1; text-align:center; }
