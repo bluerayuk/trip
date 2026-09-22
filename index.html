@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/5.12.0/maplibre-gl.min.css">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -41,6 +42,15 @@
     <span class="packages-label">Packages</span>
     <div class="packages-list" id="packagesList"></div>
     <button class="icon-text-btn" onclick="createPackage()" title="Create a new package">+ New package</button>
+  </div>
+
+  <div class="mylist-section" id="myListSection">
+    <div class="mylist-header">
+      <h2>My attractions</h2>
+      <span class="budget-total" id="myListBudgetTotal"><span>Est. total</span>$0</span>
+    </div>
+    <div class="mylist-grid grid-container" id="myListGrid"></div>
+    <p class="mylist-empty" id="myListEmpty">No attractions added yet — tap "Add to my list" on any attraction below to shortlist it here.</p>
   </div>
 
   <div class="control-panel-wrap" id="controlPanelWrap">
@@ -163,7 +173,8 @@
       <label class="switch-label"><input type="checkbox" id="groupByDayToggle" onchange="renderPlaces()"> Group by day</label>
       <div class="view-toggle" role="group" aria-label="Change view" id="viewToggle">
         <button class="pill-btn active" data-view="grid">Grid</button>
-        <button class="pill-btn" data-view="route">Route</button>
+        <button class="pill-btn" data-view="map">Map</button>
+        <button class="pill-btn" data-view="split">Split</button>
       </div>
       <button class="toolbar-btn" onclick="copyItinerary()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="8" y="8" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M4 16V6a2 2 0 0 1 2-2h10" stroke="currentColor" stroke-width="1.6"/></svg>
@@ -206,6 +217,15 @@
 
 </div>
 
+<script src="sample-places.js"></script>
+<script src="sample-packages.js"></script>
+<script src="my-list.js"></script>
+<script src="drag-drop.js"></script>
+<script src="export-import.js"></script>
+<script src="maps-link.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/5.12.0/maplibre-gl.min.js"></script>
+<script src="map-view.js"></script>
+<script src="nearest.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
