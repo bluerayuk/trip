@@ -1513,13 +1513,53 @@
   }
 
   /* ============ Toolbar events ============ */
+  const filterMoreWrap = document.getElementById('filterMore');
+  const filterMoreToggle = document.getElementById('filterMoreToggle');
+  const filterMoreLabel = document.getElementById('filterMoreLabel');
+  const filterMoreDefaultLabel = filterMoreLabel ? filterMoreLabel.textContent : 'More';
+
   document.getElementById('filterGroup').addEventListener('click', (e) => {
     const btn = e.target.closest('.pill-btn');
     if (!btn) return;
     currentFilter = btn.dataset.filter;
     document.querySelectorAll('#filterGroup .pill-btn').forEach(b => b.classList.toggle('active', b === btn));
+
+    // Keep the "More" toggle (mobile only) in sync: show the picked
+    // category's name and highlight it when the active filter lives inside
+    // the dropdown; otherwise reset it back to its default label.
+    if (filterMoreWrap && filterMoreToggle && filterMoreLabel) {
+      const pickedInMenu = filterMoreWrap.contains(btn);
+      filterMoreToggle.classList.toggle('active', pickedInMenu);
+      filterMoreLabel.textContent = pickedInMenu ? btn.textContent : filterMoreDefaultLabel;
+      filterMoreWrap.classList.remove('open');
+      filterMoreToggle.setAttribute('aria-expanded', 'false');
+    }
+
     renderPlaces();
   });
+
+  if (filterMoreWrap && filterMoreToggle) {
+    filterMoreToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isOpen = filterMoreWrap.classList.toggle('open');
+      filterMoreToggle.setAttribute('aria-expanded', String(isOpen));
+    });
+    // Close the dropdown on any click elsewhere on the page.
+    document.addEventListener('click', (e) => {
+      if (!filterMoreWrap.contains(e.target)) {
+        filterMoreWrap.classList.remove('open');
+        filterMoreToggle.setAttribute('aria-expanded', 'false');
+      }
+    });
+    // Close on Escape for keyboard users.
+    filterMoreWrap.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        filterMoreWrap.classList.remove('open');
+        filterMoreToggle.setAttribute('aria-expanded', 'false');
+        filterMoreToggle.focus();
+      }
+    });
+  }
 
   document.getElementById('viewToggle').addEventListener('click', (e) => {
     const btn = e.target.closest('.pill-btn');
