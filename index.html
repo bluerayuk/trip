@@ -10,34 +10,70 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/5.12.0/maplibre-gl.min.css">
 <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body class="tab-explore">
 <div class="page">
 
   <h1 id="tripHeading" class="sr-only">Trip itinerary</h1>
 
-  <!-- On mobile this wraps the trip bar and packages bar into one visual
-       card with an internal divider, instead of two separate stacked
-       cards (see .mobile-summary-card in styles.css). On desktop it's
-       display:contents, so trip-bar/packages-bar sit exactly as before. -->
+  <!-- Mobile-only: a persistent top bar, pinned to the top of the screen so it
+       stays visible after scrolling past the trip card below. On phones,
+       app.js (syncTopbarPlacement) moves the trip picker (.trip-select-wrap)
+       in before the price and the ⋮ menu in after it, giving
+       [ trip picker ] [ price ] [ ⋮ ]; on wider screens they go back to the
+       trip bar. The price badge mirrors #budgetTotal's value (updated in the
+       same place in app.js); it's purely informational, so it's aria-hidden
+       to avoid double-announcing the total that's already in the trip bar. -->
+  <div class="mobile-topbar" id="mobileTopbar">
+    <div class="sticky-total-badge" id="stickyTotalBadge" aria-hidden="true">
+      <span id="stickyTotalValue">$0</span>
+    </div>
+    <button type="button" class="topbar-search-btn" id="searchToggleBtn" onclick="toggleSearch()" aria-label="Search stops" aria-expanded="false" aria-controls="searchInput" title="Search stops">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+    <div class="topbar-filter-wrap" id="filterMenuWrap">
+      <button type="button" class="topbar-search-btn" id="filterToggleBtn" onclick="toggleFilterMenu()" aria-haspopup="true" aria-expanded="false" aria-controls="filterMenu" aria-label="Filter by category" title="Filter by category">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 5h18l-7 8.5V19l-4 2v-7.5L3 5z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="trip-more-menu filter-menu" id="filterMenu" role="menu"><!-- filled by JS --></div>
+    </div>
+    <div class="topbar-filter-wrap" id="viewMenuWrap">
+      <button type="button" class="topbar-search-btn" id="viewToggleBtn" onclick="toggleViewMenu()" aria-haspopup="true" aria-expanded="false" aria-controls="viewMenu" aria-label="Change view" title="Change view"><!-- current view icon, set by JS --></button>
+      <div class="trip-more-menu filter-menu view-menu" id="viewMenu" role="menu"><!-- filled by JS --></div>
+    </div>
+  </div>
+
+  <!-- On mobile this wraps the trip bar, the collapsible sharing/packages
+       panel, and (previously) the packages bar into one visual card with
+       internal dividers, instead of several separate stacked cards (see
+       .mobile-summary-card in styles.css). On desktop it's display:contents,
+       so everything still reads as independent bars, just as before. -->
   <div class="mobile-summary-card">
   <div class="trip-bar">
     <div class="trip-select-wrap">
       <select id="tripSelect" aria-label="Select trip"></select>
-      <button class="icon-text-btn" onclick="createTrip()" title="New trip">+ New</button>
+      <button class="icon-text-btn" id="newTripBtn" onclick="createTrip()" title="New trip" aria-label="New trip">+<span class="btn-label"> New</span></button>
       <div class="trip-admin-btns">
         <button class="icon-text-btn" onclick="renameTrip()" title="Rename trip">Rename</button>
         <button class="icon-text-btn danger" onclick="deleteTrip()" title="Delete trip">Delete</button>
       </div>
     </div>
-    <label class="shared-toggle">
-      <input type="checkbox" id="sharedToggle" onchange="toggleShared()">
-      Shared trip
-    </label>
-    <span class="shared-badge" id="sharedBadge">Visible to all users</span>
     <div class="trip-status-row">
       <span class="save-indicator" id="saveIndicator"><span class="dot"></span><span id="saveText">Saved</span></span>
       <span class="budget-total" id="budgetTotal"><span>Est. total</span>$0</span>
     </div>
+
+    <!-- Mobile-only: Shared trip + Packages tuck behind this disclosure so
+         the header leads with just the trip picker and its cost/status at
+         a glance, instead of always showing every control. Desktop hides
+         this toggle and shows the panel below inline, unchanged in
+         substance (see .trip-details-toggle/.trip-details-panel in
+         styles.css). Nothing here changes what any control does, only how
+         much is visible before you ask for it. -->
+    <button type="button" class="trip-details-toggle" id="tripDetailsToggle" onclick="toggleTripDetails()" aria-expanded="false" aria-controls="tripDetailsPanel">
+      <span id="tripDetailsToggleText">Packages</span>
+      <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+
     <div class="trip-bar-right">
       <button class="icon-text-btn" onclick="exportJson()">Export JSON</button>
       <button class="icon-text-btn" onclick="document.getElementById('importInput').click()">Import JSON</button>
@@ -57,8 +93,18 @@
         <svg width="18" height="18" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="3" r="1.3" fill="currentColor"/><circle cx="8" cy="8" r="1.3" fill="currentColor"/><circle cx="8" cy="13" r="1.3" fill="currentColor"/></svg>
       </button>
       <div class="trip-more-menu" id="tripMoreMenu">
+        <button type="button" class="trip-more-item" onclick="openAddFromMenu()">Add attraction</button>
+        <div class="trip-more-divider"></div>
+        <button type="button" class="trip-more-item" onclick="createTrip(); toggleTripMoreMenu(false)">New trip</button>
         <button type="button" class="trip-more-item" onclick="renameTrip(); toggleTripMoreMenu(false)">Rename trip</button>
         <button type="button" class="trip-more-item danger" onclick="deleteTrip(); toggleTripMoreMenu(false)">Delete trip</button>
+        <div class="trip-more-divider"></div>
+        <button type="button" class="trip-more-item trip-more-shared" id="sharedMenuItem" role="menuitemcheckbox" aria-checked="false" onclick="toggleSharedFromMenu()">
+          <span>Shared trip</span><span class="trip-more-check" aria-hidden="true">✓</span>
+        </button>
+        <div class="trip-more-divider"></div>
+        <button type="button" class="trip-more-item" onclick="copyItinerary(); toggleTripMoreMenu(false)">Copy list</button>
+        <button type="button" class="trip-more-item" onclick="window.print(); toggleTripMoreMenu(false)">Print</button>
         <div class="trip-more-divider"></div>
         <button type="button" class="trip-more-item" onclick="exportJson(); toggleTripMoreMenu(false)">Export JSON</button>
         <button type="button" class="trip-more-item" onclick="document.getElementById('importInput').click(); toggleTripMoreMenu(false)">Import JSON</button>
@@ -68,20 +114,23 @@
     </div>
   </div>
 
-  <div class="packages-bar" id="packagesBar" style="display:none;">
-    <span class="packages-label">Packages</span>
-    <div class="packages-list" id="packagesList"></div>
-    <button class="icon-text-btn" onclick="createPackage()" title="Create a new package">+ New package</button>
+  <div class="trip-details-panel" id="tripDetailsPanel">
+    <label class="shared-toggle">
+      <input type="checkbox" id="sharedToggle" onchange="toggleShared()">
+      Shared trip
+    </label>
+    <span class="shared-badge" id="sharedBadge">Visible to all users</span>
+    <div class="packages-bar" id="packagesBar" style="display:none;">
+      <span class="packages-label">Packages</span>
+      <div class="packages-list" id="packagesList"></div>
+      <button class="icon-text-btn" onclick="createPackage()" title="Create a new package">+ New package</button>
+    </div>
   </div>
   </div>
 
-  <div class="mylist-section" id="myListSection">
-    <div class="mylist-header">
-      <h2>My attractions</h2>
-      <span class="budget-total" id="myListBudgetTotal"><span>Est. total</span>$0</span>
-    </div>
-    <div class="mylist-grid grid-container" id="myListGrid"></div>
-    <p class="mylist-empty" id="myListEmpty">No attractions added yet — tap "Add to my list" on any attraction below to shortlist it here.</p>
+  <div class="view-tabs" role="tablist" aria-label="Attractions">
+    <button type="button" class="view-tab active" id="tabExplore" role="tab" aria-selected="true" onclick="setTab('explore')">Explore</button>
+    <button type="button" class="view-tab" id="tabMyList" role="tab" aria-selected="false" onclick="setTab('mylist')">My attractions <span class="view-tab-count" id="tabMyListCount">0</span></button>
   </div>
 
   <div class="control-panel-wrap" id="controlPanelWrap">
@@ -180,7 +229,7 @@
 
   <div class="toolbar">
     <div class="toolbar-left">
-      <button class="add-stop-toggle-btn" id="addStopToggleBtn" onclick="toggleAddPanel()" aria-expanded="false" aria-controls="controlPanelWrap">
+      <button class="add-stop-toggle-btn" id="addStopToggleBtn" onclick="toggleAddPanel()" aria-expanded="false" aria-controls="controlPanelWrap" aria-label="Add a stop">
         <svg width="14" height="14" viewBox="0 0 16 16" fill="none" id="addStopToggleIcon"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
         <span id="addStopToggleLabel">Add a stop</span>
       </button>
@@ -224,6 +273,15 @@
         Print
       </button>
     </div>
+  </div>
+
+  <div class="mylist-section" id="myListSection">
+    <div class="mylist-header">
+      <h2>My attractions</h2>
+      <span class="budget-total" id="myListBudgetTotal"></span>
+    </div>
+    <div class="mylist-grid grid-container" id="myListGrid"></div>
+    <p class="mylist-empty" id="myListEmpty">Nothing added yet. Tap the bookmark on any attraction in Explore to add it here.</p>
   </div>
 
   <div id="viewContainer" style="width:100%; display:flex; flex-direction:column; align-items:center; gap:1.5rem;">

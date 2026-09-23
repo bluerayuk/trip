@@ -316,6 +316,11 @@ function updateMapControlsUi() {
     myBtn.classList.toggle('active', mapMyListOnly);
     myBtn.setAttribute('aria-pressed', mapMyListOnly ? 'true' : 'false');
   }
+  const activeFilters = [...hiddenMapCategories].filter(c => currentMapPlaces.some(p => p.category === c)).length + (mapMyListOnly ? 1 : 0);
+  const fbtn = mapControlsEl.querySelector('.map-filter-btn');
+  const badge = mapControlsEl.querySelector('.map-filter-badge');
+  if (fbtn) fbtn.classList.toggle('active', activeFilters > 0);
+  if (badge) { badge.textContent = activeFilters; badge.style.display = activeFilters ? '' : 'none'; }
   const status = mapControlsEl.querySelector('.map-legend-status');
   if (status) {
     const total = currentMapPlaces.length;
@@ -323,6 +328,23 @@ function updateMapControlsUi() {
     status.textContent = shown === total ? `${total} stop${total !== 1 ? 's' : ''}` : `Showing ${shown} of ${total} stops`;
   }
 }
+
+function toggleMapFilterPanel(open) {
+  if (!mapControlsEl) return;
+  const panel = mapControlsEl.querySelector('.map-filter-panel');
+  const btn = mapControlsEl.querySelector('.map-filter-btn');
+  if (!panel || !btn) return;
+  const shouldOpen = open !== undefined ? open : !panel.classList.contains('open');
+  if (shouldOpen && typeof toggleTourPanel === 'function') toggleTourPanel(false);
+  panel.classList.toggle('open', shouldOpen);
+  btn.setAttribute('aria-expanded', String(shouldOpen));
+}
+document.addEventListener('click', (e) => {
+  if (mapControlsEl && !mapControlsEl.contains(e.target)) { toggleMapFilterPanel(false); if (typeof toggleTourPanel === 'function') toggleTourPanel(false); }
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') { toggleMapFilterPanel(false); if (typeof toggleTourPanel === 'function') toggleTourPanel(false); }
+});
 
 function buildMapControls(visible, wrap, mapEl) {
   currentMapPlaces = visible;
@@ -336,30 +358,35 @@ function buildMapControls(visible, wrap, mapEl) {
   ];
 
   const bar = document.createElement('div');
-  bar.className = 'map-controls';
+  bar.className = 'map-filter-control';
   bar.innerHTML = `
-    <div class="map-legend" role="group" aria-label="Show or hide categories on the map">
-      ${ordered.map(cat => `
+    <button type="button" class="icon-text-btn map-filter-btn" data-action="toggle-filters" aria-haspopup="true" aria-expanded="false" title="Filter the map">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 5h18l-7 8.5V19l-4 2v-7.5L3 5z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+      Filters <span class="map-filter-badge" style="display:none"></span>
+    </button>
+    <button type="button" class="icon-text-btn" data-fit="all">Fit all</button>
+    <button type="button" class="icon-text-btn" data-fit="manhattan">Fit to Manhattan</button>
+    <div class="map-filter-panel" role="group" aria-label="Map filters">
+      <div class="map-filter-head"><span>Show on map</span><span class="map-legend-status" aria-live="polite"></span></div>
+      <div class="map-legend">
+        ${ordered.map(cat => `
         <button type="button" class="map-legend-chip" data-cat="${escapeHtml(cat)}" aria-pressed="true">
           <span class="map-legend-dot" style="background:${categoryDotColor(cat) || 'var(--accent)'}"></span>
           <span class="map-legend-label">${escapeHtml(categoryLabel(cat))}</span>
           <span class="map-legend-count">${counts[cat]}</span>
         </button>`).join('')}
-    </div>
-    <div class="map-controls-actions">
-      <button type="button" class="icon-text-btn map-mylist-toggle" data-action="mylist" aria-pressed="false"${myCount ? '' : ' disabled title="Add stops to My attractions first"'}>
-        ${MYLIST_PIN_BADGE_SVG.replace('fill="#fff"', 'fill="currentColor"')} My list only (${myCount})
-      </button>
-      <span class="map-controls-sep" aria-hidden="true"></span>
-      <button type="button" class="icon-text-btn" data-action="all">All</button>
-      <button type="button" class="icon-text-btn" data-action="none">None</button>
-      <span class="map-controls-sep" aria-hidden="true"></span>
-      <button type="button" class="icon-text-btn" data-fit="all">Fit all</button>
-      <button type="button" class="icon-text-btn" data-fit="manhattan">Fit to Manhattan</button>
-      <span class="map-legend-status" aria-live="polite"></span>
+      </div>
+      <div class="map-filter-actions">
+        <button type="button" class="icon-text-btn map-mylist-toggle" data-action="mylist" aria-pressed="false"${myCount ? '' : ' disabled title="Add stops to My attractions first"'}>
+          ${MYLIST_PIN_BADGE_SVG.replace('fill="#fff"', 'fill="currentColor"')} My list only (${myCount})
+        </button>
+        <button type="button" class="icon-text-btn" data-action="all">All</button>
+        <button type="button" class="icon-text-btn" data-action="none">None</button>
+      </div>
     </div>`;
 
   bar.addEventListener('click', (e) => {
+    if (e.target.closest('[data-action="toggle-filters"]')) { toggleMapFilterPanel(); return; }
     const chip = e.target.closest('.map-legend-chip');
     if (chip) {
       const cat = chip.dataset.cat;
@@ -384,8 +411,7 @@ function buildMapControls(visible, wrap, mapEl) {
     }
   });
 
-  wrap.insertBefore(bar, mapEl);
-  mapControlsEl = bar;
+  mapControlsEl = bar; // attached onto the map itself in renderMapView(), once MapLibre has set up its container
   updateMapControlsUi();
 }
 
@@ -587,6 +613,7 @@ function showOnMap(id, opts = {}) {
   if (!place) return;
   if (!hasMapLocation(place)) { showToast('No address saved for this stop'); return; }
   pendingFocusId = id;
+  if (activeTab !== 'explore') setTab('explore'); // the map lives on the Explore tab
   if (currentView === 'map' || currentView === 'split') {
     if (!tryPendingFocus() && !pendingGeocodeIds.has(id)) showToast('Locating on the map…');
     if (opts.scroll !== false) scrollMapIntoView();
@@ -703,6 +730,17 @@ function reorderSplitList(listEl) {
   [...inRoute.map(id => rowById.get(id)), ...restOrdered].forEach(row => list.appendChild(row));
 }
 
+/* ---- Fill the screen: map height = viewport minus whatever sits above it ---- */
+function updateMapHeight() {
+  if (!document.body.classList.contains('map-fullscreen')) return;
+  const vc = document.getElementById('viewContainer');
+  if (!vc) return;
+  const top = vc.getBoundingClientRect().top + window.scrollY;
+  const h = Math.max(480, Math.round(window.innerHeight - top - 16));
+  document.documentElement.style.setProperty('--map-h', h + 'px');
+}
+window.addEventListener('resize', updateMapHeight);
+
 function renderMapView(container, visible) {
   const renderId = ++mapRenderId;
 
@@ -733,6 +771,7 @@ function renderMapView(container, visible) {
   wrap.appendChild(unlocatedPanelEl);
 
   container.appendChild(wrap);
+  updateMapHeight();
 
   if (typeof maplibregl === 'undefined') {
     wrap.innerHTML = `<div class="empty-state">
@@ -750,9 +789,26 @@ function renderMapView(container, visible) {
     style: 'https://tiles.openfreemap.org/styles/liberty',
     center: [0, 20],
     zoom: 1.5,
-    attributionControl: true
+    attributionControl: false // added below as a collapsed "i" button instead
   });
   maplibreMap.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
+  // Attribution (required by OpenStreetMap / OpenFreeMap) tucked into a small "i" button,
+  // closed by default, instead of a permanent text strip across the map corner.
+  maplibreMap.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right');
+  // MapLibre re-opens the attribution on load / resize / source updates, so keep it shut every time.
+  const collapseAttrib = () => {
+    const el = mapEl.querySelector('.maplibregl-ctrl-attrib');
+    if (!el) return;
+    el.classList.add('maplibregl-compact');
+    el.classList.remove('maplibregl-compact-show');
+    el.removeAttribute('open');
+  };
+  collapseAttrib();
+  maplibreMap.on('load', collapseAttrib);
+  maplibreMap.on('resize', collapseAttrib);
+  maplibreMap.once('idle', collapseAttrib);
+  if (typeof tourMountOnMap === 'function') tourMountOnMap(mapEl); // bottom route card (nearest.js)
+  if (mapControlsEl) mapEl.appendChild(mapControlsEl); // filter icon + Fit buttons sit on the map (top-left)
   if (typeof tourOnMapCreated === 'function') tourOnMapCreated(maplibreMap); // draws the route line once the style loads (nearest.js)
   // Once the user pans/zooms themselves, stop auto-fitting when late geocodes land.
   ['dragstart', 'zoomstart', 'rotatestart'].forEach(ev =>

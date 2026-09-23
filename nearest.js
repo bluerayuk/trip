@@ -47,8 +47,12 @@ const TOUR_ICON_SVG = '<svg width="16" height="16" viewBox="0 0 24 24" fill="non
 /* ---- State ---- */
 let tourIds = [];            // ordered stop ids; the first one is the chosen start
 let tourSuggestedId = null;  // the single closest next stop (gets the pulsing pin)
-let tourPanelEl = null;
+let tourPanelEl = null;      // dropdown under the Route button (start box / full route list)
 let tourPanelHtmlCache = '';
+let tourBtnEl = null;        // the Route button on the map
+let tourCardEl = null;       // compact card at the bottom of the map while a route is running
+let tourCardHtmlCache = '';
+let tourCardCollapsed = false;
 let tourMapReady = false;    // true once the current MapLibre style has loaded
 
 /* ---- Small helpers ---- */
@@ -123,6 +127,7 @@ function startTour(id) {
   if (!p) return;
   if (!hasCoords(p)) { showToast("That stop hasn't been located on the map yet"); return; }
   tourIds = [id];
+  toggleTourPanel(false);
   refreshTour();
   flyToPlace(id);
   announce(`Route started at ${p.name}`);
@@ -241,23 +246,58 @@ function repairKnownCoords() {
   return changed;
 }
 
-// Called from renderMapView() after the category legend is built and before pins are placed.
+// Called from renderMapView() after the map's filter control is built, before the map exists.
+// The Route button + dropdown live in that control (top-left of the map). The running route's
+// card sits at the bottom of the map and is attached by tourMountOnMap() once MapLibre is set up.
 function buildTourPanel(wrap, mapEl) {
   if (repairKnownCoords()) persistPlaces();
+  tourPanelHtmlCache = ''; tourCardHtmlCache = '';
+  tourBtnEl = document.createElement('button');
+  tourBtnEl.type = 'button';
+  tourBtnEl.className = 'icon-text-btn map-route-btn';
+  tourBtnEl.setAttribute('aria-haspopup', 'true');
+  tourBtnEl.setAttribute('aria-expanded', 'false');
+  tourBtnEl.title = 'Route helper: plan a walking route, always to the closest next stop';
+  tourBtnEl.innerHTML = `${TOUR_ICON_SVG} Route <span class="map-filter-badge" style="display:none"></span>`;
+  tourBtnEl.addEventListener('click', () => toggleTourPanel());
   tourPanelEl = document.createElement('div');
-  tourPanelEl.className = 'tour-panel';
+  tourPanelEl.className = 'map-route-panel';
   tourPanelEl.setAttribute('role', 'region');
   tourPanelEl.setAttribute('aria-label', 'Route helper');
-  tourPanelHtmlCache = '';
-  wrap.insertBefore(tourPanelEl, mapEl);
+  tourCardEl = document.createElement('div');
+  tourCardEl.className = 'tour-card' + (tourCardCollapsed ? ' collapsed' : '');
+  tourCardEl.setAttribute('role', 'region');
+  tourCardEl.setAttribute('aria-label', 'Your route');
+  tourCardEl.style.display = 'none';
+  if (mapControlsEl) {
+    const fb = mapControlsEl.querySelector('.map-filter-btn');
+    if (fb) fb.after(tourBtnEl); else mapControlsEl.prepend(tourBtnEl);
+    mapControlsEl.appendChild(tourPanelEl);
+  }
   pruneTour();
   updateSuggestion();
   renderTourPanel();
   decorateSplitRows();
 }
 
+function tourMountOnMap(mapEl) { if (tourCardEl) mapEl.appendChild(tourCardEl); }
+
+function toggleTourPanel(open) {
+  if (!tourPanelEl || !tourBtnEl) return;
+  const shouldOpen = open !== undefined ? open : !tourPanelEl.classList.contains('open');
+  if (shouldOpen && typeof toggleMapFilterPanel === 'function') toggleMapFilterPanel(false);
+  tourPanelEl.classList.toggle('open', shouldOpen);
+  tourBtnEl.setAttribute('aria-expanded', String(shouldOpen));
+  if (shouldOpen) setTimeout(() => { const i = tourPanelEl.querySelector('#tourStartInput'); if (i) i.focus(); }, 0);
+}
+
+function toggleTourCard() {
+  tourCardCollapsed = !tourCardCollapsed;
+  if (tourCardEl) tourCardEl.classList.toggle('collapsed', tourCardCollapsed);
+}
+
 function renderTourPanel() {
-  if (!tourPanelEl || !tourPanelEl.isConnected) return;
+  if (!tourPanelEl) return;
 
   const pool = getTourPool();
   const located = pool.filter(hasCoords);
@@ -267,20 +307,24 @@ function renderTourPanel() {
     : '';
 
   const tourPlaces = getTourPlaces();
-  let html;
+  if (tourBtnEl) {
+    tourBtnEl.classList.toggle('active', tourPlaces.length > 0);
+    const badge = tourBtnEl.querySelector('.map-filter-badge');
+    if (badge) { badge.textContent = tourPlaces.length; badge.style.display = tourPlaces.length ? '' : 'none'; }
+  }
+
+  let panelHtml, cardHtml = '';
 
   if (tourPlaces.length === 0) {
-    // A searchable text input (backed by a <datalist>) instead of a plain
-    // dropdown: browsers filter the suggestion list as you type, which
-    // matters once a trip has dozens of located stops to scroll through.
+    // Searchable text input (backed by a <datalist>): the browser filters suggestions as you type.
     const sortedLocated = located.slice().sort((a, b) => (a.name || '').localeCompare(b.name || ''));
     const dataOptions = sortedLocated.map(p => `<option value="${escapeHtml(p.name)}"></option>`).join('');
-    html = `
+    panelHtml = `
       <div class="tour-head">
         <div class="tour-title">${TOUR_ICON_SVG}Route helper</div>
         <span class="tour-summary">${located.length} located stop${located.length !== 1 ? 's' : ''} to choose from</span>
       </div>
-      <p class="tour-lead">Choose where you're starting. You'll then see the closest stop to go to next, and the closest after that, so you don't cross the city for one attraction.</p>
+      <p class="tour-lead">Choose where you're starting. You'll then see the closest stop to go to next, so you don't cross the city for one attraction.</p>
       <div class="tour-start-row">
         <input type="text" id="tourStartInput" list="tourStartOptions" aria-label="Starting stop" placeholder="Search a starting stop…" autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault(); startTourFromSelect();}">
         <datalist id="tourStartOptions">${dataOptions}</datalist>
@@ -311,12 +355,31 @@ function renderTourPanel() {
             <span class="tour-suggest-name"><span class="tour-suggest-dot" style="background:${categoryDotColor(s.place.category) || 'var(--accent)'}"></span>${escapeHtml(s.place.name)}</span>
             <span class="tour-suggest-meta">${i === 0 ? '<span class="tour-closest-tag">Closest</span>' : ''}${escapeHtml(tourFmtLeg(cur, s.place))}</span>
           </button>`).join('')}</div>`
-      : `<p class="tour-note">${getTourPool().some(p => hasCoords(p)) ? 'Every located stop on the map is now on your route.' : 'No other located stops on the map.'} Change the filters above to widen the choice.</p>`;
+      : `<p class="tour-note">${getTourPool().some(p => hasCoords(p)) ? 'Every located stop on the map is now on your route.' : 'No other located stops on the map.'} Change the map filters to widen the choice.</p>`;
 
-    html = `
+    // Full route list lives in the dropdown so it doesn't crowd the map.
+    panelHtml = `
       <div class="tour-head">
-        <div class="tour-title">${TOUR_ICON_SVG}Route helper</div>
+        <div class="tour-title">${TOUR_ICON_SVG}Your route</div>
         <span class="tour-summary">${escapeHtml(summary)}</span>
+      </div>
+      <ol class="tour-route" aria-label="Your route so far">${tourPlaces.map((p, i) => `
+        <li><button type="button" class="tour-stop" onclick="flyToPlace('${p.id}')" title="Show on map">
+          <span class="tour-stop-num">${i + 1}</span><span class="tour-stop-name">${escapeHtml(p.name)}</span>${i > 0 ? `<span class="tour-stop-leg">${escapeHtml(tourFmtLeg(tourPlaces[i - 1], p, true))}</span>` : ''}
+        </button></li>`).join('')}</ol>
+      ${unlocatedNote}`;
+
+    // Compact card on the map: where you are, the closest next stops, and the route actions.
+    cardHtml = `
+      <div class="tour-card-head">
+        <p class="tour-now">You're at <strong>${tourPlaces.length}. ${escapeHtml(cur.name)}</strong><span class="tour-summary"> · ${escapeHtml(summary)}</span></p>
+        <button type="button" class="icon-only-btn tour-card-toggle" onclick="toggleTourCard()" title="Collapse / expand" aria-label="Collapse or expand the route card">
+          <svg width="14" height="14" viewBox="0 0 10 10" fill="none"><path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+      <div class="tour-card-body">
+        ${sugg.length ? '<div class="tour-card-label">Closest next</div>' : ''}
+        ${suggestHtml}
         <div class="tour-actions">
           <button type="button" class="icon-text-btn" onclick="undoTourStep()">Undo last</button>
           <button type="button" class="icon-text-btn" onclick="autoCompleteTour()"${sugg.length ? '' : ' disabled'} title="Keep going to the closest stop until none are left">Auto-complete</button>
@@ -324,26 +387,24 @@ function renderTourPanel() {
           <button type="button" class="icon-text-btn" onclick="applyTourOrder()"${tourPlaces.length < 2 ? ' disabled' : ''} title="Move these stops to the top of your trip, in this order">Use as trip order</button>
           <button type="button" class="icon-text-btn danger" onclick="clearTour()">Clear</button>
         </div>
-      </div>
-      <p class="tour-now">You're at <strong>${tourPlaces.length}. ${escapeHtml(cur.name)}</strong>${sugg.length ? '. Closest next:' : '.'}</p>
-      ${suggestHtml}
-      <ol class="tour-route" aria-label="Your route so far">${tourPlaces.map((p, i) => `
-        <li><button type="button" class="tour-stop" onclick="flyToPlace('${p.id}')" title="Show on map">
-          <span class="tour-stop-num">${i + 1}</span><span class="tour-stop-name">${escapeHtml(p.name)}</span>${i > 0 ? `<span class="tour-stop-leg">${escapeHtml(tourFmtLeg(tourPlaces[i - 1], p, true))}</span>` : ''}
-        </button></li>`).join('')}</ol>
-      ${unlocatedNote}`;
+      </div>`;
   }
 
-  // Geocoding results arrive one at a time and each one refreshes the panel. Skip identical
-  // renders, and never rebuild while the dropdown/search box is in use or the person's
-  // in-progress choice or typed text would vanish.
-  if (html === tourPanelHtmlCache) return;
+  // The card is cheap to rebuild and holds no typed input.
+  if (tourCardEl && cardHtml !== tourCardHtmlCache) {
+    tourCardHtmlCache = cardHtml;
+    tourCardEl.innerHTML = cardHtml;
+    tourCardEl.style.display = cardHtml ? '' : 'none';
+  }
+
+  // Never rebuild the dropdown while the start box is in use, or typed text would vanish.
+  if (panelHtml === tourPanelHtmlCache) return;
   const active = document.activeElement;
-  if (active && (active.tagName === 'SELECT' || active.id === 'tourStartInput') && tourPanelEl.contains(active)) return;
+  if (active && active.id === 'tourStartInput' && tourPanelEl.contains(active)) return;
   const prevInput = tourPanelEl.querySelector('#tourStartInput');
   const prevValue = prevInput ? prevInput.value : '';
-  tourPanelHtmlCache = html;
-  tourPanelEl.innerHTML = html;
+  tourPanelHtmlCache = panelHtml;
+  tourPanelEl.innerHTML = panelHtml;
   const nextInput = tourPanelEl.querySelector('#tourStartInput');
   if (nextInput && prevValue) nextInput.value = prevValue;
 }
@@ -437,7 +498,7 @@ function fitTourBounds() {
   const bounds = pts.reduce((b, p) => b.extend([p.lng, p.lat]),
     new maplibregl.LngLatBounds([pts[0].lng, pts[0].lat], [pts[0].lng, pts[0].lat]));
   mapAutoFit = false; // don't let late geocodes pull the camera away
-  maplibreMap.fitBounds(bounds, { padding: 70, maxZoom: 15, animate: true });
+  maplibreMap.fitBounds(bounds, { padding: { top: 70, left: 70, right: 70, bottom: 170 }, maxZoom: 15, animate: true });
 }
 
 /* ---- Split-view list rows ---- */

@@ -28,7 +28,7 @@
   /* ============ State ============ */
   let places = [];
   let packages = [];           // [{id, name, cost}] — shared prices covering multiple stops
-  let myListIds = [];          // ids of places the user has shortlisted into "My attractions", per trip
+  let myList = [];             // separate ordered list: [{id, placeId, day, note}] (see my-list.js), per trip
   let trips = [];              // [{id, name, shared}]
   let currentTripId = null;
 
@@ -53,6 +53,33 @@
   }
   coarsePointerQuery.addEventListener('change', handleMobileUIChange);
   narrowScreenQuery.addEventListener('change', handleMobileUIChange);
+
+  /* ============ Phone top bar: [ trip picker ] [ price ] [ ⋮ ] ============ */
+  // On phones (same 640px breakpoint as the CSS) the trip picker and the ⋮
+  // menu are moved into the fixed #mobileTopbar around the price badge; on
+  // wider screens they're put back exactly where they were in the trip bar.
+  // Moving the real elements (rather than duplicating them) keeps every
+  // existing listener and id working.
+  const phoneTopbarQuery = window.matchMedia('(max-width: 640px)');
+  const topbarMovables = ['.trip-select-wrap', '.trip-more-wrap'].map(sel => {
+    const el = document.querySelector(sel);
+    return el ? { el, parent: el.parentNode, next: el.nextSibling } : null;
+  }).filter(Boolean);
+  function syncTopbarPlacement() {
+    const topbar = document.getElementById('mobileTopbar');
+    const badge = document.getElementById('stickyTotalBadge');
+    if (!topbar || !badge) return;
+    if (phoneTopbarQuery.matches) {
+      topbarMovables.forEach(m => {
+        if (m.el.matches('.trip-select-wrap')) topbar.insertBefore(m.el, badge); // before the price
+        else topbar.appendChild(m.el);                                          // after the price
+      });
+    } else {
+      topbarMovables.forEach(m => m.parent.insertBefore(m.el, m.next));
+    }
+  }
+  phoneTopbarQuery.addEventListener('change', syncTopbarPlacement);
+  syncTopbarPlacement();
 
   let currentFilter = 'all';
   let currentView = 'grid';
@@ -100,26 +127,26 @@
       const res = await window.storage.get(tripPlacesKey(trip.id), !!trip.shared);
       if (res && res.value) {
         const parsed = JSON.parse(res.value);
-        if (Array.isArray(parsed)) { places = parsed; packages = []; myListIds = []; }
+        if (Array.isArray(parsed)) { places = parsed; packages = []; myList = []; }
         else {
           places = Array.isArray(parsed.places) ? parsed.places : [];
           packages = Array.isArray(parsed.packages) ? parsed.packages : [];
-          myListIds = Array.isArray(parsed.myListIds) ? parsed.myListIds : [];
+          myList = readMyList(parsed);
         }
       } else {
         places = trip.id === 'trip-default' ? JSON.parse(JSON.stringify(SAMPLE_PLACES)) : [];
         packages = trip.id === 'trip-default' ? JSON.parse(JSON.stringify(SAMPLE_PACKAGES)) : [];
-        myListIds = [];
+        myList = [];
         await persistPlaces();
       }
     } catch (e) {
       places = trip.id === 'trip-default' ? JSON.parse(JSON.stringify(SAMPLE_PLACES)) : [];
       packages = trip.id === 'trip-default' ? JSON.parse(JSON.stringify(SAMPLE_PACKAGES)) : [];
-      myListIds = [];
+      myList = [];
       await persistPlaces();
     }
     isLoading = false;
-    lastKnownTripValue = JSON.stringify({ places, packages, myListIds });
+    lastKnownTripValue = JSON.stringify({ places, packages, myList });
     populatePackageSelect();
     renderPlaces();
     syncPollingState();
@@ -133,12 +160,15 @@
     indicator.classList.add('saving');
     text.textContent = 'Saving...';
     try {
-      const raw = JSON.stringify({ places, packages, myListIds });
+      const raw = JSON.stringify({ places, packages, myList });
       await window.storage.set(tripPlacesKey(trip.id), raw, !!trip.shared);
       lastKnownTripValue = raw; // this is now the latest known state; skip re-rendering our own write on the next poll
       text.textContent = 'Saved';
     } catch (e) {
       text.textContent = 'Save failed';
+      // The Saved/Save-failed indicator lives in the trip card, which is hidden on
+      // phones, so also surface a failure as a toast so it can't go unnoticed.
+      showToast('Save failed - changes may not be stored');
     }
     setTimeout(() => indicator.classList.remove('saving'), 600);
     updateBudgetTotal();
@@ -173,11 +203,11 @@
       lastKnownTripValue = res.value;
       const parsed = JSON.parse(res.value);
       if (Array.isArray(parsed)) {
-        places = parsed; packages = []; myListIds = [];
+        places = parsed; packages = []; myList = [];
       } else {
         places = Array.isArray(parsed.places) ? parsed.places : [];
         packages = Array.isArray(parsed.packages) ? parsed.packages : [];
-        myListIds = Array.isArray(parsed.myListIds) ? parsed.myListIds : [];
+        myList = readMyList(parsed);
       }
       populatePackageSelect();
       renderPlaces();
@@ -192,6 +222,13 @@
     document.getElementById('tripHeading').textContent = currentTrip() ? currentTrip().name : 'Trip itinerary';
     document.getElementById('sharedToggle').checked = !!currentTrip()?.shared;
     document.getElementById('sharedBadge').classList.toggle('show', !!currentTrip()?.shared);
+    // Keep the mobile ⋮ menu's "Shared trip" item in sync with the trip's state.
+    const sharedMenuItem = document.getElementById('sharedMenuItem');
+    if (sharedMenuItem) {
+      const isShared = !!currentTrip()?.shared;
+      sharedMenuItem.setAttribute('aria-checked', String(isShared));
+      sharedMenuItem.classList.toggle('on', isShared);
+    }
   }
 
   document.getElementById('tripSelect').addEventListener('change', async (e) => {
@@ -209,7 +246,7 @@
     currentTripId = id;
     places = [];
     packages = [];
-    myListIds = [];
+    myList = [];
     await persistPlaces();
     renderTripSelect();
     renderPlaces();
@@ -257,6 +294,16 @@
     showToast(trip.shared ? 'Trip is now shared' : 'Trip is now private');
   }
 
+  // Mobile ⋮ menu entry for the Shared trip switch: flips the (hidden on
+  // phones) checkbox and reuses toggleShared() so the confirm prompt, saving
+  // and polling logic all stay in one place.
+  function toggleSharedFromMenu() {
+    const checkbox = document.getElementById('sharedToggle');
+    checkbox.checked = !checkbox.checked;
+    toggleTripMoreMenu(false);
+    toggleShared();
+  }
+
   /* Mobile "⋮" overflow menu for the trip-admin actions (Rename, Delete,
      Export, Import, Reset, Clear). Pass an explicit `open` to force a
      state (e.g. always-close after an action); omit it to just toggle. */
@@ -275,6 +322,157 @@
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') toggleTripMoreMenu(false);
   });
+
+  /* Mobile "⋯" overflow menu for Copy list/Print in the toolbar — same
+     pattern as the trip bar's ⋮ menu above. */
+  function toggleToolbarMoreMenu(open) {
+    const menu = document.getElementById('toolbarMoreMenu');
+    const btn = document.getElementById('toolbarMoreBtn');
+    if (!menu || !btn) return;
+    const shouldOpen = open !== undefined ? open : !menu.classList.contains('open');
+    menu.classList.toggle('open', shouldOpen);
+    btn.setAttribute('aria-expanded', String(shouldOpen));
+  }
+  document.addEventListener('click', (e) => {
+    const wrap = document.getElementById('toolbarMoreWrap');
+    if (wrap && !wrap.contains(e.target)) toggleToolbarMoreMenu(false);
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') toggleToolbarMoreMenu(false);
+  });
+
+  /* Phone search: the magnifier button in the fixed top bar (after the price)
+     shows/hides the search field, which slides in under the top bar. Closing
+     it clears the query so a hidden filter can't silently keep stops out of the
+     list. On wider screens the field is always visible and this is unused. */
+  function toggleSearch(open) {
+    const btn = document.getElementById('searchToggleBtn');
+    const input = document.getElementById('searchInput');
+    if (!btn || !input) return;
+    const shouldOpen = open !== undefined ? open : !document.body.classList.contains('search-open');
+    document.body.classList.toggle('search-open', shouldOpen);
+    btn.classList.toggle('active', shouldOpen);
+    btn.setAttribute('aria-expanded', String(shouldOpen));
+    if (shouldOpen) {
+      input.focus();
+    } else if (input.value) {
+      input.value = '';
+      renderPlaces();
+    }
+  }
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && document.body.classList.contains('search-open')
+        && document.activeElement === document.getElementById('searchInput')) toggleSearch(false);
+  });
+
+  /* Phone category filter: the funnel button in the top bar opens a list of
+     "All" + every category (built from CATEGORY_LABELS). Picking one reuses the
+     existing pill buttons' click handler, so filtering, the pills and this
+     menu can never disagree. The funnel is highlighted while a filter is on. */
+  function renderFilterMenu() {
+    const menu = document.getElementById('filterMenu');
+    const btn = document.getElementById('filterToggleBtn');
+    if (!menu) return;
+    const items = [['all', 'All'], ...Object.entries(CATEGORY_LABELS)];
+    const groupToggle = document.getElementById('groupByDayToggle');
+    const groupOn = !!(groupToggle && groupToggle.checked);
+    menu.innerHTML = items.map(([id, label]) => `
+      <button type="button" class="trip-more-item trip-more-shared${currentFilter === id ? ' on' : ''}" role="menuitemradio" aria-checked="${currentFilter === id}" data-filter="${escapeHtml(id)}">
+        <span>${escapeHtml(label)}</span><span class="trip-more-check" aria-hidden="true">✓</span>
+      </button>`).join('') + `
+      <div class="trip-more-divider"></div>
+      <button type="button" class="trip-more-item trip-more-shared${groupOn ? ' on' : ''}" role="menuitemcheckbox" aria-checked="${groupOn}" data-group-toggle="1">
+        <span>Group by day</span><span class="trip-more-check" aria-hidden="true">✓</span>
+      </button>`;
+    if (btn) btn.classList.toggle('active', currentFilter !== 'all');
+  }
+  function toggleFilterMenu(open) {
+    const menu = document.getElementById('filterMenu');
+    const btn = document.getElementById('filterToggleBtn');
+    if (!menu || !btn) return;
+    const shouldOpen = open !== undefined ? open : !menu.classList.contains('open');
+    menu.classList.toggle('open', shouldOpen);
+    btn.setAttribute('aria-expanded', String(shouldOpen));
+  }
+  document.getElementById('filterMenu').addEventListener('click', (e) => {
+    // "Group by day" lives in this menu on phones; it flips the same (hidden) checkbox the toolbar uses.
+    if (e.target.closest('[data-group-toggle]')) {
+      const cb = document.getElementById('groupByDayToggle');
+      cb.checked = !cb.checked;
+      renderFilterMenu();
+      renderPlaces();
+      toggleFilterMenu(false);
+      return;
+    }
+    const item = e.target.closest('[data-filter]');
+    if (!item) return;
+    const pill = document.querySelector(`#filterGroup .pill-btn[data-filter="${item.dataset.filter}"]`);
+    if (pill) pill.click();
+    toggleFilterMenu(false);
+  });
+  document.addEventListener('click', (e) => {
+    const wrap = document.getElementById('filterMenuWrap');
+    if (wrap && !wrap.contains(e.target)) toggleFilterMenu(false);
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') toggleFilterMenu(false);
+  });
+
+  /* Phone view switcher: one icon button in the top bar shows the current view
+     (grid / map / split) and opens a small menu to change it. Picking an item
+     calls setView(), the same function the desktop Grid/Map/Split pills use. */
+  const VIEW_ICONS = {
+    grid: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/></svg>',
+    map: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 21s7-7.5 7-12a7 7 0 1 0-14 0c0 4.5 7 12 7 12z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="9" r="2.4" stroke="currentColor" stroke-width="2"/></svg>',
+    split: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2" stroke="currentColor" stroke-width="2"/><path d="M10 4.5v15" stroke="currentColor" stroke-width="2"/></svg>'
+  };
+  const VIEW_LABELS = { grid: 'Grid', map: 'Map', split: 'Split (list + map)' };
+  function renderViewMenu() {
+    const btn = document.getElementById('viewToggleBtn');
+    const menu = document.getElementById('viewMenu');
+    if (btn) {
+      btn.innerHTML = VIEW_ICONS[currentView] || VIEW_ICONS.grid;
+      btn.setAttribute('aria-label', `Change view (now: ${VIEW_LABELS[currentView] || 'Grid'})`);
+    }
+    if (menu) menu.innerHTML = Object.keys(VIEW_ICONS).map(v => `
+      <button type="button" class="trip-more-item trip-more-shared view-item${currentView === v ? ' on' : ''}" role="menuitemradio" aria-checked="${currentView === v}" data-view-pick="${v}">
+        <span class="view-item-label">${VIEW_ICONS[v]}${escapeHtml(VIEW_LABELS[v])}</span><span class="trip-more-check" aria-hidden="true">✓</span>
+      </button>`).join('');
+  }
+  function toggleViewMenu(open) {
+    const menu = document.getElementById('viewMenu');
+    const btn = document.getElementById('viewToggleBtn');
+    if (!menu || !btn) return;
+    const shouldOpen = open !== undefined ? open : !menu.classList.contains('open');
+    menu.classList.toggle('open', shouldOpen);
+    btn.setAttribute('aria-expanded', String(shouldOpen));
+  }
+  document.getElementById('viewMenu').addEventListener('click', (e) => {
+    const item = e.target.closest('[data-view-pick]');
+    if (!item) return;
+    toggleViewMenu(false);
+    setView(item.dataset.viewPick);
+  });
+  document.addEventListener('click', (e) => {
+    const wrap = document.getElementById('viewMenuWrap');
+    if (wrap && !wrap.contains(e.target)) toggleViewMenu(false);
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') toggleViewMenu(false);
+  });
+
+  /* Mobile "Sharing & packages" disclosure in the trip bar — collapsed by
+     default so Shared trip + Packages don't cost screen space until asked
+     for. On desktop the panel this controls is always shown (the toggle
+     button itself is hidden via CSS), so this only matters on phones. */
+  function toggleTripDetails(open) {
+    const panel = document.getElementById('tripDetailsPanel');
+    const btn = document.getElementById('tripDetailsToggle');
+    if (!panel || !btn) return;
+    const shouldOpen = open !== undefined ? open : !panel.classList.contains('open');
+    panel.classList.toggle('open', shouldOpen);
+    btn.setAttribute('aria-expanded', String(shouldOpen));
+  }
 
   async function clearAllStops() {
     if (places.length === 0) return;
@@ -604,7 +802,11 @@
   }
 
   function updateBudgetTotal() {
-    document.getElementById('budgetTotal').innerHTML = budgetTotalHtml(computeTotal(places));
+    // Only count stops shortlisted in "My attractions", not every stop in the trip.
+    const result = computeTotal(getMyListPlaces());
+    document.getElementById('budgetTotal').innerHTML = budgetTotalHtml(result);
+    const stickyValue = document.getElementById('stickyTotalValue');
+    if (stickyValue) stickyValue.textContent = `$${result.total.toFixed(2)}`;
   }
 
   /* My attractions (shortlist) logic lives in my-list.js; the myListIds state stays here. */
@@ -659,7 +861,11 @@
     const bar = document.getElementById('packagesBar');
     const list = document.getElementById('packagesList');
     if (!bar || !list) return;
-    if (packages.length === 0) { bar.style.display = 'none'; list.innerHTML = ''; return; }
+    // With Shared trip living in the ⋮ menu, the phone-only "Packages" disclosure
+    // has nothing to show when there are no packages, so hide it (see .no-packages in styles.css).
+    const detailsToggle = document.getElementById('tripDetailsToggle');
+    if (detailsToggle) detailsToggle.classList.toggle('no-packages', packages.length === 0);
+    if (packages.length === 0) { bar.style.display = 'none'; list.innerHTML = ''; toggleTripDetails(false); return; }
     bar.style.display = 'flex';
     list.innerHTML = packages.map(pkg => {
       const count = places.filter(p => p.packageId === pkg.id).length;
@@ -742,6 +948,7 @@
     btn.classList.toggle('active', open);
     btn.setAttribute('aria-expanded', open ? 'true' : 'false');
     if (label) label.textContent = open ? 'Close' : 'Add a stop';
+    btn.setAttribute('aria-label', open ? 'Close add a stop panel' : 'Add a stop');
     if (icon) icon.innerHTML = open
       ? '<path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>'
       : '<path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>';
@@ -765,6 +972,17 @@
     } else {
       setAddPanelOpen(true);
     }
+  }
+
+  // "Add attraction" entry in the ⋮ menu (phones): opens the add panel and scrolls to it.
+  function openAddFromMenu() {
+    if (activeTab !== 'explore') setTab('explore');
+    toggleTripMoreMenu(false);
+    if (editingId) resetForm();
+    setAddPanelOpen(true);
+    setTimeout(() => {
+      document.getElementById('controlPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
   }
 
   /* ============ Form (add / edit) ============ */
@@ -864,6 +1082,7 @@
   }
 
   function startEdit(id) {
+    if (activeTab !== 'explore') setTab('explore');
     const p = places.find(pl => pl.id === id);
     if (!p) return;
     editingId = id;
@@ -958,49 +1177,7 @@
     showUndoToast(`Optimized route for ${label}`);
   }
 
-  /* ============ Optimize Route (per day-group nearest-neighbor reorder) ============ */
-  // Reorders the stops within a single day group ("Day 1", "Unscheduled", ...) so that,
-  // starting from whichever stop is currently first in that group, each next stop is the
-  // closest not-yet-visited stop - the same nearest-neighbor approach as the Route helper
-  // on the map (nearest.js), just applied in-place to one day's stops instead of building
-  // a separate tour. Stops with no lat/lng can't be distance-ranked, so they're left in
-  // place at the end of the group rather than blocking the whole optimization.
-  async function optimizeRoute(dayKey) {
-    if (typeof hasCoords !== 'function' || typeof tourLegKm !== 'function') return; // nearest.js not loaded
-    const indices = [];
-    places.forEach((p, i) => {
-      const key = (p.day && p.day.trim()) ? p.day.trim() : UNSCHEDULED_KEY;
-      if (key === dayKey) indices.push(i);
-    });
-    if (indices.length < 2) { showToast('Need at least two stops to optimize'); return; }
-
-    const groupPlaces = indices.map(i => places[i]);
-    const located = groupPlaces.filter(hasCoords);
-    const unlocated = groupPlaces.filter(p => !hasCoords(p));
-    if (located.length < 2) { showToast('Not enough located stops in this day to optimize'); return; }
-
-    const ordered = [located[0]];
-    const remaining = located.slice(1);
-    while (remaining.length) {
-      const cur = ordered[ordered.length - 1];
-      let bestIdx = 0, bestKm = Infinity;
-      for (let i = 0; i < remaining.length; i++) {
-        const km = tourLegKm(cur, remaining[i]);
-        if (km < bestKm) { bestKm = km; bestIdx = i; }
-      }
-      ordered.push(remaining.splice(bestIdx, 1)[0]);
-    }
-
-    const newGroupOrder = [...ordered, ...unlocated];
-    undoSnapshot = JSON.stringify(places);
-    indices.forEach((origIdx, pos) => { places[origIdx] = newGroupOrder[pos]; });
-    renderPlaces();
-    await persistPlaces();
-    const label = dayKey === UNSCHEDULED_KEY ? 'Unscheduled' : dayKey;
-    showUndoToast(`Optimized route for ${label}`);
-  }
-
-  function handleCardKeydown(e, id) {
+    function handleCardKeydown(e, id) {
     if (e.altKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
       e.preventDefault();
       moveStop(id, e.key === 'ArrowUp' ? -1 : 1);
@@ -1392,7 +1569,7 @@
       filter: ['No stops in this category', 'Try a different filter, or add a new stop above.'],
       search: ['No matches', 'Try a different search term.'],
       none: ['No stops yet', 'Add your first place above to start building the route.'],
-      inMyList: ['All set!', 'Every stop is in My attractions above - remove one to see it here again.']
+      inMyList: ['All set!', 'Every stop has been added to My attractions - open that tab and remove one to see it here again.']
     };
     const [lead, sub] = messages[reason];
     container.innerHTML = `
@@ -1465,10 +1642,19 @@
   }
 
   function renderPlaces() {
+    if (!isLoading) pruneMyList();
+    document.body.classList.toggle('map-fullscreen', currentView !== 'grid' && !isLoading);
     viewContainer.innerHTML = '';
     updateBudgetTotal();
     renderPackagesBar();
     renderMyList();
+    document.body.classList.toggle('mylist-mapview', activeTab === 'mylist' && currentView !== 'grid');
+    if (activeTab === 'mylist' && !isLoading) {
+      // My attractions: Grid = the list cards above; Map/Split = a map of only the list's stops.
+      if (currentView === 'map') renderMapView(viewContainer, []);
+      else if (currentView === 'split') renderSplitView(viewContainer, []);
+      return;
+    }
 
     if (isLoading) {
       const grid = document.createElement('div');
@@ -1535,6 +1721,7 @@
       filterMoreToggle.setAttribute('aria-expanded', 'false');
     }
 
+    renderFilterMenu();
     renderPlaces();
   });
 
@@ -1571,6 +1758,7 @@
   function setView(view) {
     currentView = view;
     document.querySelectorAll('#viewToggle .pill-btn').forEach(b => b.classList.toggle('active', b.dataset.view === view));
+    renderViewMenu();
     renderPlaces();
   }
 
@@ -1580,6 +1768,8 @@
 
   /* ============ Init ============ */
   (async function init() {
+    renderFilterMenu();
+    renderViewMenu();
     await loadTripsIndex();
     currentTripId = trips[0].id;
     renderTripSelect();

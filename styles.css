@@ -1,47 +1,47 @@
   :root{
-    --bg:#f6f7f9;
+    --bg:#eef1ef;
     --surface:#ffffff;
-    --surface-alt:#f1f3f6;
-    --text-main:#1a1f2b;
-    --text-muted:#69707d;
-    --text-faint:#98a1ad;
-    --border:#e6e8ec;
-    --border-soft:rgba(20,24,32,0.07);
+    --surface-alt:#e7ece9;
+    --text-main:#16324f;
+    --text-muted:#526773;
+    --text-faint:#8a9aa3;
+    --border:#dbe3e0;
+    --border-soft:rgba(22,50,79,0.08);
 
-    --accent:#0d9488;
-    --accent-dark:#0b7d72;
-    --accent-soft:#e7f6f4;
+    --accent:#c1861f;
+    --accent-dark:#9c6c17;
+    --accent-soft:#f8edd9;
 
-    --danger:#e0435c;
-    --danger-soft:#fdecef;
+    --danger:#a8433a;
+    --danger-soft:#f5e6e3;
 
-    --warn:#b45309;
-    --warn-soft:#fef3e2;
+    --warn:#9c6c17;
+    --warn-soft:#f8edd9;
 
-    --tag-dining:#ea580c;
-    --tag-dining-soft:#fdf1e8;
-    --tag-sightseeing:#2563eb;
-    --tag-sightseeing-soft:#eaf0fe;
-    --tag-outdoors:#16a34a;
-    --tag-outdoors-soft:#eaf7ef;
-    --tag-skyscrapers:#64748b;
-    --tag-skyscrapers-soft:#eef1f4;
-    --tag-museums:#7c3aed;
-    --tag-museums-soft:#f3ecfd;
-    --tag-entertainment:#db2777;
-    --tag-entertainment-soft:#fceaf3;
-    --tag-shopping:#ca8a04;
-    --tag-shopping-soft:#fdf8e1;
-    --tag-viewpoints:#0891b2;
-    --tag-viewpoints-soft:#e6f6f9;
+    --tag-dining:#af4f2d;
+    --tag-dining-soft:#f6e6de;
+    --tag-sightseeing:#2b5f8a;
+    --tag-sightseeing-soft:#e2ecf3;
+    --tag-outdoors:#3f7a4e;
+    --tag-outdoors-soft:#e4f0e6;
+    --tag-skyscrapers:#5a6570;
+    --tag-skyscrapers-soft:#e9ebed;
+    --tag-museums:#6b4e8e;
+    --tag-museums-soft:#ece5f3;
+    --tag-entertainment:#a13f63;
+    --tag-entertainment-soft:#f3e3ea;
+    --tag-shopping:#93731c;
+    --tag-shopping-soft:#f2ecd8;
+    --tag-viewpoints:#1e7a82;
+    --tag-viewpoints-soft:#e0eeee;
 
-    --rating-star:#f5a623;
+    --rating-star:#c1861f;
 
     --radius-lg:18px;
     --radius-md:12px;
     --radius-sm:8px;
-    --shadow-card:0 1px 2px rgba(20,24,32,0.03), 0 10px 26px -16px rgba(20,24,32,0.14);
-    --shadow-panel:0 1px 2px rgba(20,24,32,0.04), 0 16px 32px -20px rgba(20,24,32,0.14);
+    --shadow-card:0 1px 2px rgba(22,50,79,0.05), 0 10px 26px -16px rgba(22,50,79,0.18);
+    --shadow-panel:0 1px 2px rgba(22,50,79,0.06), 0 16px 32px -20px rgba(22,50,79,0.2);
   }
 
   *{ box-sizing:border-box; }
@@ -154,7 +154,7 @@
     align-items:center;
     gap:0.6rem 0.75rem;
   }
-  .packages-label{ font-size:0.78rem; font-weight:700; color:var(--text-faint); text-transform:uppercase; letter-spacing:0.03em; }
+  .packages-label{ font-size:0.78rem; font-weight:700; color:var(--text-muted); }
   .packages-list{ display:flex; flex-wrap:wrap; gap:0.5rem; flex-grow:1; }
 
   .package-chip{
@@ -219,6 +219,16 @@
   .trip-status-row{ display:contents; } /* Saved + Est.total behave as if not wrapped at all */
   .trip-more-wrap{ display:none; position:relative; }
   .trip-more-btn{ border:1px solid var(--border); }
+  /* Desktop/tablet default: the "Sharing & packages" disclosure toggle is
+     mobile-only; on wider screens the panel it controls is just always
+     shown, laid out as its own small row (shared-toggle + badge) sitting
+     above the packages card. */
+  .trip-details-toggle{ display:none; }
+  .trip-details-panel{
+    display:flex; flex-wrap:wrap; align-items:center; gap:0.6rem 0.9rem;
+    width:100%; margin-bottom:1.25rem;
+  }
+  .trip-details-panel .packages-bar{ margin-bottom:0; }
   /* Desktop: no visual merging, trip-bar and packages-bar stay independent
      bars exactly as before. */
   .mobile-summary-card{ display:contents; }
@@ -238,6 +248,9 @@
   .trip-more-item.danger{ color:var(--danger); }
   .trip-more-item.danger:hover{ background:var(--danger-soft); }
   .trip-more-divider{ height:1px; background:var(--border); margin:0.3rem 0.2rem; }
+  .trip-more-shared{ display:flex; align-items:center; justify-content:space-between; gap:0.9rem; }
+  .trip-more-check{ visibility:hidden; color:var(--accent-dark); font-weight:800; }
+  .trip-more-shared.on .trip-more-check{ visibility:visible; }
 
   /* ---------- Add-stop toggle (lives inline in the toolbar) ---------- */
   .add-stop-toggle-btn{
@@ -414,12 +427,23 @@
   }
   .switch-label input{ width:auto; accent-color:var(--accent); cursor:pointer; }
 
+  /* Desktop/tablet default: the fixed price badge is a phone-only
+     convenience — desktop already keeps Est. total in view inline in the
+     trip bar, no scrolling concern. */
+  .sticky-total-badge{ display:none; }
+  .mobile-topbar{ display:none; }
+
   .toolbar-btn{
     background:var(--surface); color:var(--text-main); border:1px solid var(--border);
     padding:0.5rem 0.9rem; border-radius:var(--radius-sm); font-size:0.82rem; font-weight:600;
     cursor:pointer; font-family:'Inter',sans-serif; display:inline-flex; align-items:center; gap:0.4rem;
   }
   .toolbar-btn:hover{ background:var(--surface-alt); }
+
+  /* Desktop/tablet default: Copy list/Print show as full buttons above,
+     so the mobile-only overflow version of the same two actions stays
+     hidden (see .toolbar-more-wrap in the phone media query). */
+  .toolbar-more-wrap{ display:none; position:relative; }
 
   /* ---------- Grid & empty state ---------- */
   .grid-container{ width:100%; display:grid; grid-template-columns:repeat(auto-fill, minmax(240px, 1fr)); gap:1.1rem; }
@@ -430,7 +454,6 @@
     margin:0 0 0.85rem; padding-top:0.5rem; display:flex; align-items:center; gap:0.5rem;
   }
   .day-group-title .count{ font-weight:500; color:var(--text-faint); font-size:0.82rem; }
-  .day-group-title .optimize-route-btn{ margin-left:auto; font-size:0.74rem; padding:0.32rem 0.65rem; font-weight:600; }
   .day-group-title .optimize-route-btn{ margin-left:auto; font-size:0.74rem; padding:0.32rem 0.65rem; font-weight:600; }
 
   .empty-state{
@@ -615,7 +638,7 @@
     transition:background-color 0.15s ease;
   }
   .card-readmore-inline svg{ flex-shrink:0; transition:transform 0.15s ease; }
-  .card:hover .card-readmore-inline, .route-item:hover .card-readmore-inline{ background:#d3ece8; text-decoration:underline; }
+  .card:hover .card-readmore-inline, .route-item:hover .card-readmore-inline{ background:#f0dfba; text-decoration:underline; }
   .card:hover .card-readmore-inline svg, .route-item:hover .card-readmore-inline svg{ transform:translateX(2px); }
 
   .tip-cards{
@@ -945,7 +968,7 @@
 
   /* ---------- Phones ---------- */
   @media (max-width:640px){
-    body{ padding:1.5rem 1rem 4rem; }
+    body{ padding:calc(3.9rem + env(safe-area-inset-top, 0px)) 1rem 4rem; } /* room for the fixed top bar */
 
     /* Trip bar: lead with the trip picker and the one action people take
        constantly (+ New). Rename/Delete/Export/Import/Reset/Clear are all
@@ -962,25 +985,99 @@
     .mobile-summary-card .packages-bar{
       border:none; border-radius:0; box-shadow:none; margin-bottom:0;
     }
-    .mobile-summary-card .packages-bar{ border-top:1px solid var(--border); }
-    .trip-bar{ flex-direction:column; align-items:stretch; padding:0.9rem 1rem; position:relative; }
-    .trip-select-wrap{ flex-wrap:wrap; row-gap:0.5rem; padding-right:2.6rem; } /* room for the ⋮ button */
-    select#tripSelect{ flex:1 1 100%; min-width:0; }
+    /* Trip bar: keep it a row-wrapping flex container (not a hard column)
+       so short items pack two-per-line instead of each claiming a full
+       row. Row 1: trip picker + a now icon-only "+" (New trip) button.
+       Row 2: Saved/Est. total. Shared trip + Packages move into the
+       "Sharing & packages" disclosure below instead of always showing,
+       which is what used to cost 2-3 extra full-width rows here. */
+    .trip-bar{
+      display:flex; flex-direction:row; flex-wrap:wrap; align-items:center;
+      padding:0.9rem 1rem; position:relative; row-gap:0.55rem; column-gap:0.6rem;
+    }
+    /* Trip picker + "+" live in the fixed top bar on phones (moved there by
+       syncTopbarPlacement in app.js), taking all the space the price and ⋮ leave. */
+    .trip-select-wrap{ flex:1 1 auto; min-width:0; flex-wrap:nowrap; gap:0.4rem; }
+    .mobile-topbar select#tripSelect{
+      flex:1 1 auto; width:100%; min-width:0; height:2rem;
+      padding:0 1.8rem 0 0.7rem; font-size:0.85rem; text-overflow:ellipsis;
+      background-position:right 0.6rem center;
+    }
+    /* "New trip" lives in the ⋮ menu on phones, so the "+" button is hidden here. */
+    #newTripBtn{ display:none; }
+    #newTripBtn .btn-label{ display:none; } /* "+ New" -> just "+"; aria-label keeps it accessible */
     .trip-admin-btns{ display:none; }
     .trip-bar-right{ display:none; }
-    .trip-more-wrap{ display:block; position:absolute; top:0.9rem; right:1rem; }
+    /* ⋮ sits last in the top bar, directly after the price badge. */
+    .trip-more-wrap{ display:block; position:relative; flex:0 0 auto; }
+    .trip-more-wrap .trip-more-btn{
+      width:2rem; height:2rem; opacity:1;
+      background:var(--surface); border:1px solid var(--border);
+      border-radius:999px; box-shadow:var(--shadow-panel);
+    }
     .trip-more-menu{ right:0; left:auto; }
 
-    /* Saved + Est. total share one row instead of two separate full-width
-       pills, since together they're one glance's worth of status. Left-
-       aligned rather than space-between, so "Saved" doesn't strand itself
-       across an empty gap from the pill next to it. */
+    /* Fixed top bar: [ trip picker ] [ price ] [ ⋮ ], unaffected by scrolling. */
+    .mobile-topbar{
+      display:flex; align-items:center; gap:0.5rem;
+      position:fixed; top:0; left:0; right:0; z-index:50;
+      padding:calc(0.5rem + env(safe-area-inset-top, 0px)) 0.75rem 0.5rem;
+      background:var(--bg); border-bottom:1px solid var(--border);
+    }
+    .sticky-total-badge{
+      display:flex; align-items:center; flex:0 0 auto; height:2rem;
+      background:var(--text-main); color:#fff; font-weight:700; font-size:0.85rem;
+      padding:0 0.8rem; border-radius:999px; box-shadow:var(--shadow-panel);
+      pointer-events:none; /* informational only, never blocks a tap underneath */
+    }
+
     .trip-status-row{
       display:flex !important; align-items:center; justify-content:flex-start;
       width:100%; gap:0.6rem;
     }
     .budget-total{ align-self:auto; }
+    /* The fixed top bar already shows the trip total on phones, so the pill in
+       the trip card is redundant here (desktop keeps it). Scoped to the trip
+       card so the My attractions total is untouched. */
+    .trip-status-row .budget-total{ display:none; }
 
+    /* "Sharing & packages" disclosure: collapsed by default so the header
+       leads with just the trip + its cost, one tap away from Shared trip
+       and Packages instead of both always taking up space. */
+    .trip-details-toggle{
+      display:flex; align-items:center; justify-content:space-between; width:100%;
+      background:transparent; border:none; border-top:1px solid var(--border);
+      margin-top:0.8rem; padding-top:0.7rem; font-size:0.82rem; font-weight:600;
+      color:var(--text-muted); cursor:pointer; font-family:'Inter',sans-serif;
+    }
+    .trip-details-toggle svg{ transition:transform 0.15s ease; flex-shrink:0; }
+    .trip-details-toggle[aria-expanded="true"] svg{ transform:rotate(180deg); }
+
+    /* Shared trip now lives in the ⋮ menu on phones, so the inline toggle and
+       its badge are hidden here; the panel only holds Packages. */
+    .trip-details-panel .shared-toggle,
+    .trip-details-panel .shared-badge{ display:none !important; }
+    .trip-details-toggle.no-packages{ display:none; }
+
+    /* Packages aren't shown on phones: hide the disclosure and its panel entirely
+       (!important so the .open state can't bring it back). Package prices still
+       count in the totals, and a stop's package can still be picked in the form. */
+    .trip-details-toggle,
+    .trip-details-panel,
+    .trip-details-panel.open{ display:none !important; }
+
+    /* With the picker, price and ⋮ in the top bar, and Saved and Packages hidden,
+       nothing is left in the trip card on phones, so drop the empty card. */
+    .mobile-summary-card{ display:none; }
+
+    .trip-details-panel{ display:none; }
+    .trip-details-panel.open{
+      display:flex; flex-direction:column; align-items:stretch; gap:0.65rem;
+      width:100%; padding:0.65rem 1rem 0.9rem;
+    }
+    .trip-details-panel .packages-bar{
+      border-top:1px solid var(--border); padding-top:0.75rem; margin-top:0.1rem;
+    }
     .packages-bar{ flex-direction:column; align-items:stretch; }
     .packages-list{ width:100%; }
 
@@ -991,6 +1088,10 @@
        something to show. (Desktop keeps it visible for discoverability,
        where the extra box costs far less screen real estate.) */
     .mylist-section.is-empty{ display:none; }
+
+    /* My attractions: no slider on phones. The cards use the normal grid
+       (a single column on phones, via .grid-container above), stacked
+       vertically like the rest of the cards. */
     .mylist-header{ flex-direction:column; align-items:flex-start; }
 
     /* Form: single column, full-width action buttons stacked */
@@ -1000,12 +1101,52 @@
     .form-actions button{ width:100%; justify-content:center; }
     .image-input-row{ flex-wrap:wrap; }
 
-    /* Toolbar: stack search/filters above view controls, everything full-width */
-    .toolbar{ flex-direction:column; align-items:stretch; }
-    .toolbar-left{ flex-direction:column; align-items:stretch; }
-    .add-stop-toggle-btn{ justify-content:center; order:-1; }
-    .search-input-wrap{ width:100%; }
+    /* Toolbar: row-wrap instead of a hard column stack, so short items
+       pack together instead of each claiming a full-width row.
+       Row 1: icon-only "Add a stop" + search (was 2 full rows).
+       Row 2: category filter chips (unchanged, its own row).
+       Row 3: Group by day + Grid/Map/Split, with Copy list/Print
+       collapsed into a "⋯" overflow menu instead of a whole extra
+       row (was 2 more rows: view controls, then copy/print). */
+    .toolbar{ flex-direction:row; flex-wrap:wrap; align-items:center; row-gap:0.85rem; }
+    .toolbar-left{ flex-direction:row; flex-wrap:wrap; align-items:center; width:100%; row-gap:0.7rem; }
+    .add-stop-toggle-btn{ flex:0 0 auto; padding-left:0.7rem; padding-right:0.7rem; }
+    /* "Add attraction" lives in the ⋮ menu on phones instead of the toolbar. */
+    .add-stop-toggle-btn{ display:none; }
+    .control-panel{ scroll-margin-top:4.5rem; }
+    /* Search: hidden in the toolbar on phones; the magnifier in the top bar
+       (after the price) reveals it as a bar pinned under the top bar. */
+    .topbar-search-btn{
+      display:flex; align-items:center; justify-content:center; flex:0 0 auto;
+      width:2rem; height:2rem; padding:0; cursor:pointer; color:var(--text-main);
+      background:var(--surface); border:1px solid var(--border); border-radius:999px;
+      box-shadow:var(--shadow-panel);
+    }
+    .topbar-search-btn.active{ background:var(--text-main); color:#fff; border-color:var(--text-main); }
+    .topbar-filter-wrap{ position:relative; flex:0 0 auto; }
+    .filter-menu{ right:0; left:auto; min-width:230px; max-height:70vh; overflow-y:auto; }
+    /* Category pills move into the funnel menu on phones; nothing else is left
+       in the toolbar's first row, so let it collapse. */
+    .filter-group{ display:none; }
+    .toolbar-left{ display:contents; }
+    /* Grid / Map / Split moves to a single icon button in the top bar on phones,
+       so the toolbar row has nothing left to show. */
+    .toolbar-right{ display:none; }
+    .toolbar{ margin-bottom:0.25rem; }
+    .mobile-topbar{ gap:0.4rem; }
+    .view-item-label{ display:inline-flex; align-items:center; gap:0.55rem; }
+    .view-item-label svg{ flex-shrink:0; }
+    /* "Group by day" moves into the funnel menu on phones. */
+    .toolbar-right > .switch-label{ display:none; }
+    .search-input-wrap{ display:none; }
+    body.search-open .search-input-wrap{
+      display:block; position:fixed; left:0; right:0; z-index:49;
+      top:calc(3rem + 1px + env(safe-area-inset-top, 0px));
+      padding:0.5rem 0.75rem; background:var(--bg); border-bottom:1px solid var(--border);
+    }
+    body.search-open .search-input-wrap svg{ left:1.45rem; }
     #searchInput{ width:100%; }
+    .filter-group{ flex:1 1 100%; } /* basis:100% forces it onto its own row */
     /* The base .filter-group is a pill-shaped (border-radius:999px) wrapper
        meant for a single row. Forced onto multiple rows, that container
        radius reads as one big lopsided oval rather than a row of chips.
@@ -1058,8 +1199,12 @@
     }
 
     .toolbar-right{ width:100%; justify-content:space-between; }
-    .view-toggle{ flex:1 1 auto; justify-content:space-between; }
+    .view-toggle{ flex:1 1 auto; justify-content:space-between; max-width:220px; }
     .view-toggle .pill-btn{ flex:1; text-align:center; }
+    /* Copy list/Print fold into the "⋯" overflow button on phones. */
+    .toolbar-right > .toolbar-btn{ display:none; }
+    .toolbar-more-wrap{ display:inline-flex; }
+    .toolbar-more-menu{ right:0; left:auto; }
 
     /* Cards: single column, taller preview image reads better on narrow screens */
     .grid-container{ grid-template-columns:1fr; }
@@ -1161,7 +1306,7 @@
     background:var(--accent-soft); color:var(--accent-dark); border:none; border-radius:var(--radius-sm);
     font-family:'Inter',sans-serif; font-size:0.76rem; font-weight:700;
   }
-  .map-popup-details:hover{ background:#d3ece8; }
+  .map-popup-details:hover{ background:#f0dfba; }
 
   button.card-address-btn{ background:none; border:none; padding:0; cursor:pointer; font-family:inherit; text-align:left; }
   .split-row-gmaps{ flex-shrink:0; text-decoration:none; }
@@ -1287,7 +1432,7 @@
   }
   .tour-suggest:hover{ background:var(--surface-alt); border-color:rgba(20,24,32,0.18); }
   .tour-suggest.is-closest{ background:var(--accent-soft); border-color:var(--accent); }
-  .tour-suggest.is-closest:hover{ background:#d3ece8; }
+  .tour-suggest.is-closest:hover{ background:#f0dfba; }
   .tour-suggest-name{ display:flex; align-items:center; gap:0.4rem; font-family:'Manrope',sans-serif; font-weight:700; font-size:0.86rem; line-height:1.25; }
   .tour-suggest-dot{ width:9px; height:9px; border-radius:50%; flex-shrink:0; }
   .tour-suggest-meta{ display:flex; flex-wrap:wrap; align-items:center; gap:0.35rem; font-size:0.76rem; color:var(--text-muted); }
@@ -1345,3 +1490,113 @@
   }
   .split-row-dist{ color:var(--accent-dark); font-weight:600; }
   .split-row-route:hover, .split-row-route.active{ background:var(--accent-soft); color:var(--accent-dark); }
+
+/* ============ Explore / My attractions tabs ============ */
+.view-tabs{ display:flex; gap:0.4rem; width:100%; margin-bottom:1.25rem; border-bottom:1px solid var(--border); }
+.view-tab{
+  background:transparent; border:none; border-bottom:3px solid transparent; margin-bottom:-1px;
+  padding:0.7rem 1.1rem; font-family:'Manrope',sans-serif; font-weight:700; font-size:0.95rem;
+  color:var(--text-muted); cursor:pointer; display:inline-flex; align-items:center; gap:0.5rem;
+}
+.view-tab:hover{ color:var(--text-main); }
+.view-tab.active{ color:var(--text-main); border-bottom-color:var(--accent); }
+.view-tab-count{
+  min-width:1.4rem; height:1.4rem; padding:0 0.4rem; border-radius:999px; background:var(--surface-alt);
+  font-size:0.74rem; display:inline-flex; align-items:center; justify-content:center;
+}
+.view-tab.active .view-tab-count{ background:var(--accent); color:#fff; }
+body.tab-explore .mylist-section{ display:none !important; }
+body.tab-mylist .control-panel-wrap,
+body.tab-mylist .add-stop-toggle-btn,
+body.tab-mylist .toolbar-right > .switch-label{ display:none !important; }
+body.tab-mylist .mylist-section.is-empty{ display:block !important; }
+body.mylist-mapview .mylist-section:not(.is-empty){ display:none !important; }
+.mylist-header .budget-total{ margin-left:auto; }
+.mylist-section .browse-btn{ display:flex; margin:0 auto 0.5rem; }
+
+/* ============ Map filter icon + dropdown (overlaid on the map) ============ */
+.map-filter-control{
+  position:absolute; top:10px; left:10px; z-index:5; display:flex; flex-wrap:wrap; align-items:flex-start;
+  gap:0.4rem; max-width:calc(100% - 60px);
+}
+.map-filter-control > .icon-text-btn{ background:var(--surface); box-shadow:0 1px 4px rgba(20,24,32,0.25); }
+.map-filter-control > .icon-text-btn:hover{ background:var(--surface-alt); }
+.map-filter-control .map-filter-btn.active{ background:var(--accent-soft); color:var(--accent-dark); border-color:var(--accent-soft); }
+.map-filter-badge{
+  min-width:1.1rem; height:1.1rem; padding:0 0.3rem; border-radius:999px; background:var(--accent); color:#fff;
+  font-size:0.68rem; font-weight:700; align-items:center; justify-content:center; display:inline-flex;
+}
+.map-filter-panel{
+  display:none; position:absolute; top:calc(100% + 0.4rem); left:0; width:min(360px, calc(100vw - 3rem));
+  max-height:min(60vh, 420px); overflow-y:auto; box-sizing:border-box;
+  background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-md);
+  box-shadow:var(--shadow-panel); padding:0.75rem; flex-direction:column; gap:0.7rem;
+}
+.map-filter-panel.open{ display:flex; }
+.map-filter-head{ display:flex; justify-content:space-between; gap:0.6rem; font-family:'Manrope',sans-serif; font-weight:700; font-size:0.82rem; color:var(--text-main); }
+.map-filter-head .map-legend-status{ margin-left:0; }
+.map-filter-actions{ display:flex; flex-wrap:wrap; gap:0.4rem; padding-top:0.6rem; border-top:1px solid var(--border); }
+.map-filter-actions .icon-text-btn.active{ background:var(--accent-soft); color:var(--accent-dark); border-color:var(--accent-soft); }
+
+/* ============ Route helper on the map: button + dropdown + bottom card ============ */
+.map-filter-control .map-route-btn.active{ background:var(--accent-soft); color:var(--accent-dark); border-color:var(--accent-soft); }
+.map-route-panel{
+  display:none; position:absolute; top:calc(100% + 0.4rem); left:0; width:min(380px, calc(100vw - 3rem));
+  max-height:min(60vh, 420px); overflow-y:auto; box-sizing:border-box;
+  background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-md);
+  box-shadow:var(--shadow-panel); padding:0.75rem; flex-direction:column; gap:0.65rem;
+}
+.map-route-panel.open{ display:flex; }
+.tour-card{
+  position:absolute; left:10px; right:10px; bottom:30px; z-index:5; max-width:780px; box-sizing:border-box;
+  max-height:45%; overflow-y:auto; display:flex; flex-direction:column; gap:0.5rem;
+  background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-md);
+  box-shadow:var(--shadow-panel); padding:0.6rem 0.75rem;
+}
+.tour-card-head{ display:flex; align-items:center; gap:0.5rem; }
+.tour-card-head .tour-now{ flex:1; min-width:0; }
+.tour-card-head .tour-summary{ font-weight:500; }
+.tour-card-toggle{ flex-shrink:0; opacity:1; border:1px solid var(--border); width:1.8rem; height:1.8rem; }
+.tour-card.collapsed .tour-card-toggle svg{ transform:rotate(180deg); }
+.tour-card.collapsed .tour-card-body{ display:none; }
+.tour-card-body{ display:flex; flex-direction:column; gap:0.5rem; }
+.tour-card-label{ font-size:0.68rem; font-weight:700; text-transform:uppercase; letter-spacing:0.03em; color:var(--text-faint); }
+.tour-card .tour-suggest-list{ display:flex; overflow-x:auto; gap:0.5rem; padding-bottom:0.2rem; }
+.tour-card .tour-suggest{ flex:0 0 auto; min-width:170px; max-width:240px; }
+.tour-card .tour-actions{ margin-left:0; }
+
+/* ============ Map fills the screen (Map / Split views) ============ */
+body.map-fullscreen{ padding-left:1rem; padding-right:1rem; padding-bottom:1rem; }
+@media (min-width:641px){
+  body.map-fullscreen{ padding-top:1.25rem; }
+}
+body.map-fullscreen .page{ max-width:none; }
+body.map-fullscreen #viewContainer{ align-items:stretch !important; }
+body.map-fullscreen .map-view-wrap{ max-width:none; }
+
+/* Map-only view: height comes from the measured space instead of a fixed 65vh */
+body.map-fullscreen .map-view-canvas{ height:var(--map-h, 65vh); min-height:480px; }
+
+/* Split view: list + map share the same height, list column slightly wider */
+body.map-fullscreen .split-view{
+  height:var(--map-h, 78vh); min-height:480px;
+  grid-template-columns:minmax(320px, 420px) minmax(0, 1fr);
+}
+body.map-fullscreen .split-map .map-view-canvas{ height:auto; min-height:0; }
+
+@media (max-width:900px){
+  /* Stack: map on top, list underneath. These must beat the two-column rule above. */
+  body.map-fullscreen .split-view{
+    grid-template-columns:1fr; grid-template-rows:auto;
+    height:auto; min-height:0;
+  }
+  body.map-fullscreen .split-map{ order:-1; height:58vh; min-height:320px; }
+  body.map-fullscreen .split-list{ height:auto; max-height:55vh; }
+  /* Leave room to scroll the page past the map on touch screens */
+  body.map-fullscreen .map-view-canvas{ height:min(var(--map-h, 65vh), 75vh); }
+  body.map-fullscreen .split-map .map-view-canvas{ height:auto; }
+}
+
+/* ============ Map attribution: only shown when the "i" button is opened ============ */
+.maplibregl-ctrl-attrib.maplibregl-compact:not([open]) .maplibregl-ctrl-attrib-inner{ display:none !important; }
+.maplibregl-ctrl-attrib.maplibregl-compact .maplibregl-ctrl-attrib-button{ display:block; }

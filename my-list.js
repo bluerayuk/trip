@@ -1,65 +1,76 @@
-/* ============ My attractions (personal shortlist) ============ */
-// Everything for the "My attractions" shortlist: which stops are in it, the
-// add/remove toggle, and rendering the section at the top of the page.
-//
-// Plain (non-module) script. It shares globals with app.js, so:
-//   - Load this file BEFORE app.js in index.html. app.js kicks off init() as soon
-//     as it runs, and init() ends up calling renderMyList().
-//   - The STATE stays in app.js: `myListIds` (declared there because it is saved
-//     and reset together with `places` / `packages` per trip).
-//   - Functions used from app.js: places, packages, computeTotal, budgetTotalHtml,
-//     buildCardEl, renderPlaces, persistPlaces, announce.
-//   - Functions exposed to app.js / inline onclick handlers: getMyListPlaces,
-//     isInMyList, toggleMyList, renderMyList.
+/* ============ My attractions (separate collection) ============ */
+// `myList` (state lives in app.js, saved with places/packages per trip) is its own
+// ordered array of entries: { id, placeId, day, note }. `placeId` points at a stop in
+// the database (`places`); day/note/order belong to the list. Bookmarked stops are
+// hidden from the main grid (getVisiblePlaces) and return to their original slot when
+// removed from the list, because `places` itself is never reordered by list actions.
 
-// myListIds just stores ids of entries already present in `places`, so
-// "My attractions" is always a live view onto the same data — editing or
-// deleting a stop anywhere updates it everywhere automatically.
-function getMyListPlaces() {
-  return myListIds.map(id => places.find(p => p.id === id)).filter(Boolean);
+// Two screens: 'explore' (the database) and 'mylist' (only what was added). Body classes
+// (tab-explore / tab-mylist) drive what is visible; see styles.css.
+let activeTab = 'explore';
+function setTab(tab) {
+  activeTab = tab === 'mylist' ? 'mylist' : 'explore';
+  document.body.classList.toggle('tab-mylist', activeTab === 'mylist');
+  document.body.classList.toggle('tab-explore', activeTab === 'explore');
+  [['tabExplore', 'explore'], ['tabMyList', 'mylist']].forEach(([id, t]) => {
+    const b = document.getElementById(id);
+    if (b) { b.classList.toggle('active', t === activeTab); b.setAttribute('aria-selected', String(t === activeTab)); }
+  });
+  renderPlaces();
+  window.scrollTo({ top: 0 });
+}
+function updateTabCount() {
+  const el = document.getElementById('tabMyListCount');
+  if (el) el.textContent = myList.length;
 }
 
-function isInMyList(id) { return myListIds.includes(id); }
+function readMyList(parsed) {
+  if (Array.isArray(parsed.myList)) return parsed.myList;
+  // Migration: older saves/exports only had a bare array of ids.
+  if (Array.isArray(parsed.myListIds)) {
+    return parsed.myListIds.map(id => ({ id: 'ml-' + id, placeId: id, day: '', note: '' }));
+  }
+  return [];
+}
 
-// A package's price is shared across every stop it covers, so treating
-// "My attractions" membership per-stop would let someone shortlist half a
-// package while computeTotal (which counts a package in full the moment
-// any one of its stops is present) still charges the whole price. To keep
-// the shortlist and the price it implies consistent, a packaged stop is
-// added/removed as a whole group together with its package siblings.
-function getPackageGroupIds(place) {
-  if (!place) return [];
-  if (!place.packageId) return [place.id];
-  return places.filter(p => p.packageId === place.packageId).map(p => p.id);
+function isInMyList(placeId) { return myList.some(e => e.placeId === placeId); }
+
+// Drops entries whose stop no longer exists (deleted, imported over, reset...).
+function pruneMyList() {
+  const ids = new Set(places.map(p => p.id));
+  if (myList.some(e => !ids.has(e.placeId))) myList = myList.filter(e => ids.has(e.placeId));
+}
+
+// Database stops merged with the list's own fields, in list order. The merged copy keeps
+// the stop's id, so cards, map, route helper and totals work unchanged.
+function getMyListPlaces() {
+  return myList.map(e => {
+    const p = places.find(x => x.id === e.placeId);
+    return p ? { ...p, day: e.day || p.day || '', note: e.note || '' } : null;
+  }).filter(Boolean);
+}
+
+// The list as shown on the My attractions tab: category filter + search apply here too.
+function getMyListVisiblePlaces() {
+  let list = getMyListPlaces();
+  if (currentFilter !== 'all') list = list.filter(p => p.category === currentFilter);
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  if (q) list = list.filter(p => [p.name, p.summary, p.desc, p.address].some(v => (v || '').toLowerCase().includes(q)));
+  return list;
 }
 
 async function toggleMyList(id) {
   const place = places.find(p => p.id === id);
   if (!place) return;
-  const groupIds = getPackageGroupIds(place);
-  const pkg = place.packageId ? packages.find(pk => pk.id === place.packageId) : null;
-  const inList = myListIds.includes(id);
-
-  // Let the card(s) shrink out of their current spot before the underlying
-  // arrays change and renderPlaces() rebuilds the grid out from under them.
-  await animateCardsOut(groupIds);
-
-  if (inList) {
-    myListIds = myListIds.filter(x => !groupIds.includes(x));
-  } else {
-    const toAdd = groupIds.filter(gid => !myListIds.includes(gid));
-    myListIds = myListIds.concat(toAdd);
-  }
-
+  const inList = isInMyList(id);
+  await animateCardsOut([id]);
+  if (inList) myList = myList.filter(e => e.placeId !== id);
+  else myList.push({ id: 'ml-' + Date.now() + Math.random().toString(36).slice(2), placeId: id, day: '', note: '' });
   renderPlaces();
-  animateCardsIn(groupIds);
+  animateCardsIn([id]);
   await persistPlaces();
-
-  const verb = inList ? 'removed from' : 'added to';
-  const msg = (pkg && groupIds.length > 1)
-    ? `${place.name} and ${groupIds.length - 1} other stop${groupIds.length - 1 !== 1 ? 's' : ''} from "${pkg.name}" ${verb} My attractions`
-    : `${place.name} ${verb} My attractions`;
-  announce(msg);
+  showToast(inList ? 'Removed - back in Explore' : 'Added to My attractions');
+  announce(`${place.name} ${inList ? 'removed from' : 'added to'} My attractions`);
 }
 
 function updateMyListBudgetTotal() {
@@ -74,21 +85,23 @@ function renderMyList() {
   const section = document.getElementById('myListSection');
   if (!grid) return;
   updateMyListBudgetTotal();
+  updateTabCount();
   const myPlaces = getMyListPlaces();
+  const shown = getMyListVisiblePlaces();
   grid.innerHTML = '';
-  if (myPlaces.length === 0) {
+  if (empty) empty.innerHTML = myPlaces.length === 0
+    ? 'Nothing added yet. Tap the bookmark on any attraction in Explore to add it here.<br><button type="button" class="icon-text-btn browse-btn" onclick="setTab(\'explore\')">Browse attractions</button>'
+    : 'No stops in your list match the current filter or search.';
+  if (shown.length === 0) {
     grid.style.display = 'none';
     if (empty) empty.style.display = 'block';
-    if (section) section.classList.add('is-empty');
+    if (section) section.classList.toggle('is-empty', myPlaces.length === 0);
     return;
   }
-  grid.style.display = 'grid';
+  grid.style.display = '';
   if (empty) empty.style.display = 'none';
   if (section) section.classList.remove('is-empty');
-  // Not draggable: reordering here would silently reorder the underlying
-  // trip stop list too, which would be a confusing side effect of just
-  // browsing a shortlist.
-  myPlaces.forEach((place, i) => {
-    grid.appendChild(buildCardEl(place, i, myPlaces, { draggable: false, context: 'mylist' }));
+  shown.forEach((place, i) => {
+    grid.appendChild(buildCardEl(place, i, shown, { draggable: false, context: 'mylist' }));
   });
 }
