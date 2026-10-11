@@ -492,6 +492,8 @@ function buildMapControls(visible, wrap, mapEl) {
   updateMapControlsUi();
 }
 
+let unlocatedDetailsOpen = false;
+
 function renderUnlocatedPanel() {
   if (!unlocatedPanelEl) return;
   const stillUnresolved = unresolvedIds
@@ -505,38 +507,56 @@ function renderUnlocatedPanel() {
   }
 
   const isPendingP = (p) => pendingGeocodeIds.has(p.id) && !failedGeocodeIds.has(p.id);
-  const pendingCount = stillUnresolved.filter(isPendingP).length;
-  const failedCount = stillUnresolved.length - pendingCount;
+  const pending = stillUnresolved.filter(isPendingP);
+  const failed = stillUnresolved.filter(p => !isPendingP(p));
+  const total = unresolvedIds.length;
+  const done = total - stillUnresolved.length;
   const plural = (n) => `${n} stop${n !== 1 ? 's' : ''}`;
-  const title = pendingCount
-    ? `Locating ${plural(pendingCount)}…${failedCount ? ` ${failedCount} couldn't be placed yet` : ''}`
-    : `Couldn't place ${plural(failedCount)} on the map`;
+
+  // Compact one-line summary. Pending stops are NOT listed individually -
+  // only a progress bar - so the banner never swallows the screen.
+  let title;
+  if (pending.length) {
+    title = `Locating stops… ${done}/${total}`;
+    if (failed.length) title += ` · ${failed.length} not found`;
+  } else {
+    title = `${plural(failed.length)} couldn't be placed`;
+  }
+  const pct = total ? Math.round((done / total) * 100) : 0;
+
+  const failedList = failed.map(p => {
+    const reason = geocodeFailureReason[p.id];
+    const searchUrl = p.address
+      ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.address)}`
+      : null;
+    return `<li class="map-unlocated-item" data-id="${p.id}">
+      <span class="map-unlocated-name">${escapeHtml(p.name)}</span>
+      <span class="map-unlocated-address">${p.address ? escapeHtml(p.address) : 'No address saved'}</span>
+      ${reason ? `<span class="map-unlocated-status">${escapeHtml(reason)}</span>` : ''}
+      <span class="map-unlocated-actions">
+        ${p.address ? `<button type="button" class="icon-text-btn map-locate-btn" onclick="retryGeocode('${p.id}')">Locate</button>` : ''}
+        <button type="button" class="icon-text-btn map-locate-btn" onclick="startEdit('${p.id}')" title="Edit the address, or paste a Google Maps link for an exact pin">Fix address</button>
+        ${searchUrl ? `<a class="map-unlocated-fallback" href="${searchUrl}" target="_blank" rel="noopener">Google Maps ↗</a>` : ''}
+      </span>
+    </li>`;
+  }).join('');
 
   unlocatedPanelEl.style.display = 'block';
   unlocatedPanelEl.innerHTML = `
     <div class="map-unlocated-head">
       <div class="map-unlocated-title">${escapeHtml(title)}</div>
-      ${failedCount ? '<button type="button" class="icon-text-btn map-locate-btn" onclick="retryAllGeocodes()">Locate all</button>' : ''}
+      <div class="map-unlocated-head-actions">
+        ${failed.length ? '<button type="button" class="icon-text-btn map-locate-btn" onclick="retryAllGeocodes()">Retry all</button>' : ''}
+        ${failed.length ? `<button type="button" class="icon-text-btn map-locate-btn" onclick="toggleUnlocatedDetails()" aria-expanded="${unlocatedDetailsOpen}">${unlocatedDetailsOpen ? 'Hide' : 'Details'}</button>` : ''}
+      </div>
     </div>
-    <ul class="map-unlocated-list">
-      ${stillUnresolved.map(p => {
-        const isPending = isPendingP(p);
-        const reason = geocodeFailureReason[p.id];
-        const searchUrl = p.address
-          ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.address)}`
-          : null;
-        return `<li class="map-unlocated-item" data-id="${p.id}">
-          <span class="map-unlocated-name">${escapeHtml(p.name)}</span>
-          ${p.address ? `<span class="map-unlocated-address">${escapeHtml(p.address)}</span>` : `<span class="map-unlocated-address">No address saved</span>`}
-          ${isPending
-            ? `<span class="map-unlocated-status">Locating…</span>`
-            : `${reason ? `<span class="map-unlocated-status">${escapeHtml(reason)}</span>` : ''}
-               ${p.address ? `<button type="button" class="icon-text-btn map-locate-btn" onclick="retryGeocode('${p.id}')">Locate</button>` : ''}
-               <button type="button" class="icon-text-btn map-locate-btn" onclick="startEdit('${p.id}')" title="Edit the address, or paste a Google Maps link for an exact pin">Fix address</button>`}
-          ${searchUrl ? `<a class="map-unlocated-fallback" href="${searchUrl}" target="_blank" rel="noopener">Find on Google Maps ↗</a>` : ''}
-        </li>`;
-      }).join('')}
-    </ul>`;
+    ${pending.length ? `<div class="map-unlocated-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}"><span style="width:${pct}%"></span></div>` : ''}
+    ${failed.length && unlocatedDetailsOpen ? `<ul class="map-unlocated-list">${failedList}</ul>` : ''}`;
+}
+
+function toggleUnlocatedDetails() {
+  unlocatedDetailsOpen = !unlocatedDetailsOpen;
+  renderUnlocatedPanel();
 }
 
 async function geocodeAndPlace(place, renderId) {

@@ -1276,6 +1276,20 @@
   .map-unlocated-fallback{ font-size:0.78rem; color:var(--accent-dark); text-decoration:none; }
   .map-unlocated-fallback:hover{ text-decoration:underline; }
 
+
+  /* Compact locating banner (progress bar + collapsible failed list) */
+  .map-unlocated-panel{ padding:0.5rem 0.75rem; }
+  .map-unlocated-head{ margin-bottom:0; flex-wrap:wrap; }
+  .map-unlocated-head-actions{ display:flex; gap:0.4rem; }
+  .map-unlocated-progress{ height:4px; border-radius:99px; background:rgba(0,0,0,0.08); overflow:hidden; margin-top:0.45rem; }
+  .map-unlocated-progress span{ display:block; height:100%; background:var(--warn); transition:width .3s ease; }
+  .map-unlocated-list{ margin-top:0.55rem; max-height:35vh; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+  .map-unlocated-actions{ display:flex; flex-wrap:wrap; align-items:center; gap:0.4rem 0.6rem; width:100%; }
+  @media (max-width:640px){
+    .map-unlocated-title{ font-size:0.78rem; }
+    .map-unlocated-address{ flex-basis:100%; margin-right:0; }
+  }
+
   /* ---- My attractions pins on the map: larger, bookmark badge ---- */
   .map-pin-icon.is-mylist{ width:26px; height:26px; z-index:2; }
   .map-pin-icon.is-mylist .map-pin-dot{
