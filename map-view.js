@@ -74,21 +74,58 @@ const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 // name-only fallback like "Burlington" can't land in Vermont.
 const NOMINATIM_VIEWBOX = '-74.45,40.45,-73.35,41.10';
 
+const PHOTON_URL = 'https://photon.komoot.io/api/';
+const inNyArea = (lat, lng) => !(lat < 40.3 || lat > 41.3 || lng < -74.5 || lng > -72.9);
+
+// Remember which provider is currently working so a blocked one isn't retried
+// for every single stop (that was what made 75 stops all hang on "Locating...").
+let geocoderOrder = ['nominatim', 'photon'];
+const demote = (name) => { geocoderOrder = [...geocoderOrder.filter(n => n !== name), name]; };
+
 async function nominatimSearch(q) {
   const url = `${NOMINATIM_URL}?format=jsonv2&limit=1&countrycodes=us&viewbox=${NOMINATIM_VIEWBOX}&bounded=0&q=${encodeURIComponent(q)}`;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    const res = await fetch(url, { headers: { Accept: 'application/json' } });
-    if (res.status === 429 || res.status >= 500) { await sleep(2000 * (attempt + 1)); continue; } // throttled: back off and retry
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const res = await fetch(url, { headers: { Accept: 'application/json' } }); // TypeError if blocked / no CORS headers
+    if (res.status === 429 || res.status >= 500) { await sleep(2000 * (attempt + 1)); continue; }
     if (!res.ok) throw new Error(`The geocoder returned ${res.status}`);
     const data = await res.json();
     if (!Array.isArray(data) || !data.length) return null;
     const lat = parseFloat(data[0].lat), lng = parseFloat(data[0].lon);
-    // Ignore hits far outside the NYC / Long Island area (e.g. a name-only match for
-    // "Burlington" landing near Albany) so the next, looser query gets a chance instead.
-    if (lat < 40.3 || lat > 41.3 || lng < -74.5 || lng > -72.9) return null;
-    return { lat, lng };
+    return inNyArea(lat, lng) ? { lat, lng } : null;
   }
   throw new Error('The geocoder is rate-limiting requests - try again in a minute');
+}
+
+// Fallback geocoder (OpenStreetMap data, CORS-enabled, no key).
+async function photonSearch(q) {
+  const url = `${PHOTON_URL}?limit=1&lat=40.73&lon=-73.95&bbox=-74.45,40.45,-73.35,41.10&q=${encodeURIComponent(q)}`;
+  const res = await fetch(url, { headers: { Accept: 'application/json' } });
+  if (!res.ok) throw new Error(`The fallback geocoder returned ${res.status}`);
+  const data = await res.json();
+  const c = data && data.features && data.features[0] && data.features[0].geometry && data.features[0].geometry.coordinates;
+  if (!c) return null;
+  const lat = c[1], lng = c[0];
+  return inNyArea(lat, lng) ? { lat, lng } : null;
+}
+
+const GEOCODERS = { nominatim: nominatimSearch, photon: photonSearch };
+
+// Try each geocoder in turn; if one is unreachable, switch to the other.
+async function geocodeQuery(q) {
+  let lastErr = null, anyAnswered = false;
+  for (const name of [...geocoderOrder]) {
+    try {
+      const hit = await GEOCODERS[name](q);
+      anyAnswered = true;
+      if (hit) return hit;
+      // answered with "no match": the next geocoder may know better
+    } catch (err) {
+      lastErr = err;
+      demote(name); // broken right now: try it last from here on
+    }
+  }
+  if (!anyAnswered && lastErr) throw lastErr;
+  return null;
 }
 
 // Ordered list of things to look up for one stop, best first. Street addresses
@@ -141,9 +178,12 @@ async function geocodePlace(place) {
   for (let i = 0; i < queries.length; i++) {
     if (i > 0) await sleep(NOMINATIM_MIN_GAP_MS);
     try {
-      const hit = await nominatimSearch(queries[i].q);
+      const hit = await geocodeQuery(queries[i].q);
       if (hit) return { ...hit, approx: queries[i].approx };
-    } catch (err) { lastErr = err; }
+    } catch (err) {
+      lastErr = err;
+      if (err instanceof TypeError) break; // every geocoder unreachable: don't burn the other queries
+    }
   }
   if (lastErr) throw lastErr; // nothing found AND something actually went wrong
   return null;                // simply no match
