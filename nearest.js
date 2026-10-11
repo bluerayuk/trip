@@ -39,7 +39,8 @@ const KM_PER_MILE = 1.609344;
 // and only if the stop is more than 3 km from where it should be (so a hand-corrected
 // pin is never overwritten).
 const COORD_FIXES = [
-  { name: 'Central Park', lat: 40.7829, lng: -73.9654 } // was saved up in Westchester
+  { name: 'Central Park', lat: 40.7829, lng: -73.9654 }, // was saved up in Westchester
+  { name: 'Burlington', lat: 40.7347, lng: -73.9906 }    // 4 Union Square S; was geocoded to a Burlington near Albany
 ];
 
 const TOUR_ICON_SVG = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="6" cy="18" r="2.5" stroke="currentColor" stroke-width="1.8"/><circle cx="18" cy="6" r="2.5" stroke="currentColor" stroke-width="1.8"/><path d="M8.5 18H14a3 3 0 0 0 0-6h-4a3 3 0 0 1 0-6h5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
@@ -52,7 +53,7 @@ let tourPanelHtmlCache = '';
 let tourBtnEl = null;        // the Route button on the map
 let tourCardEl = null;       // compact card at the bottom of the map while a route is running
 let tourCardHtmlCache = '';
-let tourCardCollapsed = false;
+let tourCardCollapsed = window.matchMedia('(max-width:640px)').matches; // start collapsed on phones so it doesn't cover the map
 let tourMapReady = false;    // true once the current MapLibre style has loaded
 
 /* ---- Small helpers ---- */
@@ -440,7 +441,11 @@ function decorateAllTourMarkers() {
 function tourPopupHtml(place) {
   if (!hasCoords(place)) return '';
   const idx = tourIndexOf(place.id);
-  if (idx >= 0) return `<div class="map-popup-tour">Stop ${idx + 1} of ${tourIds.length} on your route</div>`;
+  if (idx >= 0) {
+    const isLast = idx === tourIds.length - 1;
+    return `<div class="map-popup-tour">Stop ${idx + 1} of ${tourIds.length} on your route</div>` +
+      (isLast ? `<button type="button" class="map-popup-unroute" onclick="undoTourStep()">${tourIds.length === 1 ? 'Cancel route' : 'Remove from route'}</button>` : '');
+  }
   if (tourIds.length === 0) {
     return `<button type="button" class="map-popup-route" onclick="startTour('${place.id}')">Start route here</button>`;
   }

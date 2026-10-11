@@ -126,13 +126,7 @@
     try {
       const res = await window.storage.get(tripPlacesKey(trip.id), !!trip.shared);
       if (res && res.value) {
-        const parsed = JSON.parse(res.value);
-        if (Array.isArray(parsed)) { places = parsed; packages = []; myList = []; }
-        else {
-          places = Array.isArray(parsed.places) ? parsed.places : [];
-          packages = Array.isArray(parsed.packages) ? parsed.packages : [];
-          myList = readMyList(parsed);
-        }
+        ({ places, packages, myList } = applyParsedTrip(JSON.parse(res.value)));
       } else {
         places = trip.id === 'trip-default' ? JSON.parse(JSON.stringify(SAMPLE_PLACES)) : [];
         packages = trip.id === 'trip-default' ? JSON.parse(JSON.stringify(SAMPLE_PACKAGES)) : [];
@@ -146,7 +140,7 @@
       await persistPlaces();
     }
     isLoading = false;
-    lastKnownTripValue = JSON.stringify({ places, packages, myList });
+    lastKnownTripValue = serializeTrip(trip);
     populatePackageSelect();
     renderPlaces();
     syncPollingState();
@@ -160,7 +154,7 @@
     indicator.classList.add('saving');
     text.textContent = 'Saving...';
     try {
-      const raw = JSON.stringify({ places, packages, myList });
+      const raw = serializeTrip(trip);
       await window.storage.set(tripPlacesKey(trip.id), raw, !!trip.shared);
       lastKnownTripValue = raw; // this is now the latest known state; skip re-rendering our own write on the next poll
       text.textContent = 'Saved';
@@ -201,14 +195,7 @@
       const res = await window.storage.get(tripPlacesKey(trip.id), true);
       if (!res || !res.value || res.value === lastKnownTripValue) return;
       lastKnownTripValue = res.value;
-      const parsed = JSON.parse(res.value);
-      if (Array.isArray(parsed)) {
-        places = parsed; packages = []; myList = [];
-      } else {
-        places = Array.isArray(parsed.places) ? parsed.places : [];
-        packages = Array.isArray(parsed.packages) ? parsed.packages : [];
-        myList = readMyList(parsed);
-      }
+      ({ places, packages, myList } = applyParsedTrip(JSON.parse(res.value)));
       populatePackageSelect();
       renderPlaces();
       announce('Trip updated by another viewer');
@@ -488,7 +475,8 @@
     if (!window.confirm('Replace this trip\'s stops with the sample itinerary?')) return;
     undoSnapshot = JSON.stringify(places);
     undoPackagesSnapshot = JSON.stringify(packages);
-    places = JSON.parse(JSON.stringify(SAMPLE_PLACES)).map(p => ({ ...p, id: Date.now().toString() + Math.random().toString(36).slice(2) }));
+    places = JSON.parse(JSON.stringify(SAMPLE_PLACES));
+    myList = [];
     packages = JSON.parse(JSON.stringify(SAMPLE_PACKAGES));
     renderPlaces();
     await persistPlaces();

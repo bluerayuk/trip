@@ -1505,6 +1505,8 @@ const SAMPLE_PLACES = [
     "image": "images/114.jpg",
     "cost": null,
     "packageId": null,
+    "lat": 40.7347,
+    "lng": -73.9906,
     "website": "https://www.burlington.com"
   },
   {

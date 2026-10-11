@@ -61,12 +61,11 @@ function downloadJsonFile(data, filenameBase) {
 /* ---- JSON export / import (full trip) ---- */
 function exportJson() {
   const trip = currentTrip();
-  // myListIds is included so "My attractions" membership survives a round
-  // trip through export -> import (including into a different browser/device,
-  // which has its own separate storage and therefore starts with none).
-  const data = { tripName: trip.name, exportedAt: new Date().toISOString(), places, packages, myList };
+  const base = trip.id === 'trip-default' ? 'sample' : 'none';
+  const data = { format: DELTA_FORMAT, tripName: trip.name, exportedAt: new Date().toISOString(),
+                 delta: computeDelta(places, packages, myList, base) };
   downloadJsonFile(data, trip.name);
-  showToast('Itinerary exported');
+  showToast('Changes exported');
 }
 
 function importJson(event) {
@@ -76,23 +75,12 @@ function importJson(event) {
   reader.onload = async () => {
     try {
       const parsed = JSON.parse(reader.result);
-      const importedPlaces = Array.isArray(parsed) ? parsed : parsed.places;
-      const importedPackages = Array.isArray(parsed) ? [] : (Array.isArray(parsed.packages) ? parsed.packages : []);
-      if (!Array.isArray(importedPlaces)) throw new Error('bad shape');
-      if (!window.confirm(`Import ${importedPlaces.length} stop(s)? This will replace the current trip's stops.`)) return;
+      const result = parsed.delta ? applyDelta(parsed.delta) : applyParsedTrip(parsed);
+      if (!window.confirm(`Import ${result.places.length} stop(s)? This will replace the current trip's stops.`)) return;
       undoSnapshot = JSON.stringify(places);
       undoPackagesSnapshot = JSON.stringify(packages);
       undoMyListSnapshot = JSON.stringify(myList);
-      const importedIds = new Set(importedPlaces.map(p => p.id));
-      // Restore "My attractions" membership from the file when it carries one
-      // (a full-trip export, or one made with "Export JSON" from the My
-      // attractions section). Otherwise start empty rather than keeping the
-      // previous trip's myListIds, which would reference places that no
-      // longer exist after this wholesale replacement.
-      const importedMyList = Array.isArray(parsed) ? [] : readMyList(parsed).filter(e => importedIds.has(e.placeId));
-      places = importedPlaces;
-      packages = importedPackages;
-      myList = importedMyList;
+      places = result.places; packages = result.packages; myList = result.myList;
       renderPlaces();
       await persistPlaces();
       populatePackageSelect();

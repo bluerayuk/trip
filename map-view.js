@@ -82,7 +82,11 @@ async function nominatimSearch(q) {
     if (!res.ok) throw new Error(`The geocoder returned ${res.status}`);
     const data = await res.json();
     if (!Array.isArray(data) || !data.length) return null;
-    return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+    const lat = parseFloat(data[0].lat), lng = parseFloat(data[0].lon);
+    // Ignore hits far outside the NYC / Long Island area (e.g. a name-only match for
+    // "Burlington" landing near Albany) so the next, looser query gets a chance instead.
+    if (lat < 40.3 || lat > 41.3 || lng < -74.5 || lng > -72.9) return null;
+    return { lat, lng };
   }
   throw new Error('The geocoder is rate-limiting requests - try again in a minute');
 }
@@ -208,6 +212,50 @@ function buildMarkerEl(place) {
   return el;
 }
 
+/* ---- Nearest food (shown in non-food popups) ---- */
+const FOOD_CATEGORY = 'dining';
+const NEARBY_FOOD_COUNT = 3;
+const FOOD_STREET_FACTOR = 1.3;   // straight-line -> rough street distance
+const FOOD_WALK_KMH = 4.8;
+
+function foodDistanceKm(a, b) {
+  const R = 6371, rad = Math.PI / 180;
+  const dLat = (b.lat - a.lat) * rad, dLng = (b.lng - a.lng) * rad;
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(a.lat * rad) * Math.cos(b.lat * rad) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.min(1, Math.sqrt(h))) * FOOD_STREET_FACTOR;
+}
+
+function fmtFoodLeg(km) {
+  const mi = km / 1.609344;
+  const dist = mi < 0.1 ? `${Math.max(10, Math.round(km * 3280.84 / 10) * 10)} ft` : `${mi.toFixed(1)} mi`;
+  const mins = Math.max(1, Math.round(km / FOOD_WALK_KMH * 60));
+  return `${dist} · ${mins > 75 ? 'drive / transit' : mins + ' min walk'}`;
+}
+
+// Closest dining stops to a non-food stop. Returns [] for food stops or stops without coordinates.
+function getNearestFood(place, count = NEARBY_FOOD_COUNT) {
+  const located = p => typeof p.lat === 'number' && typeof p.lng === 'number';
+  if (!place || place.category === FOOD_CATEGORY || !located(place)) return [];
+  const pool = currentMapPlaces.length ? currentMapPlaces : places;
+  return pool
+    .filter(p => p.category === FOOD_CATEGORY && p.id !== place.id && located(p))
+    .map(p => ({ place: p, km: foodDistanceKm(place, p) }))
+    .sort((a, b) => a.km - b.km)
+    .slice(0, count);
+}
+
+function nearbyFoodPopupHtml(place) {
+  const list = getNearestFood(place);
+  if (!list.length) return '';
+  return `<div class="map-popup-food">
+    <div class="map-popup-food-title">Nearest food</div>
+    ${list.map(f => `<button type="button" class="map-popup-food-item" onclick="flyToPlace('${f.place.id}')">
+      <span class="map-popup-food-name">${escapeHtml(f.place.name)}</span>
+      <span class="map-popup-food-leg">${escapeHtml(fmtFoodLeg(f.km))}</span>
+    </button>`).join('')}
+  </div>`;
+}
+
 function buildPopupHtml(place) {
   const dirUrl = googleMapsDirectionsUrl(place);
   return `
@@ -218,15 +266,44 @@ function buildPopupHtml(place) {
       ${isInMyList(place.id) ? '<div class="map-popup-mylist">In My attractions</div>' : ''}
       ${place.address ? `<div class="map-popup-address">${escapeHtml(place.address)}</div>` : ''}
       ${place.desc ? `<button type="button" class="map-popup-details" onclick="openDetailModal('${place.id}')">View insider tips</button>` : ''}
+      ${nearbyFoodPopupHtml(place)}
       ${typeof tourPopupHtml === 'function' ? tourPopupHtml(place) : ''}
       ${dirUrl ? `<a class="map-popup-directions" href="${dirUrl}" target="_blank" rel="noopener">Directions in Google Maps ↗</a>` : ''}
+      <button type="button" class="map-popup-cancel" onclick="cancelMapSelection()">Cancel</button>
     </div>`;
+}
+
+// Popups are pinned to the top of the map (see styles.css), so the "Nearest food" list is always
+// on screen. Here: keep it free of inner scrollbars and, if the pin ended up underneath
+// the popup, nudge the map so the pin sits just below it.
+function fitPopupToMap(popup) {
+  if (!maplibreMap) return;
+  const el = popup.getElement && popup.getElement();
+  const content = el && el.querySelector('.maplibregl-popup-content');
+  if (!content) return;
+  content.style.maxHeight = 'none';
+  content.style.overflowY = 'visible';   // no inner scrollbar: the popup is compact instead
+
+  const reveal = () => {
+    if (!maplibreMap || !popup.isOpen()) return;
+    const mapRect = maplibreMap.getContainer().getBoundingClientRect();
+    const popBottom = el.getBoundingClientRect().bottom - mapRect.top;
+    const pt = maplibreMap.project(popup.getLngLat());
+    const need = popBottom + 40 - pt.y;       // keep the pin ~40px below the popup
+    if (need > 0) maplibreMap.panBy([0, -need], { duration: 250 });
+  };
+  if (maplibreMap.isMoving()) maplibreMap.once('moveend', () => setTimeout(reveal, 30));
+  else setTimeout(reveal, 30);
 }
 
 function addOrUpdateMarker(place) {
   if (markerById[place.id]) { markerById[place.id].remove(); }
   const popup = new maplibregl.Popup({ offset: isInMyList(place.id) ? 20 : 14, closeButton: true }).setHTML(buildPopupHtml(place));
-  popup.on('open', () => selectMapPin(place.id, true));
+  popup.on('open', () => {
+    popup.setHTML(buildPopupHtml(place));   // refresh: more food pins may have been located since
+    selectMapPin(place.id, true);
+    fitPopupToMap(popup);
+  });
   popup.on('close', () => { if (selectedMapId === place.id) selectMapPin(null); });
   const marker = new maplibregl.Marker({ element: buildMarkerEl(place), anchor: 'center' })
     .setLngLat([place.lng, place.lat])
@@ -545,6 +622,11 @@ function highlightPin(id, on) {
 function selectMapPin(id, scrollList) {
   selectedMapId = id;
   Object.entries(markerById).forEach(([mid, m]) => m.getElement().classList.toggle('is-selected', mid === id));
+
+  // Ring the nearest food pins while a non-food pin is selected
+  const foodIds = new Set(id ? getNearestFood(places.find(p => p.id === id)).map(f => f.place.id) : []);
+  Object.entries(markerById).forEach(([mid, m]) => m.getElement().classList.toggle('is-food-nearby', foodIds.has(mid)));
+
   const rows = [...document.querySelectorAll('.split-row')];
   rows.forEach(r => r.classList.toggle('active', r.dataset.id === id));
   if (id && scrollList) {
@@ -559,6 +641,13 @@ function selectMapPin(id, scrollList) {
       else if (bottom > list.scrollTop + list.clientHeight) list.scrollTo({ top: bottom - list.clientHeight + 4, behavior: 'smooth' });
     }
   }
+}
+
+// Deselects the current location: closes its popup and clears the pin / list-row / nearby-food highlights.
+function cancelMapSelection() {
+  pendingFocusId = null;
+  closeAllPopups();
+  selectMapPin(null);
 }
 
 function closeAllPopups(exceptId) {
@@ -657,7 +746,10 @@ function buildSplitRow(place) {
     ${place.desc ? `<button type="button" class="icon-only-btn split-row-details" title="View insider tips" aria-label="View insider tips for ${escapeHtml(place.name)}">${SPLIT_INFO_ICON_SVG}</button>` : ''}`;
 
   const main = row.querySelector('.split-row-main');
-  main.addEventListener('click', () => showOnMap(place.id, { scroll: false }));
+  main.addEventListener('click', () => {
+    if (selectedMapId === place.id) cancelMapSelection();   // tap the selected row again to deselect it
+    else showOnMap(place.id, { scroll: false });
+  });
   row.addEventListener('mouseenter', () => highlightPin(place.id, true));
   row.addEventListener('mouseleave', () => highlightPin(place.id, false));
   main.addEventListener('focus', () => highlightPin(place.id, true));

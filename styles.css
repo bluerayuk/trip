@@ -1600,3 +1600,119 @@ body.map-fullscreen .split-map .map-view-canvas{ height:auto; min-height:0; }
 /* ============ Map attribution: only shown when the "i" button is opened ============ */
 .maplibregl-ctrl-attrib.maplibregl-compact:not([open]) .maplibregl-ctrl-attrib-inner{ display:none !important; }
 .maplibregl-ctrl-attrib.maplibregl-compact .maplibregl-ctrl-attrib-button{ display:block; }
+
+
+/* ---- Nearest food in popups ---- */
+.map-popup-food{ margin:0.35rem 0 0.45rem; padding-top:0.45rem; border-top:1px solid var(--border); }
+.map-popup-food-title{
+  font-family:'Manrope',sans-serif; font-weight:700; font-size:0.66rem; text-transform:uppercase;
+  letter-spacing:0.03em; color:var(--tag-dining); margin-bottom:0.25rem;
+}
+.map-popup-food-item{
+  display:flex; flex-direction:column; align-items:flex-start; gap:0.05rem; width:100%; text-align:left;
+  background:transparent; border:none; border-radius:var(--radius-sm); padding:0.28rem 0.35rem; cursor:pointer;
+  font-family:'Inter',sans-serif;
+}
+.map-popup-food-item:hover{ background:var(--tag-dining-soft); }
+.map-popup-food-name{ font-weight:700; font-size:0.8rem; color:var(--text-main); }
+.map-popup-food-leg{ font-size:0.72rem; color:var(--text-muted); }
+
+.map-pin-icon.is-food-nearby{ z-index:4; }
+.map-pin-icon.is-food-nearby .map-pin-dot{ box-shadow:0 0 0 4px rgba(175,79,45,0.35), 0 1px 4px rgba(20,24,32,0.35); }
+.map-pin-icon.is-food-nearby .map-pin-label{ opacity:1; }
+
+/* ============ Detail modal: phone layout fixes ============ */
+@media (max-width:640px){
+  /* Info bar: one compact row per item instead of cramped wrapped pairs */
+  .detail-info-bar{ flex-direction:column; flex-wrap:nowrap; gap:0.6rem; padding:0.7rem 0.8rem; }
+  .detail-info-item{ flex:0 0 auto; width:100%; gap:0.7rem; }
+  .detail-info-icon{ width:2.4rem; height:2.4rem; }
+  .detail-info-icon svg{ width:20px; height:20px; }
+  .detail-info-label{ white-space:normal; overflow:visible; text-overflow:clip; overflow-wrap:anywhere; font-size:0.88rem; }
+
+  /* Tip cards: single column, small top-aligned icon, full-width text */
+  .tip-cards{ grid-template-columns:1fr; gap:0.55rem; }
+  .tip-card, .tip-card.tip-card-titled{ align-items:flex-start; gap:0.7rem; padding:0.8rem 0.9rem; }
+  .tip-card-icon{ width:2.1rem; height:2.1rem; margin-top:0.1rem; }
+  .tip-card-icon svg{ width:17px; height:17px; }
+  .tip-card .tip-card-title{ font-size:0.95rem; margin-bottom:3px; }
+  .tip-card .tip-card-body{ font-size:0.86rem; line-height:1.5; }
+
+  .detail-modal-desc-heading{ margin:22px 0 14px; font-size:1.1rem; }
+  .detail-modal-summary{ font-size:0.95rem; }
+  .detail-gallery-strip{ padding:0.6rem 1.1rem 0; }
+}
+
+/* Popups scroll inside the map instead of running off-screen */
+.maplibregl-popup-content{ overscroll-behavior:contain; -webkit-overflow-scrolling:touch; }
+.maplibregl-popup{ max-width:min(280px, calc(100vw - 2rem)) !important; }
+.map-popup-food-item{ padding:0.22rem 0.35rem; }
+
+/* Pin the pin-popup to the top of the map (below the filter / route buttons) */
+.maplibregl-popup{
+  position:absolute !important; top:52px !important; left:50% !important; bottom:auto !important; right:auto !important;
+  transform:translateX(-50%) !important; width:min(320px, calc(100% - 20px)); max-width:none !important; z-index:6;
+}
+.maplibregl-popup-tip{ display:none !important; }
+.maplibregl-popup-content{ width:100%; box-sizing:border-box; }
+
+/* Compact popup, no inner scrollbar */
+.maplibregl-popup-content{ max-height:none !important; overflow:visible !important; padding:0.55rem 0.7rem; }
+.map-popup-category{ margin-bottom:0.05rem; }
+.map-popup-title{ font-size:0.9rem; margin-bottom:0.1rem; }
+.map-popup-address{ font-size:0.74rem; margin-bottom:0.25rem; }
+.map-popup-details{ margin:0.05rem 0 0.25rem; padding:0.22rem 0.5rem; }
+.map-popup-food{ margin:0.25rem 0 0.3rem; padding-top:0.3rem; }
+.map-popup-food-item{ flex-direction:row; align-items:baseline; justify-content:space-between; gap:0.5rem; padding:0.15rem 0.3rem; }
+.map-popup-food-name{ font-size:0.76rem; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.map-popup-food-leg{ font-size:0.68rem; white-space:nowrap; flex-shrink:0; }
+.map-popup-route{ margin:0.05rem 0 0.25rem; padding:0.28rem 0.6rem; }
+
+/* ============ Phone: tidy map popup ============ */
+@media (max-width:640px){
+  .maplibregl-popup{ top:46px !important; width:calc(100% - 16px); }
+  .maplibregl-popup-content{ padding:0.5rem 0.65rem 0.55rem; }
+  .map-popup{ display:flex; flex-wrap:wrap; align-items:center; gap:0.3rem 0.4rem; }
+
+  /* Only what matters: name, nearest food, actions */
+  .map-popup-category, .map-popup-address, .map-popup-mylist,
+  .map-popup-approx, .map-popup-leg{ display:none; }
+
+  .map-popup-title{ order:1; width:100%; margin:0; padding-right:1.3rem; font-size:0.95rem; }
+  .map-popup-food{ order:2; width:100%; margin:0.1rem 0 0.1rem; padding-top:0.3rem; }
+  .map-popup-details, .map-popup-route, .map-popup-tour, .map-popup-directions{ order:3; margin:0; }
+  .map-popup-route, .map-popup-details{ padding:0.3rem 0.65rem; font-size:0.74rem; }
+  .map-popup-directions{ font-size:0.74rem; margin-left:auto; }
+  .maplibregl-popup-close-button{ top:2px; right:2px; font-size:1.15rem; }
+
+  /* Give the map a bit more room in the stacked split view */
+  body.map-fullscreen .split-map{ height:66vh; }
+}
+
+/* ============ Phone: route card + popup shouldn't fight over the map ============ */
+@media (max-width:640px){
+  /* While a pin popup is open, hide the bottom route card; it returns when the popup closes */
+  .map-view-canvas:has(.maplibregl-popup) .tour-card{ display:none !important; }
+
+  /* Route card: slimmer, no scrollbars */
+  .tour-card{ bottom:26px; max-height:38%; padding:0.45rem 0.6rem; scrollbar-width:none; }
+  .tour-card::-webkit-scrollbar, .tour-card .tour-suggest-list::-webkit-scrollbar{ display:none; }
+  .tour-card .tour-suggest-list{ scrollbar-width:none; }
+  .tour-card .tour-actions{ gap:0.3rem; }
+  .tour-card .tour-actions .icon-text-btn{ padding:0.28rem 0.5rem; font-size:0.72rem; }
+
+  .maplibregl-popup{ top:52px !important; }
+}
+
+/* ---- Cancel / deselect a location ---- */
+.map-popup-cancel, .map-popup-unroute{
+  display:inline-flex; align-items:center; justify-content:center; margin:0.25rem 0.4rem 0 0; padding:0.3rem 0.7rem; cursor:pointer;
+  background:transparent; color:var(--text-muted); border:1px solid var(--border); border-radius:var(--radius-sm);
+  font-family:'Inter',sans-serif; font-size:0.76rem; font-weight:700;
+}
+.map-popup-cancel:hover{ background:var(--surface-alt); color:var(--text-main); }
+.map-popup-unroute{ color:var(--danger); }
+.map-popup-unroute:hover{ background:var(--danger-soft); border-color:var(--danger-soft); }
+@media (max-width:640px){
+  .map-popup-cancel, .map-popup-unroute{ order:4; margin:0; padding:0.3rem 0.65rem; }
+}
