@@ -89,6 +89,8 @@
   let lastFocusId = null;
   let undoSnapshot = null;
   let undoPackagesSnapshot = null; // only set when an action also changes packages[]
+  let undoMyListSnapshot = null;   // only set when an action also changes myList[]
+  let toastTimer = null;           // single shared timer for the toast, so a newer toast can cancel an older one's hide
   let lastKnownTripValue = null;   // raw JSON string last seen from storage for the current trip, used to detect remote changes
   let pollIntervalId = null;       // live-sync poll timer, only runs while viewing a shared trip
 
@@ -119,28 +121,49 @@
   function tripPlacesKey(tripId) { return `trip-places:${tripId}`; }
 
   /* ============ Storage: places for current trip ============ */
+  // Did the storage read fail because the key is genuinely absent, or because something is wrong?
+  async function storageKeyMissing(key, shared) {
+    try { const l = await window.storage.list('trip-places:', !!shared); return !(l.keys || []).includes(key); }
+    catch (e) { return false; }   // can't tell -> assume it exists and do NOT overwrite
+  }
+
   async function loadCurrentTripPlaces() {
     isLoading = true;
     renderPlaces();
     const trip = currentTrip();
-    try {
-      const res = await window.storage.get(tripPlacesKey(trip.id), !!trip.shared);
-      if (res && res.value) {
-        ({ places, packages, myList } = applyParsedTrip(JSON.parse(res.value)));
-      } else {
-        places = trip.id === 'trip-default' ? JSON.parse(JSON.stringify(SAMPLE_PLACES)) : [];
-        packages = trip.id === 'trip-default' ? JSON.parse(JSON.stringify(SAMPLE_PACKAGES)) : [];
-        myList = [];
-        await persistPlaces();
-      }
-    } catch (e) {
+    const key = tripPlacesKey(trip.id), shared = !!trip.shared;
+    const seed = () => {
       places = trip.id === 'trip-default' ? JSON.parse(JSON.stringify(SAMPLE_PLACES)) : [];
       packages = trip.id === 'trip-default' ? JSON.parse(JSON.stringify(SAMPLE_PACKAGES)) : [];
       myList = [];
-      await persistPlaces();
+    };
+    saveBlocked = false;
+    hideRecoveryBanner();
+    let raw = null, readError = false;
+    try {
+      const res = await window.storage.get(key, shared);
+      raw = res && res.value ? res.value : null;
+    } catch (e) {
+      readError = !(await storageKeyMissing(key, shared));
+    }
+    if (raw) {
+      try {
+        ({ places, packages, myList } = applyParsedTrip(JSON.parse(raw)));
+      } catch (e) {
+        // Saved data exists but could not be understood. Keep a copy, show the sample in memory only, and refuse to save over it.
+        try { await window.storage.set(`corrupt:${trip.id}:${Date.now()}`, raw, false); } catch (e2) {}
+        seed(); saveBlocked = true;
+        showRecoveryBanner('Your saved data could not be read, so saving is turned off to keep it safe.');
+      }
+    } else if (readError) {
+      seed(); saveBlocked = true;
+      showRecoveryBanner('Storage could not be read just now, so saving is turned off to keep your data safe. Reload to try again.');
+    } else {
+      seed();
+      await persistPlaces();   // genuinely first run: write the starting data
     }
     isLoading = false;
-    lastKnownTripValue = serializeTrip(trip);
+    lastKnownTripValue = saveBlocked ? raw : serializeTrip(trip);
     populatePackageSelect();
     renderPlaces();
     syncPollingState();
@@ -149,16 +172,27 @@
   async function persistPlaces() {
     const trip = currentTrip();
     if (!trip) return;
+    if (saveBlocked) { showToast('Saving is off: your saved data could not be read'); return; }
     const indicator = document.getElementById('saveIndicator');
     const text = document.getElementById('saveText');
     indicator.classList.add('saving');
     text.textContent = 'Saving...';
     try {
       const raw = serializeTrip(trip);
-      await window.storage.set(tripPlacesKey(trip.id), raw, !!trip.shared);
+      // Keep a rolling history: snapshot what is about to be replaced (at most every 5 minutes).
+      if (lastKnownTripValue && lastKnownTripValue !== raw && Date.now() - lastSnapshotAt > AUTO_SNAPSHOT_GAP_MS) {
+        await takeSnapshot('Auto', lastKnownTripValue);
+      }
+      try {
+        await window.storage.set(tripPlacesKey(trip.id), raw, !!trip.shared);
+      } catch (firstErr) {
+        await pruneSnapshots(2);   // free space, then retry once
+        await window.storage.set(tripPlacesKey(trip.id), raw, !!trip.shared);
+      }
       lastKnownTripValue = raw; // this is now the latest known state; skip re-rendering our own write on the next poll
       text.textContent = 'Saved';
     } catch (e) {
+      console.error('Save failed', e);
       text.textContent = 'Save failed';
       // The Saved/Save-failed indicator lives in the trip card, which is hidden on
       // phones, so also surface a failure as a toast so it can't go unnoticed.
@@ -205,7 +239,7 @@
   /* ============ Trip management ============ */
   function renderTripSelect() {
     const select = document.getElementById('tripSelect');
-    select.innerHTML = trips.map(t => `<option value="${t.id}" ${t.id === currentTripId ? 'selected' : ''}>${escapeHtml(t.name)}${t.shared ? ' (shared)' : ''}</option>`).join('');
+    select.innerHTML = trips.map(t => `<option value="${escapeHtml(t.id)}" ${t.id === currentTripId ? 'selected' : ''}>${escapeHtml(t.name)}${t.shared ? ' (shared)' : ''}</option>`).join('');
     document.getElementById('tripHeading').textContent = currentTrip() ? currentTrip().name : 'Trip itinerary';
     document.getElementById('sharedToggle').checked = !!currentTrip()?.shared;
     document.getElementById('sharedBadge').classList.toggle('show', !!currentTrip()?.shared);
@@ -254,7 +288,8 @@
   async function deleteTrip() {
     if (trips.length <= 1) { showToast("Can't delete your only trip"); return; }
     const trip = currentTrip();
-    if (!window.confirm(`Delete "${trip.name}" and all its stops? This can't be undone.`)) return;
+    if (!window.confirm(`Delete "${trip.name}" and all its stops?\n\nA restorable version is saved first (menu: Restore a previous version).`)) return;
+    await takeSnapshot('Before delete trip', serializeTrip(trip));
     try { await window.storage.delete(tripPlacesKey(trip.id), !!trip.shared); } catch (e) { /* ignore */ }
     trips = trips.filter(t => t.id !== trip.id);
     await persistTripsIndex();
@@ -310,23 +345,22 @@
     if (e.key === 'Escape') toggleTripMoreMenu(false);
   });
 
-  /* Mobile "⋯" overflow menu for Copy list/Print in the toolbar — same
-     pattern as the trip bar's ⋮ menu above. */
-  function toggleToolbarMoreMenu(open) {
-    const menu = document.getElementById('toolbarMoreMenu');
-    const btn = document.getElementById('toolbarMoreBtn');
-    if (!menu || !btn) return;
-    const shouldOpen = open !== undefined ? open : !menu.classList.contains('open');
-    menu.classList.toggle('open', shouldOpen);
-    btn.setAttribute('aria-expanded', String(shouldOpen));
+  /* Debounced search: filtering runs 200ms after the last keystroke, and updates the
+     live map in place (map-view.js updateMapInPlace) instead of rebuilding it. */
+  function debounce(fn, ms) {
+    let t;
+    const wrapped = (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
+    wrapped.cancel = () => clearTimeout(t);
+    return wrapped;
   }
-  document.addEventListener('click', (e) => {
-    const wrap = document.getElementById('toolbarMoreWrap');
-    if (wrap && !wrap.contains(e.target)) toggleToolbarMoreMenu(false);
-  });
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') toggleToolbarMoreMenu(false);
-  });
+  function onSearchInput() {
+    if (isLoading) return;
+    if (typeof updateMapInPlace === 'function' && updateMapInPlace()) return;
+    renderPlaces();
+  }
+  const onSearchInputDebounced = debounce(onSearchInput, 200);
+  // Programmatic changes (clear button, closing phone search): apply now, drop any pending run.
+  function runSearchNow() { onSearchInputDebounced.cancel(); onSearchInput(); }
 
   /* Phone search: the magnifier button in the fixed top bar (after the price)
      shows/hides the search field, which slides in under the top bar. Closing
@@ -344,9 +378,30 @@
       input.focus();
     } else if (input.value) {
       input.value = '';
-      renderPlaces();
+      runSearchNow();
     }
+    updateSearchClear();
   }
+
+  /* Search field "x": shows only while there's text; clears it and keeps focus. */
+  function updateSearchClear() {
+    const input = document.getElementById('searchInput');
+    if (!input || !input.parentElement) return;
+    input.parentElement.classList.toggle('has-value', input.value.length > 0);
+  }
+  function clearSearch() {
+    const input = document.getElementById('searchInput');
+    if (!input) return;
+    input.value = '';
+    updateSearchClear();
+    runSearchNow();
+    input.focus();
+  }
+  (function () {
+    const input = document.getElementById('searchInput');
+    if (input) input.addEventListener('input', updateSearchClear);
+    updateSearchClear();
+  })();
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && document.body.classList.contains('search-open')
         && document.activeElement === document.getElementById('searchInput')) toggleSearch(false);
@@ -363,6 +418,9 @@
     const items = [['all', 'All'], ...Object.entries(CATEGORY_LABELS)];
     const groupToggle = document.getElementById('groupByDayToggle');
     const groupOn = !!(groupToggle && groupToggle.checked);
+    const hideOn = !!hideShortlisted;
+    const proxOn = !!proximitySort;
+    const uniqOn = !!uniqueLocations;
     menu.innerHTML = items.map(([id, label]) => `
       <button type="button" class="trip-more-item trip-more-shared${currentFilter === id ? ' on' : ''}" role="menuitemradio" aria-checked="${currentFilter === id}" data-filter="${escapeHtml(id)}">
         <span>${escapeHtml(label)}</span><span class="trip-more-check" aria-hidden="true">✓</span>
@@ -370,7 +428,16 @@
       <div class="trip-more-divider"></div>
       <button type="button" class="trip-more-item trip-more-shared${groupOn ? ' on' : ''}" role="menuitemcheckbox" aria-checked="${groupOn}" data-group-toggle="1">
         <span>Group by day</span><span class="trip-more-check" aria-hidden="true">✓</span>
-      </button>`;
+      </button>
+      <button type="button" class="trip-more-item trip-more-shared${hideOn ? ' on' : ''}" role="menuitemcheckbox" aria-checked="${hideOn}" data-hide-toggle="1">
+        <span>Hide shortlisted</span><span class="trip-more-check" aria-hidden="true">✓</span>
+      </button>
+      <button type="button" class="trip-more-item trip-more-shared${proxOn ? ' on' : ''}" role="menuitemcheckbox" aria-checked="${proxOn}" data-prox-toggle="1">
+        <span>Nearest first</span><span class="trip-more-check" aria-hidden="true">✓</span>
+      </button>
+      <button type="button" class="trip-more-item trip-more-shared${uniqOn ? ' on' : ''}" role="menuitemcheckbox" aria-checked="${uniqOn}" data-unique-toggle="1">
+        <span>Unique locations</span><span class="trip-more-check" aria-hidden="true">✓</span>
+      </button>` + addedMenuHtml();
     if (btn) btn.classList.toggle('active', currentFilter !== 'all');
   }
   function toggleFilterMenu(open) {
@@ -383,6 +450,23 @@
   }
   document.getElementById('filterMenu').addEventListener('click', (e) => {
     // "Group by day" lives in this menu on phones; it flips the same (hidden) checkbox the toolbar uses.
+    const ao = e.target.closest('[data-added-order]');
+    if (ao) { setAddedOrder(ao.dataset.addedOrder); toggleFilterMenu(false); return; }
+    if (e.target.closest('[data-prox-toggle]')) {
+      setProximitySort(!proximitySort);
+      toggleFilterMenu(false);
+      return;
+    }
+    if (e.target.closest('[data-unique-toggle]')) {
+      setUniqueLocations(!uniqueLocations);
+      toggleFilterMenu(false);
+      return;
+    }
+    if (e.target.closest('[data-hide-toggle]')) {
+      setHideShortlisted(!hideShortlisted);
+      toggleFilterMenu(false);
+      return;
+    }
     if (e.target.closest('[data-group-toggle]')) {
       const cb = document.getElementById('groupByDayToggle');
       cb.checked = !cb.checked;
@@ -411,9 +495,10 @@
   const VIEW_ICONS = {
     grid: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/></svg>',
     map: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 21s7-7.5 7-12a7 7 0 1 0-14 0c0 4.5 7 12 7 12z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="9" r="2.4" stroke="currentColor" stroke-width="2"/></svg>',
-    split: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2" stroke="currentColor" stroke-width="2"/><path d="M10 4.5v15" stroke="currentColor" stroke-width="2"/></svg>'
+    split: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2" stroke="currentColor" stroke-width="2"/><path d="M10 4.5v15" stroke="currentColor" stroke-width="2"/></svg>',
+    swipe: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="6" y="4" width="12" height="16" rx="2.5" stroke="currentColor" stroke-width="2"/><path d="M3 8.5v7M21 8.5v7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'
   };
-  const VIEW_LABELS = { grid: 'Grid', map: 'Map', split: 'Split (list + map)' };
+  const VIEW_LABELS = { grid: 'Grid', map: 'Map', split: 'Split (list + map)', swipe: (typeof SWIPE_NAME !== 'undefined' ? SWIPE_NAME : 'Swipe') + ' (curate attractions)' };
   function renderViewMenu() {
     const btn = document.getElementById('viewToggleBtn');
     const menu = document.getElementById('viewMenu');
@@ -438,6 +523,8 @@
     const item = e.target.closest('[data-view-pick]');
     if (!item) return;
     toggleViewMenu(false);
+    // Swipe is an overlay (swipe.js), not a page view: launch it instead of switching view.
+    if (item.dataset.viewPick === 'swipe') { if (typeof openSwipe === 'function') openSwipe(); return; }
     setView(item.dataset.viewPick);
   });
   document.addEventListener('click', (e) => {
@@ -463,8 +550,11 @@
 
   async function clearAllStops() {
     if (places.length === 0) return;
-    if (!window.confirm('Remove all stops from this trip?')) return;
+    if (!window.confirm(`Remove all ${places.length} stop(s) from this trip?\n\nA restorable version is saved first (menu: Restore a previous version).`)) return;
+    await takeSnapshot('Before clear all', serializeTrip(currentTrip()));
     undoSnapshot = JSON.stringify(places);
+    undoPackagesSnapshot = null;
+    undoMyListSnapshot = JSON.stringify(myList);
     places = [];
     renderPlaces();
     await persistPlaces();
@@ -472,9 +562,13 @@
   }
 
   async function resetToSample() {
-    if (!window.confirm('Replace this trip\'s stops with the sample itinerary?')) return;
+    const edits = computeDelta(places, packages, myList, currentTrip().id === 'trip-default' ? 'sample' : 'none');
+    const lost = edits.places.added.length + edits.places.modified.length;
+    if (!window.confirm(`Replace this trip with the sample itinerary?\n\nThis discards ${lost} stop(s) you added or edited, plus your removals, ordering and My list.\nA restorable version is saved first (menu: Restore a previous version).`)) return;
+    await takeSnapshot('Before reset', serializeTrip(currentTrip()));
     undoSnapshot = JSON.stringify(places);
     undoPackagesSnapshot = JSON.stringify(packages);
+    undoMyListSnapshot = JSON.stringify(myList);
     places = JSON.parse(JSON.stringify(SAMPLE_PLACES));
     myList = [];
     packages = JSON.parse(JSON.stringify(SAMPLE_PACKAGES));
@@ -630,10 +724,13 @@
   }
 
   /* ============ Helpers ============ */
+  // Escapes quotes as well as & < >, so the result is safe inside a double- or
+  // single-quoted HTML attribute (value="...", src="...", href="...") and not
+  // just in text content.
   function escapeHtml(str) {
-    const div = document.createElement('div');
-    div.textContent = str || '';
-    return div.innerHTML;
+    return String(str || '')
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
 
   // Adds a https:// scheme to a bare domain (e.g. "nps.gov/stli" ->
@@ -653,6 +750,60 @@
   // place.gallery on submit.
   let galleryUrls = [];
 
+  /* ---- "More locations" editor (branches of one stop; see locations.js) ---- */
+  let extraLocations = [];
+  let addPanelSettleTimer = null;
+
+  function renderLocationInputs() {
+    const list = document.getElementById('locationInputList');
+    if (!list) return;
+    list.innerHTML = extraLocations.map((l, i) => `
+      <div class="loc-input-row">
+        <input type="text" class="loc-input-label" value="${escapeHtml(l.label || '')}" placeholder="Label, e.g. West Village" aria-label="Location ${i + 1} label" oninput="updateLocationField(${i}, 'label', this.value)">
+        <input type="text" class="loc-input-address" value="${escapeHtml(l.address || '')}" placeholder="Address — or paste a Google Maps link" aria-label="Location ${i + 1} address" oninput="updateLocationField(${i}, 'address', this.value)" onpaste="setTimeout(() => commitLocationAddress(${i}, this), 0)">
+        <button type="button" class="loc-input-remove" onclick="removeLocationRow(${i})" title="Remove this location" aria-label="Remove location ${i + 1}">×</button>
+      </div>`).join('');
+  }
+
+  function addLocationRow() {
+    extraLocations.push({ label: '', address: '' });
+    renderLocationInputs();
+    const rows = document.querySelectorAll('#locationInputList .loc-input-label');
+    if (rows.length) rows[rows.length - 1].focus();
+  }
+
+  function removeLocationRow(i) {
+    extraLocations.splice(i, 1);
+    renderLocationInputs();
+  }
+
+  function updateLocationField(i, field, value) {
+    const l = extraLocations[i];
+    if (!l) return;
+    if (field === 'address' && l.address !== value) { delete l.lat; delete l.lng; delete l.approxLocation; } // old pin no longer matches
+    l[field] = value;
+  }
+
+  // A Google Maps link pasted into a branch row: keep its exact coordinates and a clean name.
+  function commitLocationAddress(i, input) {
+    const l = extraLocations[i];
+    if (!l) return;
+    const parsed = parseGoogleMapsLink(input.value);
+    if (!parsed) return;
+    if (parsed.shortened) { showToast("Shortened Maps links don't carry coordinates — use the full google.com/maps link instead"); return; }
+    l.lat = parsed.lat; l.lng = parsed.lng; delete l.approxLocation;
+    if (parsed.name) { l.address = parsed.name; input.value = parsed.name; }
+    showToast('Exact location captured from Google Maps link');
+  }
+
+  // Rows worth saving: they need an address (or exact coords from a link).
+  function cleanLocations() {
+    return extraLocations
+      .map(l => ({ ...l, label: (l.label || '').trim(), address: tidyAddress((l.address || '').trim()) }))
+      .filter(l => l.address || typeof l.lat === 'number')
+      .map(l => { if (!l.label) delete l.label; return l; });
+  }
+
   function renderGalleryInputs() {
     const list = document.getElementById('galleryInputList');
     if (!list) return;
@@ -668,7 +819,7 @@
   function addGalleryUrls() {
     const ta = document.getElementById('galleryUrlInput');
     if (!ta) return;
-    const urls = ta.value.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
+    const urls = ta.value.split(/[\n,]+/).map(s => resolveImagePath(s)).filter(Boolean);
     if (urls.length === 0) return;
     galleryUrls.push(...urls);
     ta.value = '';
@@ -688,7 +839,7 @@
   }
 
   // A stop's card gets destroyed and recreated on every renderPlaces() call
-  // (grid/route markup is rebuilt from scratch), so an exit animation has to
+  // (grid markup is rebuilt from scratch), so an exit animation has to
   // run to completion BEFORE the state change and re-render happen - there's
   // no DOM node left to animate afterward. findCardEls looks in both the
   // main grid and the My attractions grid since a given id only ever lives
@@ -717,9 +868,9 @@
 
   function getVisiblePlaces() {
     let list = currentFilter === 'all' ? places : places.filter(p => p.category === currentFilter);
-    // Stops shortlisted into "My attractions" live there instead of in the
-    // main list now - toggleMyList() is what moves them back and forth.
-    list = list.filter(p => !isInMyList(p.id));
+    // Shortlisted stops stay visible in Explore (with a filled bookmark) so
+    // bookmarking never makes a card vanish. "Hide shortlisted" is opt-in.
+    if (hideShortlisted) list = list.filter(p => !isInMyList(p.id));
     const q = document.getElementById('searchInput').value.trim().toLowerCase();
     if (q) {
       list = list.filter(p =>
@@ -732,18 +883,29 @@
     return list;
   }
 
+  function clearUndoSnapshots() {
+    undoSnapshot = null;
+    undoPackagesSnapshot = null;
+    undoMyListSnapshot = null;
+  }
+
   function showToast(msg) {
     const toast = document.getElementById('toast');
+    clearTimeout(toastTimer);
+    // Don't touch the undo snapshots here: persistPlaces() can call showToast('Save failed')
+    // between an action taking its snapshot and showUndoToast() appearing. Every action
+    // overwrites or nulls the snapshots itself, and the Undo button only lives in the undo toast.
     toast.innerHTML = escapeHtml(msg);
     toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 2200);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
   }
 
   function showUndoToast(msg) {
     const toast = document.getElementById('toast');
+    clearTimeout(toastTimer);
     toast.innerHTML = `${escapeHtml(msg)} <button onclick="performUndo()">Undo</button>`;
     toast.classList.add('show');
-    setTimeout(() => { if (toast.classList.contains('show')) { toast.classList.remove('show'); undoSnapshot = null; } }, 5000);
+    toastTimer = setTimeout(() => { toast.classList.remove('show'); clearUndoSnapshots(); }, 5000);
   }
 
   async function performUndo() {
@@ -755,6 +917,11 @@
       undoPackagesSnapshot = null;
       populatePackageSelect();
     }
+    if (undoMyListSnapshot) {
+      myList = JSON.parse(undoMyListSnapshot);
+      undoMyListSnapshot = null;
+    }
+    clearTimeout(toastTimer);
     document.getElementById('toast').classList.remove('show');
     renderPlaces();
     await persistPlaces();
@@ -872,7 +1039,7 @@
     if (!sel) return;
     const current = selectedId !== undefined ? selectedId : sel.value;
     sel.innerHTML = '<option value="">No package — pay individually</option>' +
-      packages.map(pkg => `<option value="${pkg.id}">${escapeHtml(pkg.name)} — $${(parseFloat(pkg.cost) || 0).toFixed(2)}</option>`).join('') +
+      packages.map(pkg => `<option value="${escapeHtml(pkg.id)}">${escapeHtml(pkg.name)} — $${(parseFloat(pkg.cost) || 0).toFixed(2)}</option>`).join('') +
       '<option value="__new__">+ New package…</option>';
     sel.value = (current && packages.some(pk => pk.id === current)) ? current : '';
     updatePackageFieldUI();
@@ -917,8 +1084,34 @@
   }
 
   /* ============ Image handling (URL, or a picked file downscaled to a data URL) ============ */
+  // Bare filenames ("80.jpg") live in a folder that defaults to images/ but the
+  // user can change it (saved in this browser). Anything that already has a
+  // path or URL (contains "/", or starts with data:/blob:) is used as typed.
+  const DEFAULT_IMAGE_DIR = 'images/';
+  function getImageDir() {
+    let d = DEFAULT_IMAGE_DIR;
+    try { d = localStorage.getItem('imageDir') || DEFAULT_IMAGE_DIR; } catch (e) {}
+    d = d.trim();
+    return d && !d.endsWith('/') ? d + '/' : d;
+  }
+  function resolveImagePath(raw) {
+    const t = (raw || '').trim();
+    if (!t) return '';
+    if (/^(data|blob):/i.test(t) || t.includes('/')) return t;
+    return getImageDir() + t;
+  }
+  function handleImageDirInput() {
+    const el = document.getElementById('imageDir');
+    try { localStorage.setItem('imageDir', el.value.trim() || DEFAULT_IMAGE_DIR); } catch (e) {}
+    handleImageUrlInput();
+  }
+  function initImageDirField() {
+    const el = document.getElementById('imageDir');
+    if (el) el.value = getImageDir();
+  }
+
   function handleImageUrlInput() {
-    const url = document.getElementById('placeImage').value.trim();
+    const url = resolveImagePath(document.getElementById('placeImage').value);
     const preview = document.getElementById('imagePreview');
     if (!url) { preview.style.display = 'none'; preview.removeAttribute('src'); return; }
     preview.src = url;
@@ -932,7 +1125,21 @@
     const icon = document.getElementById('addStopToggleIcon');
     const label = document.getElementById('addStopToggleLabel');
     if (!wrap || !btn) return;
-    wrap.classList.toggle('open', open);
+    clearTimeout(addPanelSettleTimer);
+    if (open) {
+      wrap.classList.add('open');
+      // After the open animation finishes, lift the height cap so the form can grow freely
+      addPanelSettleTimer = setTimeout(() => wrap.classList.add('settled'), 350);
+    } else {
+      if (wrap.classList.contains('settled')) {
+        // Pin the current height so the close animation still has something to animate from
+        wrap.style.maxHeight = wrap.scrollHeight + 'px';
+        void wrap.offsetHeight; // force reflow
+        wrap.classList.remove('settled');
+      }
+      wrap.classList.remove('open');
+      wrap.style.maxHeight = '';
+    }
     btn.classList.toggle('active', open);
     btn.setAttribute('aria-expanded', open ? 'true' : 'false');
     if (label) label.textContent = open ? 'Close' : 'Add a stop';
@@ -980,7 +1187,7 @@
     const day = document.getElementById('placeDay').value.trim();
     const website = document.getElementById('placeWebsite').value.trim();
     const addressRaw = document.getElementById('placeAddress').value.trim();
-    const image = document.getElementById('placeImage').value.trim();
+    const image = resolveImagePath(document.getElementById('placeImage').value);
     const cost = document.getElementById('placeCost').value;
     const ratingRaw = document.getElementById('placeRating').value;
     const summary = document.getElementById('placeSummary').value.trim().slice(0, SUMMARY_MAX_LEN);
@@ -1008,7 +1215,6 @@
       if (linkInField.name) address = linkInField.name;
     }
 
-    let placeRef;
     if (editingId) {
       const p = places.find(pl => pl.id === editingId);
       if (p) {
@@ -1019,9 +1225,9 @@
         p.rating = rating;
         p.packageId = packageId;
         p.gallery = galleryUrls.slice();
+        { const locs = cleanLocations(); if (locs.length) p.locations = locs; else delete p.locations; }
         if (coords) { p.lat = coords.lat; p.lng = coords.lng; delete p.approxLocation; }
         else if (addressChanged) { delete p.lat; delete p.lng; delete p.approxLocation; } // stale coords for the old address
-        placeRef = p;
       }
       showToast('Stop updated');
     } else {
@@ -1031,8 +1237,8 @@
         gallery: galleryUrls.slice()
       };
       if (coords) { newPlace.lat = coords.lat; newPlace.lng = coords.lng; }
+      { const locs = cleanLocations(); if (locs.length) newPlace.locations = locs; }
       places.push(newPlace);
-      placeRef = newPlace;
       showToast('Stop added');
     }
 
@@ -1061,6 +1267,9 @@
     populatePackageSelect('');
     galleryUrls = [];
     renderGalleryInputs();
+    extraLocations = [];
+    renderLocationInputs();
+    pendingCoords = null;
     editingId = null;
     document.getElementById('formTitle').textContent = 'Add a stop';
     document.getElementById('editBadge').style.display = 'none';
@@ -1074,6 +1283,7 @@
     const p = places.find(pl => pl.id === id);
     if (!p) return;
     editingId = id;
+    pendingCoords = null;   // don't carry a pin from an earlier pasted link into this edit
     document.getElementById('placeName').value = p.name;
     document.getElementById('placeCategory').value = p.category;
     document.getElementById('placeDay').value = p.day || '';
@@ -1090,6 +1300,8 @@
     if (p.image) { preview.src = p.image; preview.style.display = 'block'; } else { preview.style.display = 'none'; preview.removeAttribute('src'); }
     galleryUrls = Array.isArray(p.gallery) ? p.gallery.slice() : [];
     renderGalleryInputs();
+    extraLocations = Array.isArray(p.locations) ? p.locations.map(l => ({ ...l })) : [];
+    renderLocationInputs();
 
     document.getElementById('formTitle').textContent = 'Edit stop';
     document.getElementById('editBadge').style.display = 'inline-block';
@@ -1108,6 +1320,8 @@
     if (confirmingDeleteId === id) {
       const removed = places.find(p => p.id === id);
       undoSnapshot = JSON.stringify(places);
+      undoPackagesSnapshot = null;
+      undoMyListSnapshot = null;
       places = places.filter(p => p.id !== id);
       confirmingDeleteId = null;
       renderPlaces();
@@ -1158,6 +1372,8 @@
 
     const newGroupOrder = [...ordered, ...unlocated];
     undoSnapshot = JSON.stringify(places);
+    undoPackagesSnapshot = null;
+    undoMyListSnapshot = null;
     indices.forEach((origIdx, pos) => { places[origIdx] = newGroupOrder[pos]; });
     renderPlaces();
     await persistPlaces();
@@ -1197,7 +1413,8 @@
     'museums-culture': 'Culture & Museums',
     'entertainment-nightlife': 'Entertainment & Nightlife',
     shopping: 'Shopping',
-    'viewpoints-photography': 'Views & Photography'
+    'viewpoints-photography': 'Views & Photography',
+    'quirky-pop-culture': 'Quirky & Pop Culture'
   };
   function categoryLabel(category) { return CATEGORY_LABELS[category] || category; }
 
@@ -1210,7 +1427,8 @@
       'museums-culture': 'var(--tag-museums)',
       'entertainment-nightlife': 'var(--tag-entertainment)',
       shopping: 'var(--tag-shopping)',
-      'viewpoints-photography': 'var(--tag-viewpoints)'
+      'viewpoints-photography': 'var(--tag-viewpoints)',
+      'quirky-pop-culture': 'var(--tag-quirky)'
     }[category];
   }
 
@@ -1237,16 +1455,47 @@
   const WEBSITE_ICON_SVG = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9.2" stroke="currentColor" stroke-width="1.8"/><path d="M12 2.8c2.4 2.6 3.7 5.9 3.7 9.2s-1.3 6.6-3.7 9.2M12 2.8c-2.4 2.6-3.7 5.9-3.7 9.2s1.3 6.6 3.7 9.2M2.8 12h18.4" stroke="currentColor" stroke-width="1.4"/></svg>';
   const READMORE_CHEVRON_SVG = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
+  // Swaps the star row on every card showing this stop (e.g. My attractions
+  // cards) and in the open detail modal, without rebuilding anything else.
+  function updateStarRowsInPlace(p) {
+    const html = buildStarRowHtml(p);
+
+    document.querySelectorAll(`.card[data-id="${p.id}"] .card-star-row, .card[data-id^="${p.id}#"] .card-star-row`).forEach(row => {
+      // Rating buttons are re-created, so remember whether focus was on one
+      const hadFocus = row.contains(document.activeElement);
+      const wrap = document.createElement('div');
+      wrap.innerHTML = html;
+      const fresh = wrap.firstElementChild;
+      row.replaceWith(fresh);
+      if (hadFocus) {
+        const btn = fresh.querySelector('.card-star-btn.filled:last-of-type') || fresh.querySelector('.card-star-btn');
+        if (btn) btn.focus();
+      }
+    });
+
+    if (detailModalTriggerId === p.id) {
+      const starRow = document.querySelector('#detailModalBody .detail-modal-star-row');
+      if (starRow) starRow.innerHTML = html;
+    }
+  }
+
   async function rateStop(id, value) {
     const p = places.find(pl => pl.id === id);
     if (!p) return;
     // Clicking the already-committed star again clears the rating.
     p.rating = (p.rating != null && Math.round(p.rating) === value) ? null : value;
-    renderPlaces();
-    if (detailModalTriggerId === id) {
-      const starRow = document.querySelector('#detailModalBody .detail-modal-star-row');
-      if (starRow) starRow.innerHTML = buildStarRowHtml(p);
+
+    if (currentView !== 'grid') {
+      // Map / Split: a full renderPlaces() would tear down and reload the map.
+      updateStarRowsInPlace(p);
+    } else {
+      renderPlaces();
+      if (detailModalTriggerId === id) {
+        const starRow = document.querySelector('#detailModalBody .detail-modal-star-row');
+        if (starRow) starRow.innerHTML = buildStarRowHtml(p);
+      }
     }
+
     await persistPlaces();
     announce(p.rating != null ? `${p.name} rated ${p.rating} star${p.rating === 1 ? '' : 's'}` : `${p.name} rating cleared`);
   }
@@ -1255,7 +1504,7 @@
     const rounded = place.rating != null ? Math.round(place.rating) : 0;
     let buttons = '';
     for (let v = 5; v >= 1; v--) {
-      buttons += `<button type="button" class="card-star-btn ${v <= rounded ? 'filled' : ''}" onclick="event.stopPropagation(); rateStop('${place.id}', ${v})" title="Rate ${v} star${v > 1 ? 's' : ''}" aria-label="Rate ${v} star${v > 1 ? 's' : ''}">${CARD_STAR_SVG}</button>`;
+      buttons += `<button type="button" class="card-star-btn ${v <= rounded ? 'filled' : ''}" onclick="event.stopPropagation(); rateStop('${baseIdOf(place.id)}', ${v})" title="Rate ${v} star${v > 1 ? 's' : ''}" aria-label="Rate ${v} star${v > 1 ? 's' : ''}">${CARD_STAR_SVG}</button>`;
     }
     const formatted = place.rating != null ? formatRating(place.rating) : null;
     const valueLabel = formatted !== null
@@ -1278,7 +1527,7 @@
     const col1Sub = websiteUrl ? 'Official website' : 'Category';
     const col1TextInner = `<div class="detail-info-label" title="${escapeHtml(col1Label)}">${escapeHtml(col1Label)}</div><div class="detail-info-sub">${escapeHtml(col1Sub)}</div>`;
     const col1Text = websiteUrl
-      ? `<a class="detail-info-text detail-info-link" href="${websiteUrl}" target="_blank" rel="noopener" title="Official website">${col1TextInner}</a>`
+      ? `<a class="detail-info-text detail-info-link" href="${escapeHtml(websiteUrl)}" target="_blank" rel="noopener" title="Official website">${col1TextInner}</a>`
       : `<div class="detail-info-text">${col1TextInner}</div>`;
 
     const priceVal = placePkg ? (parseFloat(placePkg.cost) || 0) : (p.cost != null && p.cost !== '' ? parseFloat(p.cost) : null);
@@ -1286,20 +1535,55 @@
     const col2Sub = placePkg ? 'Total price' : 'Price';
 
     const col3Label = p.address ? p.address : 'No address added';
-    const col3Sub = 'Location';
+    const extraCount = mapEntriesOf(p).length - 1;
+    const col3Sub = extraCount > 0 ? `Location · +${extraCount} more` : 'Location';
     const col3MapsUrl = p.address ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.address)}` : null;
     const col3TextInner = `<div class="detail-info-label" title="${escapeHtml(col3Label)}">${escapeHtml(col3Label)}</div><div class="detail-info-sub">${escapeHtml(col3Sub)}</div>`;
-    const col3Text = col3MapsUrl
-      ? `<a class="detail-info-text detail-info-link" href="${col3MapsUrl}" target="_blank" rel="noopener" title="Open in Google Maps">${col3TextInner}</a>`
-      : `<div class="detail-info-text">${col3TextInner}</div>`;
+    const entries = mapEntriesOf(p);
+    const mapsHref = (addr) => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addr || '')}`;
+    // Several locations: the bar's Location cell becomes a button that drops down every location,
+    // so nothing is repeated underneath the bar. One location: it stays a plain Google Maps link.
+    const col3Text = extraCount > 0
+      ? `<button type="button" class="detail-info-text detail-info-link detail-info-btn" aria-expanded="false" aria-haspopup="true" onclick="toggleInfoLocations(this)" title="Show all locations">
+           <div class="detail-info-label" title="${escapeHtml(col3Label)}">${escapeHtml(col3Label)}</div><div class="detail-info-sub">${escapeHtml(col3Sub)} ▾</div></button>
+         <div class="detail-loc-pop" hidden><ul>${entries.map((e, i) => `<li><strong>${escapeHtml(i === 0 ? 'Main' : (e.branchLabel || 'Location'))}</strong>
+           <a href="${mapsHref(e.address)}" target="_blank" rel="noopener">${escapeHtml(e.address || 'No address')} ↗</a></li>`).join('')}</ul></div>`
+      : (col3MapsUrl
+        ? `<a class="detail-info-text detail-info-link" href="${col3MapsUrl}" target="_blank" rel="noopener" title="Open in Google Maps">${col3TextInner}</a>`
+        : `<div class="detail-info-text">${col3TextInner}</div>`);
 
     return `<div class="detail-info-bar">
       <div class="detail-info-item"><span class="detail-info-icon">${col1Icon}</span>${col1Text}</div>
       <div class="detail-info-divider"></div>
       <div class="detail-info-item"><span class="detail-info-icon">${TIP_ICONS.coin}</span><div class="detail-info-text"><div class="detail-info-label">${escapeHtml(col2Label)}</div><div class="detail-info-sub">${escapeHtml(col2Sub)}</div></div></div>
       <div class="detail-info-divider"></div>
-      <div class="detail-info-item"><span class="detail-info-icon">${TIP_ICONS.pin}</span>${col3Text}</div>
+      <div class="detail-info-item detail-info-item-loc"><span class="detail-info-icon">${TIP_ICONS.pin}</span>${col3Text}</div>
     </div>`;
+  }
+
+  function toggleInfoLocations(btn) {
+    const pop = btn.nextElementSibling;
+    if (!pop) return;
+    const open = pop.hasAttribute('hidden');
+    if (open) pop.removeAttribute('hidden'); else pop.setAttribute('hidden', '');
+    btn.setAttribute('aria-expanded', String(open));
+  }
+  // Tapping anywhere else closes an open locations dropdown.
+  document.addEventListener('click', (e) => {
+    document.querySelectorAll('.detail-loc-pop:not([hidden])').forEach(pop => {
+      if (!pop.parentElement.contains(e.target)) {
+        pop.setAttribute('hidden', '');
+        const b = pop.previousElementSibling; if (b) b.setAttribute('aria-expanded', 'false');
+      }
+    });
+  });
+
+  function toggleCardBranches(btn) {
+    const list = btn.nextElementSibling;
+    if (!list) return;
+    const open = list.hasAttribute('hidden');
+    if (open) list.removeAttribute('hidden'); else list.setAttribute('hidden', '');
+    btn.setAttribute('aria-expanded', String(open));
   }
 
   function openDetailModal(id) {
@@ -1314,7 +1598,7 @@
     const placePkg = p.packageId ? packages.find(pk => pk.id === p.packageId) : null;
     const galleryPhotos = [p.image, ...((Array.isArray(p.gallery) ? p.gallery : []))].filter(Boolean);
     const imageMarkup = p.image
-      ? `<img class="detail-modal-image" src="${p.image}" alt="${escapeHtml(p.name)}" style="cursor:zoom-in;" onclick="openLightbox('${p.id}', 0)">`
+      ? `<img class="detail-modal-image" src="${escapeHtml(p.image)}" alt="${escapeHtml(p.name)}" style="cursor:zoom-in;" onclick="openLightbox('${p.id}', 0)">`
       : `<div class="detail-modal-image-placeholder hero-placeholder">
            <svg width="34" height="34" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><circle cx="8.5" cy="10" r="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M21 15l-5-4-4 3-3-2-6 5" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
          </div>`;
@@ -1360,7 +1644,7 @@
     document.body.classList.remove('modal-open');
     document.removeEventListener('keydown', handleDetailModalKeydown);
     if (detailModalTriggerId) {
-      const el = document.querySelector(`.card[data-id="${detailModalTriggerId}"], .route-item[data-id="${detailModalTriggerId}"]`);
+      const el = document.querySelector(`.card[data-id="${detailModalTriggerId}"]`);
       if (el) el.focus();
     }
     detailModalTriggerId = null;
@@ -1419,23 +1703,24 @@
 
   function buildCardEl(place, globalIndex, visible, opts = {}) {
     const mobileUI = isMobileUI();
+    const baseId = baseIdOf(place.id); // actions (bookmark, edit, delete, rate...) act on the whole stop; place.id may be a branch id
     // HTML5 drag-and-drop (dragstart/dragover/drop) is a mouse-era API: touch
     // browsers either ignore it or fire it inconsistently, and a draggable
     // element under a finger also fights the page's own scroll gesture. So on
     // touch/narrow screens we don't mark cards draggable at all — reordering
     // instead happens through the Up/Down buttons rendered below, which call
     // the same moveStop() the keyboard shortcut already uses.
-    const draggableCard = opts.draggable !== false && !mobileUI;
-    const reorderableCard = opts.draggable !== false; // true whenever this card belongs to the orderable list, drag or not
+    const draggableCard = opts.draggable !== false && !mobileUI && !orderLocked() && !place.isBranch;
+    const reorderableCard = opts.draggable !== false && !orderLocked() && !place.isBranch; // true whenever this card belongs to the orderable list, drag or not
     const context = opts.context === 'mylist' ? 'mylist' : 'database'; // 'mylist' cards get a single unambiguous "remove from list" action instead of edit/delete
     const card = document.createElement('div');
-    card.className = 'card' + (place.desc ? ' has-desc' : '');
+    card.className = 'card' + (place.desc ? ' has-desc' : '') + (context === 'database' && isInMyList(baseId) ? ' is-shortlisted' : '');
     card.dataset.id = place.id;
     card.draggable = draggableCard;
     card.tabIndex = 0;
     card.setAttribute('aria-label', `${place.name}, stop ${globalIndex + 1}.${place.desc ? ' Press Enter for full details.' : ''}${draggableCard ? ' Press Alt plus arrow keys to reorder.' : ''}`);
 
-    card.addEventListener('click', (e) => handleCardClick(e, place.id, !!place.desc));
+    card.addEventListener('click', (e) => handleCardClick(e, baseId, !!place.desc));
     // Hovering/focusing a card highlights its pin whenever a map is on screen
     // (e.g. the My attractions cards sitting above the Map / Split view).
     card.addEventListener('mouseenter', () => highlightPin(place.id, true));
@@ -1445,18 +1730,18 @@
     if (draggableCard) {
       card.addEventListener('dragstart', handleDragStart);
       card.addEventListener('dragend', handleDragEnd);
-      card.addEventListener('keydown', (e) => handleCardKeydown(e, place.id));
+      card.addEventListener('keydown', (e) => handleCardKeydown(e, baseId));
     } else if (reorderableCard) {
       // Mobile: no drag handlers, but Alt+Arrow keyboard reordering still
       // works for anyone with a hardware keyboard (e.g. a connected iPad).
-      card.addEventListener('keydown', (e) => handleCardKeydown(e, place.id));
+      card.addEventListener('keydown', (e) => handleCardKeydown(e, baseId));
     } else {
       // Cards rendered in the "My attractions" shortlist aren't part of the
       // draggable trip-order list, but Enter should still open full details.
       card.addEventListener('keydown', (e) => {
-        if ((e.key === 'Enter' || e.key === ' ') && !e.target.closest('button, a')) {
+        if ((e.key === 'Enter' || e.key === ' ') && !e.target.closest('button, a, input, textarea')) {
           e.preventDefault();
-          if (place.desc) openDetailModal(place.id);
+          if (place.desc) openDetailModal(baseId);
         }
       });
     }
@@ -1474,7 +1759,7 @@
 
     const categoryBadge = `<span class="category-tag card-badge tag-${place.category}">${categoryLabel(place.category)}</span>`;
     const imageMarkup = `<div class="card-image-wrap">${place.image
-      ? `<img class="card-image" src="${place.image}" alt="${escapeHtml(place.name)}" draggable="false">`
+      ? `<img class="card-image" src="${escapeHtml(place.image)}" alt="${escapeHtml(place.name)}" draggable="false">`
       : `<div class="card-image-placeholder" draggable="false">
            <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><circle cx="8.5" cy="10" r="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M21 15l-5-4-4 3-3-2-6 5" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
          </div>`}${categoryBadge}${cardPriceBadgeHtml}</div>`;
@@ -1482,14 +1767,50 @@
     const mapsUrl = place.address ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.address)}` : null;
     const websiteUrl = normalizeWebsiteUrl(place.website);
     const canShowOnMap = !!((place.address && place.address.trim()) || (typeof place.lat === 'number' && typeof place.lng === 'number'));
-    const hasBottomBlock = !!(mapsUrl || canShowOnMap || websiteUrl || place.desc);
+    const branchEntries = []; // extra locations are separate cards now, so no inline "+N more" list
+    const baseStop = places.find(p => p.id === baseId) || place;
+    const locEntries = mapEntriesOf(baseStop);
+    const locIdx = locEntries.findIndex(x => x.id === place.id);
+    const locBadge = locEntries.length > 1 ? `<div class="stop-time">Location ${locIdx + 1} of ${locEntries.length}</div>` : '';
+    const tidyAddr = (s) => (s || '').replace(/,?\s*United States$/i, '');
+    const CHEVRON_SVG = '<svg class="card-branches-chevron" width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    const branchesHtml = branchEntries.length ? `<div class="card-branches">
+          <button type="button" class="card-branches-toggle" aria-expanded="false" onclick="event.stopPropagation(); toggleCardBranches(this)">${MAP_PIN_ICON_SVG}<span>+${branchEntries.length} more location${branchEntries.length !== 1 ? 's' : ''}</span>${CHEVRON_SVG}</button>
+          <ul class="card-branches-list" hidden>${branchEntries.map(e => {
+            const addr = tidyAddr(e.address);
+            const label = e.branchLabel || '';
+            const redundant = !label || addr.toLowerCase().startsWith(label.toLowerCase()); // label was just the street address
+            const main = redundant ? addr : label;
+            const sub = redundant ? '' : addr;
+            return `<li class="card-branch">
+            <div class="card-branch-text" title="${escapeHtml(e.address || '')}">
+              <div class="card-branch-name">${escapeHtml(main || 'Location')}</div>
+              ${sub ? `<div class="card-branch-address">${escapeHtml(sub)}</div>` : ''}
+            </div>
+            <button type="button" class="card-branch-icon" title="Show on map" aria-label="Show ${escapeHtml(main)} on the map" onclick="event.stopPropagation(); showOnMap('${e.id}')">${MAP_PIN_ICON_SVG}</button>
+            ${e.address ? `<a class="card-branch-icon" title="Open in Google Maps" aria-label="Open ${escapeHtml(main)} in Google Maps" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(e.address)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${WEBSITE_ICON_SVG}</a>` : ''}
+          </li>`; }).join('')}</ul>
+        </div>` : '';
+    const hasBottomBlock = !!(mapsUrl || canShowOnMap || websiteUrl || place.desc || branchEntries.length);
+
+    const myEntry = context === 'mylist' ? myList.find(e => e.placeId === baseId) : null;
+    const mylistEditorHtml = myEntry ? `
+      <div class="mylist-edit" onclick="event.stopPropagation()">
+        <input type="text" class="mylist-day-input" value="${escapeHtml(myEntry.day || '')}" placeholder="${escapeHtml(place.day || 'Day, e.g. Day 1')}" aria-label="Day for ${escapeHtml(place.name)}" onchange="updateMyListField('${baseId}', 'day', this.value)">
+        <input type="text" class="mylist-note-input" value="${escapeHtml(myEntry.note || '')}" placeholder="Add a note…" aria-label="Note for ${escapeHtml(place.name)}" onchange="updateMyListField('${baseId}', 'note', this.value)">
+        ${orderLocked() ? '' : `<div class="mobile-reorder-btns">
+          <button type="button" class="icon-only-btn reorder-btn" onclick="moveMyListEntry('${baseId}', -1)" title="Move up" aria-label="Move ${escapeHtml(place.name)} up">↑</button>
+          <button type="button" class="icon-only-btn reorder-btn" onclick="moveMyListEntry('${baseId}', 1)" title="Move down" aria-label="Move ${escapeHtml(place.name)} down">↓</button>
+        </div>`}
+      </div>` : '';
 
     card.innerHTML = `
       ${imageMarkup}
       <div class="card-body">
         <div class="card-main">
         <div class="card-header">
-          <h3 class="card-title" title="${escapeHtml(place.name)}">${escapeHtml(place.name)}</h3>
+          <h3 class="card-title" title="${escapeHtml(entryTitle(place))}">${escapeHtml(entryTitle(place))}</h3>
+          ${locBadge}
         </div>
         <div class="card-desc-wrap">
           <div class="card-desc">${getCardBlurb(place) ? escapeHtml(getCardBlurb(place)) : 'No description added.'}</div>
@@ -1505,7 +1826,8 @@
             <span class="card-address-text">Google Maps ↗</span>
           </a>` : ''}
         </div>` : ''}
-        ${websiteUrl ? `<a class="card-website" href="${websiteUrl}" target="_blank" rel="noopener" title="Official website (opening times, tickets, etc.)">
+        ${branchesHtml}
+        ${websiteUrl ? `<a class="card-website" href="${escapeHtml(websiteUrl)}" target="_blank" rel="noopener" title="Official website (opening times, tickets, etc.)">
           ${WEBSITE_ICON_SVG}
           Official website<span class="link-arrow">↗</span>
         </a>` : ''}
@@ -1514,9 +1836,10 @@
         </div>
         <div class="card-footer${context === 'mylist' ? ' mylist-footer' : ''}">
           ${context === 'mylist' ? `
+          ${mylistEditorHtml}
           ${buildStarRowHtml(place)}
           <div class="footer-actions">
-            <button type="button" class="icon-text-btn danger mylist-remove-btn" onclick="event.stopPropagation(); toggleMyList('${place.id}')" title="Remove from My attractions" aria-label="Remove ${escapeHtml(place.name)} from My attractions">
+            <button type="button" class="icon-text-btn danger mylist-remove-btn" onclick="event.stopPropagation(); toggleMyList('${baseId}')" title="Remove from My attractions" aria-label="Remove ${escapeHtml(place.name)} from My attractions">
               ${REMOVE_FROM_LIST_ICON_SVG} Remove from list
             </button>
           </div>
@@ -1525,20 +1848,20 @@
           <div class="footer-actions-row">
             ${reorderableCard && mobileUI ? `
             <div class="mobile-reorder-btns">
-              <button type="button" class="icon-only-btn reorder-btn" onclick="event.stopPropagation(); moveStop('${place.id}', -1)" ${isFirst ? 'disabled' : ''} title="Move up" aria-label="Move ${escapeHtml(place.name)} up">
+              <button type="button" class="icon-only-btn reorder-btn" onclick="event.stopPropagation(); moveStop('${baseId}', -1)" ${isFirst ? 'disabled' : ''} title="Move up" aria-label="Move ${escapeHtml(place.name)} up">
                 <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 12.5V3.5M8 3.5L3.5 8M8 3.5L12.5 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </button>
-              <button type="button" class="icon-only-btn reorder-btn" onclick="event.stopPropagation(); moveStop('${place.id}', 1)" ${isLast ? 'disabled' : ''} title="Move down" aria-label="Move ${escapeHtml(place.name)} down">
+              <button type="button" class="icon-only-btn reorder-btn" onclick="event.stopPropagation(); moveStop('${baseId}', 1)" ${isLast ? 'disabled' : ''} title="Move down" aria-label="Move ${escapeHtml(place.name)} down">
                 <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 3.5v9M8 12.5L3.5 8M8 12.5L12.5 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </button>
             </div>` : ''}
-            <button class="icon-only-btn mylist-btn ${isInMyList(place.id) ? 'active' : ''}" onclick="event.stopPropagation(); toggleMyList('${place.id}')" title="${isInMyList(place.id) ? 'Remove from My attractions' : 'Add to my list'}" aria-label="${isInMyList(place.id) ? 'Remove ' + escapeHtml(place.name) + ' from My attractions' : 'Add ' + escapeHtml(place.name) + ' to My attractions'}">
+            <button class="icon-only-btn mylist-btn ${isInMyList(baseId) ? 'active' : ''}" aria-pressed="${isInMyList(baseId)}" onclick="event.stopPropagation(); toggleMyList('${baseId}')" title="${isInMyList(baseId) ? 'Remove from My attractions' : 'Add to my list'}" aria-label="${isInMyList(baseId) ? 'Remove ' + escapeHtml(place.name) + ' from My attractions' : 'Add ' + escapeHtml(place.name) + ' to My attractions'}">
               ${BOOKMARK_ICON_SVG}
             </button>
-            <button class="icon-only-btn edit-btn" onclick="event.stopPropagation(); startEdit('${place.id}')" title="Edit stop" aria-label="Edit ${escapeHtml(place.name)}">
+            <button class="icon-only-btn edit-btn" onclick="event.stopPropagation(); startEdit('${baseId}')" title="Edit stop" aria-label="Edit ${escapeHtml(place.name)}">
               <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M11 2l3 3-8.5 8.5L2 14l0.5-3.5L11 2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/></svg>
             </button>
-            <button class="icon-only-btn delete-btn ${isConfirming ? 'confirming' : ''}" onclick="event.stopPropagation(); requestDelete('${place.id}')" title="${isConfirming ? 'Click again to confirm deletion' : 'Delete stop (removes it entirely, not just from My attractions)'}" aria-label="${isConfirming ? 'Confirm deletion of ' + escapeHtml(place.name) : 'Delete ' + escapeHtml(place.name) + ' entirely'}">
+            <button class="icon-only-btn delete-btn ${isConfirming ? 'confirming' : ''}" onclick="event.stopPropagation(); requestDelete('${baseId}')" title="${isConfirming ? 'Click again to confirm deletion' : 'Delete stop (removes it entirely, not just from My attractions)'}" aria-label="${isConfirming ? 'Confirm deletion of ' + escapeHtml(place.name) : 'Delete ' + escapeHtml(place.name) + ' entirely'}">
               ${isConfirming
                 ? '<svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5L13 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'
                 : '<svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 4.5h10M6.5 4.5V3a1 1 0 0 1 1-1h1a1 1 0 0 1 1 1v1.5M4.5 4.5l0.6 8.4a1 1 0 0 0 1 0.9h3.8a1 1 0 0 0 1-0.9l0.6-8.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'}
@@ -1557,7 +1880,7 @@
       filter: ['No stops in this category', 'Try a different filter, or add a new stop above.'],
       search: ['No matches', 'Try a different search term.'],
       none: ['No stops yet', 'Add your first place above to start building the route.'],
-      inMyList: ['All set!', 'Every stop has been added to My attractions - open that tab and remove one to see it here again.']
+      inMyList: ['All set!', 'Every stop is in My attractions and "Hide shortlisted" is on - turn it off to see them here again.']
     };
     const [lead, sub] = messages[reason];
     container.innerHTML = `
@@ -1571,13 +1894,15 @@
   }
 
   function renderGridView(container, visible) {
+    // One card per location: stops with extra locations become several cards (nearest-first applies after splitting)
+    visible = sortByProximity(expandMapEntries(visible));
     const groupByDay = document.getElementById('groupByDayToggle').checked;
 
     if (!groupByDay) {
       const grid = document.createElement('div');
       grid.className = 'grid-container';
       visible.forEach(place => {
-        const gi = places.findIndex(p => p.id === place.id);
+        const gi = places.findIndex(p => p.id === baseIdOf(place.id));
         grid.appendChild(buildCardEl(place, gi, visible));
       });
       grid.appendChild(buildEndDropZone());
@@ -1615,7 +1940,7 @@
       grid.className = 'grid-container';
       grid.dataset.groupKey = key; // lets drag handlers know which day a drop here should assign
       groupMap[key].forEach(place => {
-        const gi = places.findIndex(p => p.id === place.id);
+        const gi = places.findIndex(p => p.id === baseIdOf(place.id));
         grid.appendChild(buildCardEl(place, gi, visible));
       });
       // Every group gets its own end-drop-zone (not just the last one) so
@@ -1710,7 +2035,7 @@
     }
 
     renderFilterMenu();
-    renderPlaces();
+    if (!(typeof updateMapInPlace === 'function' && updateMapInPlace())) renderPlaces();
   });
 
   if (filterMoreWrap && filterMoreToggle) {
@@ -1738,7 +2063,7 @@
 
   document.getElementById('viewToggle').addEventListener('click', (e) => {
     const btn = e.target.closest('.pill-btn');
-    if (!btn) return;
+    if (!btn || !btn.dataset.view) return;   // the Swipe pill launches its overlay itself
     setView(btn.dataset.view);
   });
 
@@ -1756,6 +2081,10 @@
 
   /* ============ Init ============ */
   (async function init() {
+    initHideShortlisted();
+    initProximitySort();
+    initUniqueLocations();
+    initAddedOrder();
     renderFilterMenu();
     renderViewMenu();
     await loadTripsIndex();
@@ -1763,3 +2092,6 @@
     renderTripSelect();
     await loadCurrentTripPlaces();
   })();
+
+
+document.addEventListener('DOMContentLoaded', initImageDirField);

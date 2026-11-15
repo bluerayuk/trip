@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/5.12.0/maplibre-gl.min.css">
 <link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="swipe.css">
 </head>
 <body class="tab-explore">
 <div class="page">
@@ -76,8 +77,10 @@
 
     <div class="trip-bar-right">
       <button class="icon-text-btn" onclick="exportJson()">Export JSON</button>
+      <button class="icon-text-btn" onclick="exportCsv()" title="Download attractions and categories as a spreadsheet">Export CSV</button>
       <button class="icon-text-btn" onclick="document.getElementById('importInput').click()">Import JSON</button>
       <input type="file" id="importInput" accept="application/json" style="display:none;" onchange="importJson(event)">
+      <button class="icon-text-btn" onclick="openRestoreDialog()">Restore a previous version</button>
       <button class="icon-text-btn" onclick="resetToSample()">Reset to sample</button>
       <button class="icon-text-btn danger" onclick="clearAllStops()">Clear all</button>
     </div>
@@ -93,9 +96,9 @@
         <svg width="18" height="18" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="3" r="1.3" fill="currentColor"/><circle cx="8" cy="8" r="1.3" fill="currentColor"/><circle cx="8" cy="13" r="1.3" fill="currentColor"/></svg>
       </button>
       <div class="trip-more-menu" id="tripMoreMenu">
-        <button type="button" class="trip-more-item" onclick="openAddFromMenu()">Add attraction</button>
-        <div class="trip-more-divider"></div>
-        <button type="button" class="trip-more-item" onclick="createTrip(); toggleTripMoreMenu(false)">New trip</button>
+        <button type="button" class="trip-more-item mobile-only" onclick="openAddFromMenu()">Add attraction</button>
+        <div class="trip-more-divider mobile-only"></div>
+        <button type="button" class="trip-more-item mobile-only" onclick="createTrip(); toggleTripMoreMenu(false)">New trip</button>
         <button type="button" class="trip-more-item" onclick="renameTrip(); toggleTripMoreMenu(false)">Rename trip</button>
         <button type="button" class="trip-more-item danger" onclick="deleteTrip(); toggleTripMoreMenu(false)">Delete trip</button>
         <div class="trip-more-divider"></div>
@@ -103,11 +106,13 @@
           <span>Shared trip</span><span class="trip-more-check" aria-hidden="true">✓</span>
         </button>
         <div class="trip-more-divider"></div>
-        <button type="button" class="trip-more-item" onclick="copyItinerary(); toggleTripMoreMenu(false)">Copy list</button>
-        <button type="button" class="trip-more-item" onclick="window.print(); toggleTripMoreMenu(false)">Print</button>
-        <div class="trip-more-divider"></div>
+        <button type="button" class="trip-more-item mobile-only" onclick="copyItinerary(); toggleTripMoreMenu(false)">Copy list</button>
+        <button type="button" class="trip-more-item mobile-only" onclick="window.print(); toggleTripMoreMenu(false)">Print</button>
+        <div class="trip-more-divider mobile-only"></div>
         <button type="button" class="trip-more-item" onclick="exportJson(); toggleTripMoreMenu(false)">Export JSON</button>
+        <button type="button" class="trip-more-item" onclick="exportCsv(); toggleTripMoreMenu(false)">Export CSV</button>
         <button type="button" class="trip-more-item" onclick="document.getElementById('importInput').click(); toggleTripMoreMenu(false)">Import JSON</button>
+        <button type="button" class="trip-more-item" onclick="openRestoreDialog(); toggleTripMoreMenu(false)">Restore a previous version</button>
         <button type="button" class="trip-more-item" onclick="resetToSample(); toggleTripMoreMenu(false)">Reset to sample</button>
         <button type="button" class="trip-more-item danger" onclick="clearAllStops(); toggleTripMoreMenu(false)">Clear all</button>
       </div>
@@ -129,7 +134,7 @@
   </div>
 
   <div class="view-tabs" role="tablist" aria-label="Attractions">
-    <button type="button" class="view-tab active" id="tabExplore" role="tab" aria-selected="true" onclick="setTab('explore')">Explore</button>
+    <button type="button" class="view-tab active" id="tabExplore" role="tab" aria-selected="true" onclick="setTab('explore')">Explore <span class="view-tab-count" id="tabExploreCount" title="Stops in this trip's database">0</span></button>
     <button type="button" class="view-tab" id="tabMyList" role="tab" aria-selected="false" onclick="setTab('mylist')">My attractions <span class="view-tab-count" id="tabMyListCount">0</span></button>
   </div>
 
@@ -139,6 +144,14 @@
       <h2 id="formTitle">Add a stop</h2>
       <span class="edit-badge" id="editBadge" style="display:none;">Editing</span>
     </div>
+
+    <div class="field full-width">
+      <label for="quickAddInput">Quick add <span class="hint">(paste several addresses of the SAME business, one per line. Fill in the name and photo above first)</span></label>
+      <textarea id="quickAddInput" rows="5" placeholder="620 6th Ave, New York, NY 10011&#10;4 Union Sq E, New York, NY 10003&#10;..."></textarea>
+      <button type="button" class="icon-text-btn" id="quickAddBtn" onclick="quickAddRun()">Look up &amp; fill in</button>
+      <span class="hint" id="quickAddStatus"></span>
+    </div>
+
 
     <div class="field half-width">
       <label for="placeName">Attraction name</label>
@@ -155,6 +168,7 @@
         <option value="entertainment-nightlife">Entertainment & Nightlife</option>
         <option value="shopping">Shopping</option>
         <option value="viewpoints-photography">Views & Photography</option>
+        <option value="quirky-pop-culture">Quirky & Pop Culture</option>
       </select>
     </div>
     <div class="field">
@@ -170,7 +184,12 @@
 
     <div class="field half-width">
       <label for="placeAddress">Address</label>
-      <input type="text" id="placeAddress" placeholder="Street, city — or paste a Google Maps link for an exact pin" onpaste="setTimeout(handleAddressPaste, 0)">
+      <input type="text" id="placeAddress" placeholder="Street, city — or paste a Google Maps link for an exact pin" oninput="pendingCoords=null" onpaste="setTimeout(handleAddressPaste, 0)">
+    </div>
+    <div class="field full-width">
+      <label>More locations <span class="hint">(optional — other branches of the same place, e.g. a pizza chain. Each gets its own pin on the map)</span></label>
+      <div class="loc-input-list" id="locationInputList"></div>
+      <button type="button" class="icon-text-btn loc-add-btn" onclick="addLocationRow()">+ Add location</button>
     </div>
     <div class="field half-width">
       <label for="placeWebsite">Official website <span class="hint">(optional — for opening times, tickets, etc.)</span></label>
@@ -194,9 +213,9 @@
     </div>
 
     <div class="field full-width">
-      <label for="placeImage">Cover photo <span class="hint">(optional — paste an image URL)</span></label>
+      <label for="placeImage">Cover photo <span class="hint">(optional — a filename like 80.jpg is looked up in the image folder below; or paste a full URL)</span></label>
       <div class="image-input-row">
-        <input type="text" id="placeImage" placeholder="https://..." oninput="handleImageUrlInput()">
+        <input type="text" id="placeImage" placeholder="80.jpg or https://..." oninput="handleImageUrlInput()">
         <div class="image-preview-wrap">
           <img id="imagePreview" class="image-preview" alt="Preview" onerror="this.style.display='none'">
         </div>
@@ -204,9 +223,14 @@
     </div>
 
     <div class="field full-width">
+      <label for="imageDir">Image folder <span class="hint">(where bare filenames are looked up; default images/)</span></label>
+      <input type="text" id="imageDir" value="images/" placeholder="images/" oninput="handleImageDirInput()">
+    </div>
+
+    <div class="field full-width">
       <label for="galleryUrlInput">Gallery photos <span class="hint">(optional — extra photos people can browse in the detail view)</span></label>
       <div class="gallery-add-row">
-        <textarea id="galleryUrlInput" rows="2" placeholder="Paste one or more image URLs here (one per line, or comma-separated), then click Add" onkeydown="handleGalleryInputKeydown(event)"></textarea>
+        <textarea id="galleryUrlInput" rows="2" placeholder="Filenames or image URLs (one per line, or comma-separated), then click Add" onkeydown="handleGalleryInputKeydown(event)"></textarea>
         <button type="button" class="icon-text-btn" onclick="addGalleryUrls()">+ Add photo(s)</button>
       </div>
       <div class="gallery-input-list" id="galleryInputList"></div>
@@ -235,7 +259,10 @@
       </button>
       <div class="search-input-wrap">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-        <input type="text" id="searchInput" placeholder="Search stops..." oninput="renderPlaces()">
+        <input type="text" id="searchInput" placeholder="Search stops..." oninput="onSearchInputDebounced()" autocomplete="off">
+        <button type="button" class="search-input-clear" id="searchClearBtn" onclick="clearSearch()" aria-label="Clear search" title="Clear search">
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 2l6 6M8 2L2 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </button>
       </div>
       <div class="filter-group" role="group" aria-label="Filter by category" id="filterGroup">
         <button class="pill-btn active" data-filter="all">All</button>
@@ -253,12 +280,17 @@
             <button class="pill-btn" data-filter="entertainment-nightlife">Entertainment & Nightlife</button>
             <button class="pill-btn" data-filter="shopping">Shopping</button>
             <button class="pill-btn" data-filter="viewpoints-photography">Views & Photography</button>
+            <button class="pill-btn" data-filter="quirky-pop-culture">Quirky & Pop Culture</button>
           </div>
         </div>
       </div>
     </div>
     <div class="toolbar-right">
       <label class="switch-label"><input type="checkbox" id="groupByDayToggle" onchange="renderPlaces()"> Group by day</label>
+      <label class="switch-label" title="Order cards so each one is close to the previous"><input type="checkbox" id="proximitySortToggle" onchange="onProximitySortChange()"> Nearest first</label>
+      <label class="switch-label" title="Hide stops you've already added to My attractions"><input type="checkbox" id="hideShortlistedToggle" onchange="onHideShortlistedChange()"> Hide shortlisted</label>
+      <label class="switch-label" title="Show each stop once, even if it has several locations (branches)"><input type="checkbox" id="uniqueLocationsToggle" onchange="onUniqueLocationsChange()"> Unique locations</label>
+      <label class="switch-label" title="Browse by when stops were added: oldest first starts at stop 1 / photo 1"><select id="addedOrderSelect" aria-label="Order by time added" onchange="onAddedOrderChange()"><option value="trip">Trip order</option><option value="oldest">Oldest added first</option><option value="newest">Newest added first</option></select></label>
       <div class="view-toggle" role="group" aria-label="Change view" id="viewToggle">
         <button class="pill-btn active" data-view="grid">Grid</button>
         <button class="pill-btn" data-view="map">Map</button>
@@ -317,12 +349,17 @@
 <script src="sample-places.js"></script>
 <script src="sample-packages.js"></script>
 <script src="delta.js"></script>
+<script src="locations.js"></script>
 <script src="my-list.js"></script>
+<script src="swipe.js"></script>
 <script src="drag-drop.js"></script>
 <script src="export-import.js"></script>
+<script src="snapshots.js"></script>
 <script src="maps-link.js"></script>
+<script src="quick-add.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/5.12.0/maplibre-gl.min.js"></script>
 <script src="map-view.js"></script>
+<script src="proximity.js"></script>
 <script src="nearest.js"></script>
 <script src="app.js"></script>
 </body>

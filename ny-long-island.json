@@ -1,7 +1,7 @@
 {
-  "format": "delta-v1",
+  "format": "delta-v2",
   "tripName": "NY & Long Island",
-  "exportedAt": "2026-10-11T19:54:25.959Z",
+  "exportedAt": "2026-11-15T20:42:56.144Z",
   "delta": {
     "base": "sample",
     "places": {
@@ -9,968 +9,1497 @@
       "removed": [],
       "modified": [
         {
-          "id": "s1",
-          "set": {
-            "rating": 5
-          },
-          "unset": []
-        },
-        {
-          "id": "1788197283793",
-          "set": {
-            "lat": 40.7829,
-            "lng": -73.9654
-          },
-          "unset": []
-        },
-        {
-          "id": "1788197817249",
-          "set": {
-            "lat": 40.7420041,
-            "lng": -74.0106105
-          },
-          "unset": []
-        },
-        {
-          "id": "1788210434835",
-          "set": {
-            "lat": 40.7645974,
-            "lng": -73.9995974
-          },
-          "unset": []
-        },
-        {
-          "id": "1788461113442",
-          "set": {
-            "lat": 40.7576555,
-            "lng": -73.9842961
-          },
-          "unset": []
-        },
-        {
-          "id": "1788463783002",
-          "set": {
-            "lat": 40.7574184,
-            "lng": -73.9844713
-          },
-          "unset": []
-        },
-        {
-          "id": "1788464505629",
-          "set": {
-            "lat": 40.7592576,
-            "lng": -73.9799569
-          },
-          "unset": []
-        },
-        {
-          "id": "1788464770925",
-          "set": {
-            "lat": 40.5737988,
-            "lng": -73.9802654
-          },
-          "unset": []
-        },
-        {
-          "id": "1788466050759",
-          "set": {
-            "lat": 40.7655725,
-            "lng": -73.9835863
-          },
-          "unset": []
-        },
-        {
-          "id": "1788466922365",
-          "set": {
-            "lat": 40.7601258,
-            "lng": -73.9800192
-          },
-          "unset": []
-        },
-        {
-          "id": "1788467215986",
-          "set": {
-            "lat": 40.7029052,
-            "lng": -73.990118
-          },
-          "unset": []
-        },
-        {
-          "id": "1788467514276",
-          "set": {
-            "lat": 40.7648811,
-            "lng": -73.9802763
-          },
-          "unset": []
-        },
-        {
-          "id": "1788468090767",
-          "set": {
-            "lat": 40.8088567,
-            "lng": -74.0715609
-          },
-          "unset": []
-        },
-        {
-          "id": "1788468580495",
-          "set": {
-            "lat": 40.7191029,
-            "lng": -73.9975415
-          },
-          "unset": []
-        },
-        {
-          "id": "1788468814209",
-          "set": {
-            "lat": 40.7157916,
-            "lng": -73.9994912
-          },
-          "unset": []
-        },
-        {
-          "id": "1788469643088",
-          "set": {
-            "lat": 40.7527584,
-            "lng": -73.9789619
-          },
-          "unset": []
-        },
-        {
-          "id": "1788470015231",
-          "set": {
-            "lat": 40.7115549,
-            "lng": -74.0114199
-          },
-          "unset": []
-        },
-        {
-          "id": "1788470186066",
-          "set": {
-            "lat": 40.7059882,
-            "lng": -74.0131226
-          },
-          "unset": []
-        },
-        {
-          "id": "1788470430144",
-          "set": {
-            "lat": 40.7492685,
-            "lng": -73.9814652
-          },
-          "unset": []
-        },
-        {
-          "id": "1788470549533",
-          "set": {
-            "lat": 40.7492685,
-            "lng": -73.9814652
-          },
-          "unset": []
-        },
-        {
-          "id": "1788470776017",
-          "set": {
-            "lat": 40.7410592,
-            "lng": -73.9896416
-          },
-          "unset": []
-        },
-        {
-          "id": "1788470934968",
-          "set": {
-            "lat": 40.9333446,
-            "lng": -73.7622551
-          },
-          "unset": []
-        },
-        {
-          "id": "1788471146363",
-          "set": {
-            "lat": 40.7420513,
-            "lng": -74.0048973
-          },
-          "unset": []
-        },
-        {
-          "id": "1788471449030",
-          "set": {
-            "lat": 40.7127281,
-            "lng": -74.0060152,
-            "approxLocation": true
-          },
-          "unset": []
-        },
-        {
-          "id": "1788622003718",
-          "set": {
-            "lat": 40.7223431,
-            "lng": -73.987353
-          },
-          "unset": []
-        },
-        {
-          "id": "1788622634655",
-          "set": {
-            "lat": 40.7035408,
-            "lng": -73.9919894
-          },
-          "unset": []
-        },
-        {
-          "id": "1788622978482",
-          "set": {
-            "lat": 40.7562129,
-            "lng": -73.9865339
-          },
-          "unset": []
-        },
-        {
-          "id": "1788624365119",
-          "set": {
-            "lat": 40.7644598,
-            "lng": -73.9744941
-          },
-          "unset": []
-        },
-        {
-          "id": "1788624789641",
-          "set": {
-            "lat": 40.7442431,
-            "lng": -73.9885906
-          },
-          "unset": []
-        },
-        {
-          "id": "1788625171675",
-          "set": {
-            "lat": 40.7132868,
-            "lng": -74.0040272
-          },
-          "unset": []
-        },
-        {
-          "id": "1788629109266",
-          "set": {
-            "lat": 40.7615923,
-            "lng": -73.964959
-          },
-          "unset": []
-        },
-        {
-          "id": "1788716279125",
-          "set": {
-            "lat": 40.7032255,
-            "lng": -74.0090671
-          },
-          "unset": []
-        },
-        {
-          "id": "1788717674418",
-          "set": {
-            "lat": 40.7111949,
-            "lng": -74.0069009
-          },
-          "unset": []
-        },
-        {
-          "id": "1788718029044",
-          "set": {
-            "lat": 40.7195531,
-            "lng": -74.006613
-          },
-          "unset": []
-        },
-        {
-          "id": "1788718323034",
-          "set": {
-            "lat": 40.7498787,
-            "lng": -73.9711586
-          },
-          "unset": []
-        },
-        {
-          "id": "1788718610987",
-          "set": {
-            "lat": 40.7089388,
-            "lng": -74.0114723
-          },
-          "unset": []
-        },
-        {
-          "id": "1788718890126",
-          "set": {
-            "lat": 40.6906609,
-            "lng": -73.9955661
-          },
-          "unset": []
-        },
-        {
-          "id": "1788719088794",
-          "set": {
-            "lat": 40.7153077,
-            "lng": -73.998197
-          },
-          "unset": []
-        },
-        {
-          "id": "1788719557018",
-          "set": {
-            "lat": 40.6905176,
-            "lng": -73.9899802
-          },
-          "unset": []
-        },
-        {
-          "id": "1788720311468",
-          "set": {
-            "lat": 40.7127281,
-            "lng": -74.0060152,
-            "approxLocation": true
-          },
-          "unset": []
-        },
-        {
-          "id": "1788720569311",
-          "set": {
-            "lat": 40.6665922,
-            "lng": -73.9620246
-          },
-          "unset": []
-        },
-        {
-          "id": "1788722089918",
-          "set": {
-            "lat": 40.7561938,
-            "lng": -73.969411
-          },
-          "unset": []
-        },
-        {
-          "id": "1788721807480",
-          "set": {
-            "lat": 40.7579107,
-            "lng": -73.9714608
-          },
-          "unset": []
-        },
-        {
-          "id": "1788722953888",
-          "set": {
-            "lat": 40.690887,
-            "lng": -73.9830979
-          },
-          "unset": []
-        },
-        {
-          "id": "1788723221034",
-          "set": {
-            "lat": 40.7495768,
-            "lng": -73.9912564
-          },
-          "unset": []
-        },
-        {
-          "id": "1788723484494",
-          "set": {
-            "lat": 40.7082308,
-            "lng": -74.0085461
-          },
-          "unset": []
-        },
-        {
-          "id": "1788723670418",
-          "set": {
-            "lat": 40.7114046,
-            "lng": -74.0159648
-          },
-          "unset": []
-        },
-        {
-          "id": "1788723795881",
-          "set": {
-            "lat": 40.7061876,
-            "lng": -74.0112443
-          },
-          "unset": []
-        },
-        {
-          "id": "1788724055926",
-          "set": {
-            "lat": 40.847969,
-            "lng": -73.9279678
-          },
-          "unset": []
-        },
-        {
-          "id": "1788724470230",
-          "set": {
-            "lat": 40.846449,
-            "lng": -73.9378989
-          },
-          "unset": []
-        },
-        {
-          "id": "1788724805324",
-          "set": {
-            "lat": 40.754222,
-            "lng": -73.9845689
-          },
-          "unset": []
-        },
-        {
-          "id": "1788725048434",
-          "set": {
-            "lat": 40.7575933,
-            "lng": -73.9843375
-          },
-          "unset": []
-        },
-        {
           "id": "1788725580933",
           "set": {
-            "lat": 40.7124684,
-            "lng": -74.0079294
+            "lat": 40.7117757,
+            "lng": -74.0085572
           },
-          "unset": []
-        },
-        {
-          "id": "1788725827225",
-          "set": {
-            "lat": 40.7127281,
-            "lng": -74.0060152,
-            "approxLocation": true
-          },
-          "unset": []
-        },
-        {
-          "id": "1788726238221",
-          "set": {
-            "lat": 40.7165418,
-            "lng": -74.0059177
-          },
-          "unset": []
-        },
-        {
-          "id": "1788726722834",
-          "set": {
-            "lat": 40.7508895,
-            "lng": -73.9892551
-          },
-          "unset": []
-        },
-        {
-          "id": "1788726887707",
-          "set": {
-            "lat": 40.4983064,
-            "lng": -74.2191353
-          },
-          "unset": []
-        },
-        {
-          "id": "1788728055119",
-          "set": {
-            "lat": 40.7078104,
-            "lng": -74.0035241
-          },
-          "unset": []
-        },
-        {
-          "id": "1788728220857",
-          "set": {
-            "lat": 40.7526944,
-            "lng": -73.977253
-          },
-          "unset": []
-        },
-        {
-          "id": "1788813671557",
-          "set": {
-            "lat": 40.7127281,
-            "lng": -74.0060152,
-            "approxLocation": true
-          },
-          "unset": []
-        },
-        {
-          "id": "1788814110975",
-          "set": {
-            "lat": 40.7937231,
-            "lng": -73.9733507
-          },
-          "unset": []
-        },
-        {
-          "id": "1788814461835",
-          "set": {
-            "lat": 40.702617,
-            "lng": -73.9945726
-          },
-          "unset": []
-        },
-        {
-          "id": "1788815108107",
-          "set": {
-            "lat": 40.7709814,
-            "lng": -73.9953215
-          },
-          "unset": []
-        },
-        {
-          "id": "1788815474719",
-          "set": {
-            "lat": 40.660397,
-            "lng": -73.998091
-          },
-          "unset": []
-        },
-        {
-          "id": "1788815777032",
-          "set": {
-            "lat": 40.7308294,
-            "lng": -73.9967075
-          },
-          "unset": []
-        },
-        {
-          "id": "1788816187575",
-          "set": {
-            "lat": 40.750466,
-            "lng": -73.9739588
-          },
-          "unset": []
-        },
-        {
-          "id": "1788816465896",
-          "set": {
-            "lat": 40.8128986,
-            "lng": -73.962725
-          },
-          "unset": []
-        },
-        {
-          "id": "1788816662625",
-          "set": {
-            "lat": 40.714344,
-            "lng": -74.0154477
-          },
-          "unset": []
-        },
-        {
-          "id": "1788890634915",
-          "set": {
-            "lat": 40.752795,
-            "lng": -73.9936323
-          },
-          "unset": []
-        },
-        {
-          "id": "1788892273508",
-          "set": {
-            "lat": 40.7602575,
-            "lng": -73.9750532
-          },
-          "unset": []
-        },
-        {
-          "id": "1788893062429",
-          "set": {
-            "lat": 40.7127281,
-            "lng": -74.0060152,
-            "approxLocation": true
-          },
-          "unset": []
-        },
-        {
-          "id": "1788893298997",
-          "set": {
-            "lat": 40.7590632,
-            "lng": -73.952079
-          },
-          "unset": []
+          "unset": [],
+          "full": {
+            "id": "1788725580933",
+            "name": "The Woolworth Building",
+            "category": "sightseeing",
+            "day": "",
+            "address": "The Woolworth Building, 233 Broadway, New York, NY 10007, United States",
+            "desc": "Zero Public Access\nThe building is strictly closed to the general public. Unless you are a resident or have a confirmed business appointment, security will immediately turn you away.\n\nThe City Hall Park Vantage\nDo not photograph it from the sidewalk directly in front. Cross Broadway into City Hall Park for the necessary distance to capture clean, unobstructed wide-angle shots.\n\nThe Copper Crown\nThe distinctive pyramidal roof is clad in heavily oxidized copper. Use a telephoto lens to capture the vibrant green gothic spires popping against the skyline.\n\nTerra Cotta Reflectivity\nThe exterior is entirely clad in intricately carved architectural terra cotta. This glazed surface makes the building highly reflective, catching light dynamically throughout the day.\n\nThe Golden Hour Glow\nThe primary facade faces east and south. Shoot from City Hall Park just before sunset when the warm light turns the white terra cotta a striking, luminous gold.\n\nExterior Gothic Details\nEquip a 200mm to 400mm lens to scan the mid-level setbacks. The exterior is covered in ornate gargoyles and intricate medieval stonework completely invisible from street level.\n\nThe Scale Distortion\nStanding at its base on Broadway creates massive optical distortion. You must step back at least one full block to correct the converging vertical lines in your camera frame.\n\nSymmetrical Framing\nStand directly across Broadway at the main entrance to City Hall Park. Center the massive, arched doorway for a perfectly symmetrical, meticulously balanced architectural portrait.\n\nThe Lost Observatory\nDo not look for ticket booths. The top floors were recently converted into ultra-luxury penthouses, meaning the historic 58th-floor observation deck is permanently sealed from the public.\n\nMorning Shadow Hazard\nDo not attempt to photograph the Broadway facade at sunrise. The massive skyscrapers of the Financial District throw the Woolworth into deep, unworkable shadows until mid-morning.\n\nThe Archway Entrance\nWhile you cannot go inside, photograph the three-story main exterior archway. It features intricate stone carvings and floral motifs that are a masterpiece of neo-Gothic design.\n\nThe Night Illumination\nReturn after dark. The green copper crown is aggressively up-lit by powerful spotlights, creating a glowing, highly cinematic silhouette against the black sky.\n\nThe Oculus Contrast\nWalk south toward the World Trade Center for a striking architectural juxtaposition. Frame the dark, gothic Woolworth spire directly against the sleek white steel ribs of the Oculus.\n\nThe Brooklyn Bridge Pivot\nYou are standing directly across from the Manhattan pedestrian entrance to the Brooklyn Bridge. Cross the park to seamlessly begin a golden hour bridge walk.\n\nThe Subway Approach\nTake the 2 or 3 train to the Park Place station, or the R and W to City Hall. Both options drop you within a flat, one-minute walk of the entrance.",
+            "summary": "The Woolworth Building is a Gothic Revival skyscraper known for its ornate architecture, grand interiors, and iconic presence in Lower Manhattan.",
+            "image": "images/72.jpg",
+            "cost": 0,
+            "packageId": null,
+            "website": "https://woolworthtoursnyc.com",
+            "rating": null,
+            "lat": 40.7117757,
+            "lng": -74.0085572
+          }
         },
         {
           "id": "1788893615398",
           "set": {
-            "lat": 40.7539124,
-            "lng": -73.988651
+            "rating": null,
+            "gallery": [],
+            "lat": 40.7541701,
+            "lng": -73.9881018
           },
-          "unset": []
-        },
-        {
-          "id": "1788893800644",
-          "set": {
-            "lat": 40.720194,
-            "lng": -73.9884455
-          },
-          "unset": []
-        },
-        {
-          "id": "1788894472996",
-          "set": {
-            "lat": 40.7181022,
-            "lng": -74.0095601
-          },
-          "unset": []
-        },
-        {
-          "id": "1788894710883",
-          "set": {
-            "lat": 40.7591449,
-            "lng": -73.95326,
-            "approxLocation": true
-          },
-          "unset": []
-        },
-        {
-          "id": "1788895772155",
-          "set": {
-            "lat": 40.7045091,
-            "lng": -74.0140946
-          },
-          "unset": []
-        },
-        {
-          "id": "1788896238118",
-          "set": {
-            "lat": 40.7053128,
-            "lng": -74.0129107
-          },
-          "unset": []
-        },
-        {
-          "id": "1788896446950",
-          "set": {
-            "lat": 40.8502575,
-            "lng": -73.9469631
-          },
-          "unset": []
-        },
-        {
-          "id": "1788897704351",
-          "set": {
-            "lat": 40.7113675,
-            "lng": -74.0132704
-          },
-          "unset": []
-        },
-        {
-          "id": "1788898024590",
-          "set": {
-            "lat": 40.7201177,
-            "lng": -73.987852
-          },
-          "unset": []
+          "unset": [],
+          "full": {
+            "id": "1788893615398",
+            "name": "Giant Needle and Button",
+            "category": "quirky-pop-culture",
+            "day": "",
+            "address": "Needle Threading A Button, 191 W 39th St, New York, NY 10018, United States",
+            "desc": "The Exact Coordinates\nDo not wander the chaotic blocks of Times Square looking for this. The sculpture sits squarely in the Garment District on a pedestrian plaza at 7th Avenue and 39th Street.\n\nThe Massive Scale\nThis is not a subtle monument. The sculpture features a towering 31-foot stainless steel needle piercing a 14-foot-diameter, bright yellow aluminum button.\n\nThe Kiosk Reality\nIt is not just a standalone piece of modern art. The structure was built in 1996 and specifically designed by Pentagram to function as a working information booth for the Garment District Alliance.\n\nThe Thread Illusion\nLook closely at the \"thread\" looping through the needle. It is actually a thick, rigid steel pipe, engineered as a structural necessity to physically stabilize the massive button against high Midtown winds.\n\nThe Traffic-Yellow Contrast\nThe button is painted a highly specific, vibrant industrial yellow. This was explicitly chosen to pop aggressively against the drab gray concrete and dark glass of the surrounding skyscrapers.\n\nThe Fashion Walk of Fame\nDo not just look up. Look down at the pavement. This plaza acts as the starting point for the Fashion Walk of Fame, featuring round bronze plaques honoring legendary American fashion designers.\n\nThe Traffic Island Hazard\nWhile the plaza itself is pedestrianized, it borders the incredibly busy, multi-lane stretch of 7th Avenue. Be highly aware of aggressive taxi traffic when stepping backward into the crosswalk to frame a wide shot.\n\nThe Vertical Composition\nYou cannot capture this properly in landscape mode. To fit the entire 31-foot needle into your frame, you must shoot in portrait orientation and drop your camera physically low to the ground.\n\nThe Overcast Advantage\nShoot this on a cloudy day. The bright yellow aluminum is highly reflective; direct, harsh midday sun will completely wash out the color and cast distracting shadows from the steel needle.\n\nThe Pop-Up Plaza\nDuring the warmer months, the immediate surrounding street is frequently closed to vehicle traffic and transformed into a public seating area loaded with brightly colored folding tables and food vendors.\n\nThe Fabric Store Crawl\nUse this sculpture as your starting line. The immediate blocks along 39th and 38th Streets are still heavily packed with chaotic, floor-to-ceiling wholesale fabric and trimming shops.\n\nThe Nighttime Uplighting\nReturn after dark. The needle and button are heavily illuminated from the base by built-in spotlights, throwing a massive, dramatic shadow against the neighboring buildings.\n\nThe Pigeons and Grime\nBecause it sits directly over a bustling transit artery and information booth, the base frequently accumulates heavy city grime and pigeon droppings. Avoid leaning on the lower structure for photos.\n\nThe Macy's Pivot\nOnce you finish at the plaza, use this as your gateway south. Walk exactly five blocks straight down 7th Avenue to arrive directly at the colossal flagship Macy's at Herald Square.\n\nThe Subway Approach\nTake the 1, 2, 3, N, Q, R, W, or 7 train to the massive Times Square–42nd Street station. Emerge and walk three blocks south on 7th Avenue to escape the main tourist crush and find the needle.",
+            "summary": "Giant Needle and Button is a playful 13-foot sculpture in the Garment District, celebrating New York City’s fashion and garment-making heritage.",
+            "image": "images/93.jpg",
+            "cost": 0,
+            "packageId": null,
+            "website": "",
+            "rating": null,
+            "gallery": [],
+            "lat": 40.7541701,
+            "lng": -73.9881018
+          }
         },
         {
           "id": "1788898664930",
           "set": {
-            "lat": 40.7548102,
-            "lng": -73.9920877
+            "locations": [
+              {
+                "address": "2 Bros Pizza, 32 St Marks Pl, New York, NY 10003, United States",
+                "lat": 40.7287607,
+                "lng": -73.9883895
+              },
+              {
+                "address": "2 Bros Pizza, 542 9th Ave, New York, NY 10018, United States",
+                "lat": 40.7569564,
+                "lng": -73.9934438
+              },
+              {
+                "address": "2 Bros Pizza, 557 8th Ave, New York, NY 10018, United States",
+                "lat": 40.7546935,
+                "lng": -73.9918631
+              },
+              {
+                "address": "2 Bros. Pizza & Carmen's Kitchen, 45 W 46th St, New York, NY 10036, United States",
+                "lat": 40.7568805,
+                "lng": -73.9807404
+              }
+            ],
+            "rating": null,
+            "gallery": [],
+            "lat": 40.744349,
+            "lng": -73.991973
           },
-          "unset": []
-        },
-        {
-          "id": "1788901656901",
-          "set": {
-            "lat": 40.716059,
-            "lng": -73.9980944
-          },
-          "unset": []
-        },
-        {
-          "id": "1788901824295",
-          "set": {
-            "lat": 40.7271325,
-            "lng": -73.9841985
-          },
-          "unset": []
-        },
-        {
-          "id": "1788902028258",
-          "set": {
-            "lat": 40.7158652,
-            "lng": -73.9928915
-          },
-          "unset": []
-        },
-        {
-          "id": "1788903102586",
-          "set": {
-            "lat": 40.7979529,
-            "lng": -73.9604626
-          },
-          "unset": []
-        },
-        {
-          "id": "1788903524804",
-          "set": {
-            "lat": 40.7213721,
-            "lng": -74.0161097
-          },
-          "unset": []
+          "unset": [],
+          "full": {
+            "id": "1788898664930",
+            "name": "2 Bros Pizza",
+            "category": "dining",
+            "day": "",
+            "address": "2 Bros. Pizza, 755 6th Ave, New York, NY 10010, United States",
+            "desc": "The Price Reality\nFounded in 2007, 2 Bros pioneered the modern New York dollar slice. However, extreme city inflation finally broke the historic streak; you will now pay exactly $1.50 for a plain cheese slice.\n\nThe St. Marks Original\nWhile outposts now exist across the city, the authentic epicenter of the empire is the original, notoriously cramped storefront at 32 St. Marks Place in the East Village.\n\nThe Volume Metric\nDo not expect artisanal pacing. This is a high-volume calorie factory churning out hundreds of pies an hour, guaranteeing your slice is pulled blistering hot directly from the oven.\n\nThe Fold Necessity\nThe slices are massive, wide, and structurally floppy from the sheer weight of the molten cheese. You absolutely must execute the classic \"New York Fold\" straight down the center to eat it while standing.\n\nThe Condiment Ritual\nHead directly to the battered metal shakers on the side counter. Liberally dust the greasy cheese with generic garlic powder, oregano, and dried red pepper flakes before stepping outside.\n\nThe Sidewalk Dining\nThere is essentially zero indoor seating. You will eat your slice while standing on the chaotic pavement, balancing a flimsy white paper plate over a municipal trash can.\n\nThe Cash Prerequisite\nThe line moves with aggressive, ruthless efficiency. The absolute fastest way to navigate the queue is to have exact crumpled cash ready in your hand before you ever reach the register.\n\nThe Late-Night Gridlock\nAvoid the 2:00 AM weekend rush. The St. Marks location transforms into a completely unmanageable, shoulder-to-shoulder bottleneck of NYU students and bar-hoppers desperate for cheap calories.\n\nThe Window Action\nTo photograph the sheer speed of the kitchen, do not stand inside the claustrophobic shop. Shoot from the sidewalk through the open front window using a fast shutter speed to freeze the rapid-fire slicing.\n\nThe Tompkins Square Pivot\nOnce you secure your paper plate, use this as your gateway deeper into the East Village. Walk exactly two blocks east down St. Marks Place to eat your pizza on a bench inside historic Tompkins Square Park.\n\nThe Subway Approach\nTransit is completely straightforward. Take the 6 train to the Astor Place station or the R and W trains to 8th Street–NYU. Emerge from the underground and walk three minutes east to hit the original storefront.",
+            "summary": "2 Bros Pizza is a NYC favorite known for budget-friendly New York-style slices, quick service, and its famous $1 pizza legacy.",
+            "image": "images/101.jpg",
+            "cost": 1,
+            "packageId": null,
+            "website": "https://www.2brospizza.com/",
+            "locations": [
+              {
+                "address": "2 Bros Pizza, 32 St Marks Pl, New York, NY 10003, United States",
+                "lat": 40.7287607,
+                "lng": -73.9883895
+              },
+              {
+                "address": "2 Bros Pizza, 542 9th Ave, New York, NY 10018, United States",
+                "lat": 40.7569564,
+                "lng": -73.9934438
+              },
+              {
+                "address": "2 Bros Pizza, 557 8th Ave, New York, NY 10018, United States",
+                "lat": 40.7546935,
+                "lng": -73.9918631
+              },
+              {
+                "address": "2 Bros. Pizza & Carmen's Kitchen, 45 W 46th St, New York, NY 10036, United States",
+                "lat": 40.7568805,
+                "lng": -73.9807404
+              }
+            ],
+            "rating": null,
+            "gallery": [],
+            "lat": 40.744349,
+            "lng": -73.991973
+          }
         },
         {
           "id": "1788980763947",
           "set": {
+            "locations": [
+              {
+                "address": "Jacob's Pickles, Moynihan Train Hall, 350 W 33rd St, New York, NY 10001, United States",
+                "lat": 40.7517384,
+                "lng": -73.995919
+              },
+              {
+                "address": "Jacob’s Pickles, 55 Water St, Brooklyn, NY 11201, United States",
+                "lat": 40.7026168,
+                "lng": -73.9894421
+              }
+            ],
+            "gallery": []
+          },
+          "unset": [],
+          "full": {
+            "id": "1788980763947",
+            "name": "Jacob's Pickles",
+            "category": "dining",
+            "day": "",
+            "address": "Jacob's Pickles, 680 Columbus Ave, New York, NY 10025, United States",
+            "desc": "The Exact Coordinates\nDo not look for a tiny southern shack. This massive, perpetually packed comfort food hall commands a heavy footprint at 509 Amsterdam Avenue on the Upper West Side, right between 84th and 85th Streets.\n\nThe Biscuit Architecture\nThe sandwiches are structural marvels. They feature massive, heavy fried chicken breasts stacked precariously inside massive, crumbly buttermilk biscuits, completely defying structural integrity.\n\nThe Portion Reality\nThe scale of the food is absurd. This is a catastrophic environment for a structured hypertrophy diet; a single fried chicken and gravy biscuit will instantly obliterate a strict daily macronutrient target.\n\nThe Shared Plate Strategy\nDo not attempt a solo entree. A single order is easily enough food to completely stall two adults. Split a biscuit sandwich and a pickle flight with Beatrix, or you will be physically unable to walk the rest of your itinerary.\n\nThe Pickle Flight\nYou must order the namesake. Request the sampler flight to experience four distinct brine profiles, ranging from crisp, traditional dill to aggressively spicy, thick-cut sour cucumbers.\n\nThe Mason Jar Aesthetic\nThe restaurant completely leans into the rustic theme. Every cocktail, draft beer, and side dish is served in heavy, thick-glass mason jars, significantly increasing the weight of the trays moving through the room.\n\nThe Infused Vodkas\nLook at the walls behind the bar. They are lined with massive glass vats of house-infused vodkas, violently colored by the raw jalapeños, beets, and citrus actively fermenting inside them.\n\nThe Noise Level\nDo not plan a quiet, intimate conversation. The soaring ceilings, exposed brick walls, and heavy crowds create a deafening, echoing acoustic environment during peak dining hours.\n\nThe Brunch Gridlock\nAvoid Saturday and Sunday mornings at all costs. The sidewalk out front transforms into a completely chaotic, unnavigable mob of locals waiting over two hours for a table.\n\nThe Bar Seating\nIf you are a party of two, bypass the massive host stand queue entirely. Push your way directly to the bar; it is first-come, first-served, and the absolute fastest way to secure a full meal without a reservation.\n\nThe Lighting Challenge\nThe interior is aggressively dim, lit almost entirely by warm, low-wattage tungsten bulbs. To photograph the towering sandwiches without blur, you must open your lens aperture completely or rely heavily on window light near the entrance.\n\nThe Sticky Table Hazard\nBecause the menu relies heavily on dripping hot honey, heavy gravies, and thick sauces, the rustic wooden tables are perpetually sticky. Keep your camera gear safely secured in a bag, never resting directly on the wood.\n\nThe Takeaway Burden\nYou will inevitably have leftovers. Be prepared to carry a bulky, grease-stained cardboard box around the city for the rest of the day, as the dense food holds immense physical weight.\n\nThe Museum Pivot\nOnce you finish the heavy meal, you will need to walk it off. Walk exactly four blocks straight east to hit the sprawling, multi-block footprint of the American Museum of Natural History.\n\nThe Subway Approach\nTransit is completely effortless. Take the 1 train directly to the 86th Street station. Emerge from the underground and walk one block east to Amsterdam Avenue, then one block south.",
+            "summary": "Jacob’s Pickles is a lively Upper West Side restaurant known for Southern comfort food, generous portions, house pickles, and a bustling atmosphere.",
+            "image": "images/108.jpg",
+            "cost": null,
+            "packageId": null,
+            "website": "https://www.jacobspickles.com",
             "lat": 40.7865961,
-            "lng": -73.9754304
-          },
-          "unset": []
-        },
-        {
-          "id": "1788981405898",
-          "set": {
-            "lat": 40.6959798,
-            "lng": -73.9972345
-          },
-          "unset": []
-        },
-        {
-          "id": "1788983946017",
-          "set": {
-            "lat": 40.7071407,
-            "lng": -74.010865
-          },
-          "unset": []
-        },
-        {
-          "id": "1788984427219",
-          "set": {
-            "lat": 40.7519148,
-            "lng": -73.97553
-          },
-          "unset": []
-        },
-        {
-          "id": "1788984571616",
-          "set": {
-            "lat": 40.7473351,
-            "lng": -73.9771952
-          },
-          "unset": []
+            "lng": -73.9754304,
+            "rating": null,
+            "locations": [
+              {
+                "address": "Jacob's Pickles, Moynihan Train Hall, 350 W 33rd St, New York, NY 10001, United States",
+                "lat": 40.7517384,
+                "lng": -73.995919
+              },
+              {
+                "address": "Jacob’s Pickles, 55 Water St, Brooklyn, NY 11201, United States",
+                "lat": 40.7026168,
+                "lng": -73.9894421
+              }
+            ],
+            "gallery": []
+          }
         },
         {
           "id": "1788984845098",
           "set": {
-            "lat": 42.6582658,
-            "lng": -73.7694805
+            "gallery": []
           },
-          "unset": []
-        },
-        {
-          "id": "1788985102194",
-          "set": {
-            "lat": 40.762322,
-            "lng": -73.97415
-          },
-          "unset": []
-        },
-        {
-          "id": "1788985397281",
-          "set": {
-            "lat": 40.7279642,
-            "lng": -74.0024583
-          },
-          "unset": []
+          "unset": [],
+          "full": {
+            "id": "1788984845098",
+            "name": "Burlington",
+            "category": "sightseeing",
+            "day": "",
+            "address": "620 6th Ave, New York, NY 10011",
+            "desc": "The Exact Coordinates\nDo not look for a small, historic storefront. Located exactly at 4 Union Square East, this address anchors the massive, block-long Zeckendorf Towers complex on the southeast corner of Union Square Park.\n\nThe S. Klein Foundation\nBefore this massive brick monolith was constructed in 1988, the entire block was occupied by S. Klein \"On the Square,\" a legendary, aggressively chaotic discount department store that dominated the neighborhood for half a century.\n\nThe Four Pyramids\nStep back into the park and look straight up. The complex is completely defined by its four distinct, massive residential towers, each crowned with a striking, stepped pyramid structure that permanently altered the downtown skyline.\n\nThe Developer's Mark\nWhile the retail base uses the Union Square address, the residential skyscraper sitting directly above it is officially 1 Irving Place, named after William Zeckendorf, the aggressive real estate developer who heavily reshaped mid-century New York.\n\nThe Retail Monolith\nThe ground floors do not hide quiet history. They operate as a high-volume, multi-level retail engine housing a massive Whole Foods Market and a Burlington, churning thousands of aggressive shoppers through its doors hourly.\n\nThe Hidden Rooftop Park\nCompletely invisible from the street, the building features a sprawling, private 14,000-square-foot landscaped roof garden hovering seven stories above the pavement. It is strictly locked down and accessible only to residents.\n\nThe Café Vantage Point\nYou do not need a drone to photograph the park. Head inside the Whole Foods and ride the escalator up to the second-floor café seating area for a completely unobstructed, elevated view directly over the Union Square canopy.\n\nThe Commuter Gridlock\nAvoid the immediate sidewalk at 5:30 PM on a weekday. It transforms into a brutal, completely unnavigable chokepoint of fast-moving office commuters aggressively colliding with shoppers dragging heavy grocery bags.\n\nThe Subterranean Rumble\nThe building was engineered to sit directly on top of the sprawling 14th Street–Union Square subway complex. Stand still on the pavement near the entrance and you will feel the physical vibration of the heavy trains moving directly beneath your feet.\n\nThe Contextual Brick\nDespite being a massive 1980s mega-project, the architects intentionally clad the exterior in millions of traditional red bricks rather than modern glass, attempting to blend the monolith into the historic 19th-century architecture of Gramercy Park.\n\nThe Nighttime Illumination\nReturn after dark. The four stepped pyramids on the roof are brilliantly floodlit at night, serving as glowing, architectural compass points that are instantly recognizable from almost anywhere in Lower Manhattan.\n\nThe Wide-Angle Necessity\nYou cannot capture the towers from the immediate sidewalk. Walk diagonally across Union Square Park to the northwest corner and equip an ultra-wide 14mm lens to frame all four pyramids against the sky simultaneously.\n\nThe Greenmarket Chaos\nStep right off the curb. Four days a week (Monday, Wednesday, Friday, Saturday), the pavement immediately in front of this building is completely overrun by the Union Square Greenmarket, the largest and most chaotic farmers' market in the city.\n\nThe Tammany Hall Pivot\nLook directly across the square to the northeast corner. The massive, domed building at 44 Union Square East is the former headquarters of Tammany Hall, the infamous, ruthlessly corrupt political machine that ran New York for decades.\n\nThe Subway Approach\nTransit is completely effortless. Take the 4, 5, 6, L, N, Q, R, or W train directly to the 14th Street–Union Square station. Emerge from the southeast stairs and you are literally standing directly under the building's retail awning.",
+            "summary": "Burlington is a popular NYC discount retailer offering affordable clothing, accessories, home goods, and designer-brand finds at reduced prices.",
+            "image": "images/114.jpg",
+            "cost": null,
+            "packageId": null,
+            "lat": 40.7401063,
+            "lng": -73.994625,
+            "website": "https://www.burlington.com",
+            "rating": null,
+            "locations": [
+              {
+                "label": "New York",
+                "address": "4 Union Sq E, New York, NY 10003",
+                "lat": 40.7354443,
+                "lng": -73.9897239
+              },
+              {
+                "label": "New York",
+                "address": "808 Columbus Ave, New York, NY 10025",
+                "lat": 40.7946572,
+                "lng": -73.9666786
+              },
+              {
+                "label": "New York",
+                "address": "100-198 Dr Martin Luther King Jr Blvd, New York, NY 10027",
+                "lat": 40.8077792,
+                "lng": -73.9462736
+              },
+              {
+                "label": "New York",
+                "address": "517 E 117th St, New York, NY 10035",
+                "lat": 40.7956361,
+                "lng": -73.9308816
+              },
+              {
+                "label": "Brooklyn",
+                "address": "490 Fulton St, Brooklyn, NY 11201",
+                "lat": 40.6896547,
+                "lng": -73.9831908
+              },
+              {
+                "label": "Brooklyn",
+                "address": "625 Atlantic Ave, Brooklyn, NY 11217",
+                "lat": 40.6838452,
+                "lng": -73.9754366
+              },
+              {
+                "label": "Brooklyn",
+                "address": "4 Graham Ave, Brooklyn, NY 11206",
+                "lat": 40.7009809,
+                "lng": -73.9419914
+              },
+              {
+                "label": "Brooklyn",
+                "address": "2163 Tilden Ave, Brooklyn, NY 11226",
+                "lat": 40.6466387,
+                "lng": -73.9572844
+              },
+              {
+                "label": "Brooklyn",
+                "address": "918 Pennsylvania Ave, Brooklyn, NY 11207",
+                "lat": 40.655348,
+                "lng": -73.888331
+              },
+              {
+                "label": "Bronx",
+                "address": "2952 3rd Ave, Bronx, NY 10455",
+                "lat": 40.817901,
+                "lng": -73.9150211
+              },
+              {
+                "label": "Bronx",
+                "address": "700 Exterior St Ste 302A, Bronx, NY 10451",
+                "lat": 40.8235013,
+                "lng": -73.930462
+              },
+              {
+                "label": "Bronx",
+                "address": "2503 Grand Concourse, Bronx, NY 10468",
+                "lat": 40.8626023,
+                "lng": -73.8975492
+              },
+              {
+                "label": "Bronx",
+                "address": "1925 Turnbull Ave, Bronx, NY 10473",
+                "lat": 40.8233543,
+                "lng": -73.8580954
+              },
+              {
+                "label": "Bronx",
+                "address": "350 Baychester Ave, Bronx, NY 10475",
+                "lat": 40.8684153,
+                "lng": -73.8299525
+              },
+              {
+                "label": "Long Island City",
+                "address": "34-54 48th St, Long Island City, NY 11101",
+                "lat": 40.7527471,
+                "lng": -73.9146913
+              },
+              {
+                "label": "Astoria",
+                "address": "22-13 31st St, Astoria, NY 11105",
+                "lat": 40.7751417,
+                "lng": -73.9114449
+              },
+              {
+                "label": "Elmhurst",
+                "address": "92-59 59th Ave 1st Floor, Elmhurst, NY 11373",
+                "lat": 40.7349514,
+                "lng": -73.8677835
+              },
+              {
+                "label": "Rego Park",
+                "address": "61-35 Junction Blvd Suite A302, Rego Park, NY 11374",
+                "lat": 40.7329023,
+                "lng": -73.863417
+              },
+              {
+                "label": "Jamaica",
+                "address": "160-12 Jamaica Ave, Jamaica, NY 11432",
+                "lat": 40.7038436,
+                "lng": -73.7985049
+              },
+              {
+                "label": "Staten Island",
+                "address": "2795 Richmond Ave Ste B-12, Staten Island, NY 10314",
+                "lat": 40.5772201,
+                "lng": -74.1678611
+              },
+              {
+                "label": "Staten Island",
+                "address": "1801 South Ave, Staten Island, NY 10314",
+                "lat": 40.6013297,
+                "lng": -74.1917305
+              },
+              {
+                "label": "Staten Island",
+                "address": "2636 Hylan Blvd Ste 220, Staten Island, NY 10306",
+                "lat": 40.5664441,
+                "lng": -74.1099814
+              }
+            ],
+            "gallery": []
+          }
         },
         {
           "id": "1788985608948",
           "set": {
-            "lat": 40.7116097,
-            "lng": -73.9578261
+            "locations": [
+              {
+                "address": "L’industrie Pizzeria - West Village, 104 Christopher St, New York, NY 10014, United States",
+                "lat": 40.7332102,
+                "lng": -74.004952
+              },
+              {
+                "address": "L’industrie Pizzeria - Little Italy, 197 Grand St, New York, NY 10013, United States",
+                "lat": 40.7191522,
+                "lng": -73.9972169
+              }
+            ],
+            "gallery": []
           },
-          "unset": []
+          "unset": [],
+          "full": {
+            "id": "1788985608948",
+            "name": "L’Industrie Pizzeria",
+            "category": "dining",
+            "day": "",
+            "address": "L'industrie Pizzeria, 254 S 2nd St, Brooklyn, NY 11211, United States",
+            "desc": "The Exact Coordinates\nDo not wander aimlessly through Williamsburg. This absolute mecca of the modern New York slice is located at 254 South 2nd Street, sitting on a quiet, tree-lined block in Brooklyn.\n\nThe Florentine Fusion\nThe visionary owner, Massimo Laveglia, hails directly from Florence, Italy. He has brilliantly merged the classic, foldable architecture of a New York street slice with the premium, imported ingredients of traditional Italian fine dining.\n\nThe Dough Architecture\nThis is not standard, fast-rise pizza dough. It undergoes a meticulous, multi-day cold fermentation process, resulting in a beautifully airy, highly digestible crust with a perfect, crackling crunch that perfectly holds the weight of the toppings.\n\nThe Burrata Crown\nYou absolutely must order the signature Burrata slice. Fresh, creamy, temperature-cool burrata cheese is beautifully piped directly onto the hot slice immediately after it leaves the oven, creating a flawless, luxurious textural contrast.\n\nThe Basil Finish\nNotice the vibrant green basil garnishing the pies. It is never baked in the heavy heat of the oven to wilt; it is applied completely fresh at the exact moment of serving to preserve its bright, aromatic essential oils.\n\nThe Macro Investment\nWhile a heavy slice of rich burrata and olive oil requires a strategic macro calculation for your hypertrophy goals, the incredibly high-quality, artisanal ingredients make it an absolutely worthy, delicious addition to your daily intake.\n\nThe Shared Tasting\nTo experience the full spectrum of their culinary mastery, split a classic Margherita and a complex Fig and Bacon slice with Beatrix. This allows you to beautifully sample multiple flavor profiles without feeling overly weighed down.\n\nThe Soft Serve Elevation\nDo not skip the dessert window. They serve a masterclass in Italian soft serve gelato, brilliantly finished with a generous drizzle of high-grade extra virgin olive oil and thick, crunchy flakes of sea salt.\n\nThe Golden Hour Glow\nGrab a table in their beautiful, expanded outdoor seating pavilion. Visit exactly at golden hour to let the warm, natural afternoon light beautifully illuminate the vibrant red tomatoes and bright white cheese for flawless food photography.\n\nThe Close-Up Detail\nEquip your smartphone’s macro mode before taking your first bite. Get incredibly close to the edge of the crust to capture the beautiful, airy, honeycomb-like air pockets formed by the masterful dough fermentation.\n\nThe Action Shot\nStep inside and photograph the bustling, high-energy open kitchen. The beautifully choreographed, masterful stretching, tossing, and topping of the dough by the pizzaiolos is a brilliant display of culinary theater.\n\nThe Olive Oil Drizzle\nLook for the large, beautiful copper cruets sitting proudly on the counter. A quick drizzle of their premium, house-infused chili oil beautifully elevates the flavor profile of any classic slice with a warm, rich heat.\n\nThe West Village Sibling\nIf your itinerary keeps you strictly in Manhattan, do not worry. They operate a stunning, highly acclaimed second location at 104 Christopher Street in the West Village, offering the exact same flawless quality and energy.\n\nThe Domino Park Pivot\nOnce you finish your meal, walk straight west towards the East River. You will seamlessly transition onto the beautifully landscaped, elevated industrial walkways of Domino Park for an incredible, unobstructed view of the Manhattan skyline.\n\nThe Subway Approach\nTransit is a beautiful, easy ride over the river. Take the J, M, or Z train directly to the Marcy Avenue station in Brooklyn. Emerge from the elevated tracks and walk just three quick blocks to hit the legendary awning.",
+            "summary": "L’Industrie Pizzeria is known for thin, naturally leavened slices, Italian ingredients, and popular specialties like its burrata slice.",
+            "image": "images/117.jpg",
+            "cost": null,
+            "packageId": null,
+            "website": "http://www.lindustriebk.com",
+            "lat": 40.7116097,
+            "lng": -73.9578261,
+            "rating": null,
+            "locations": [
+              {
+                "address": "L’industrie Pizzeria - West Village, 104 Christopher St, New York, NY 10014, United States",
+                "lat": 40.7332102,
+                "lng": -74.004952
+              },
+              {
+                "address": "L’industrie Pizzeria - Little Italy, 197 Grand St, New York, NY 10013, United States",
+                "lat": 40.7191522,
+                "lng": -73.9972169
+              }
+            ],
+            "gallery": []
+          }
         },
         {
           "id": "1788986171848",
           "set": {
+            "locations": [
+              {
+                "address": "Ace's Pizza Bushwick, 423 Troutman St, Brooklyn, NY 11237, United States",
+                "lat": 40.7073745,
+                "lng": -73.9224991
+              },
+              {
+                "address": "Ace's Pizza Rock Center, 30 Rockefeller Center, New York, NY 10112, United States",
+                "lat": 40.7593578,
+                "lng": -73.9804732
+              }
+            ],
+            "gallery": []
+          },
+          "unset": [],
+          "full": {
+            "id": "1788986171848",
+            "name": "Ace’s Pizza",
+            "category": "dining",
+            "day": "",
+            "address": "Ace's Pizza, 637 Driggs Ave, Brooklyn, NY 11211, United States",
+            "desc": "The Exact Coordinates\nDo not wander aimlessly. This pizzeria is at 637 Driggs Avenue in Williamsburg, Brooklyn, on the block between Metropolitan Avenue and North 4th Street.\n\nThe Detroit Architecture\nDo not expect a classic, foldable New York triangle. This is an absolute masterclass in authentic Detroit-style pizza, baked in deep, heavy steel pans to create a towering, rectangular masterpiece.\n\nThe Frico Edge\nThe absolute best part of the pizza is the perimeter. The chefs push the cheese completely to the edges of the pan, creating a deeply caramelized, beautifully blackened, crispy cheese crown known as the frico.\n\nThe Personal Pan Strategy\nIf you want to sample multiple flavor profiles, take advantage of their sizing. They offer a brilliant 5x8 \"personal\" size cut into two massive squares, allowing you to try several styles without ordering full trays.\n\nThe Hot Burrata Pie\nYou absolutely must order their signature creation. It brilliantly combines a hot, classic cheese base topped with temperature-cool, luxurious burrata, fresh basil, and a vibrant, house-made Calabrian chili pesto.\n\nThe Pepperoni Chalices\nLook closely at the meat. They use highly specific, natural-casing pepperoni that reacts to the intense oven heat by aggressively curling up into crispy, brilliant little cups that hold the savory rendered fat.\n\nThe Macro Reality\nThis is a gloriously rich meal. The thick, focaccia-like dough and heavy application of edge-to-edge cheese carry a massive caloric payload, so factor this dense, delicious feast heavily into your daily hypertrophy targets.\n\nThe Shared Tasting\nBecause the deep-dish structure is so physically filling, order a medium 8x10 pie and split it with Beatrix. It provides exactly six heavy, satisfying slices, leaving you both with plenty of energy to explore Williamsburg.\n\nThe Lingering Room\nThis is not a grab-and-go slice counter. It has indoor and outdoor seating and a full bar, so settle in for a pie and a drink.\n\nThe Takeaway Box\nThis specific location is brilliantly optimized for takeout. The heavy-duty, custom-fit cardboard boxes are engineered specifically to protect the towering height of the pizza, ensuring the delicate toppings never crush against the lid.\n\nThe Waterfront Picnic\nIf you take a box to go, carry it toward the East River for skyline views. East River State Park and Domino Park are both roughly a 15 to 20 minute walk away.\n\nThe Streetscape Backdrop\nUse the neighborhood to your advantage. Frame the pizza box against the brick and low-rise storefronts along Driggs Avenue for an unmistakably Brooklyn shot.\n\nThe Smartphone Macro\nBefore taking a bite, pull out your Samsung Galaxy S25 Plus. Activate the dedicated macro mode and get incredibly close to capture the beautiful, honeycomb-like air pockets in the dough and the glistening edges of the caramelized cheese.\n\nThe Bedford Avenue Pivot\nOnce you finish the meal, head west to Bedford Avenue, Williamsburg's main strip of shops, cafes and bars.\n\nThe Subway Approach\nTake the L train to Bedford Avenue, or the L or G to Lorimer Street-Metropolitan Avenue. Either is about a 10-minute walk.",
+            "summary": "Ace's Pizza on Driggs Avenue in Williamsburg serves Detroit-style and Sicilian pizza, plus wings and salads, with a full bar and indoor and outdoor se",
+            "image": "images/118.jpg",
+            "cost": null,
+            "packageId": null,
+            "website": "https://www.acespizzaspot.com",
             "lat": 40.7149458,
-            "lng": -73.9585415
-          },
-          "unset": []
-        },
-        {
-          "id": "1788986492671",
-          "set": {
-            "lat": 40.7315318,
-            "lng": -74.0038772
-          },
-          "unset": []
+            "lng": -73.9585415,
+            "rating": null,
+            "locations": [
+              {
+                "address": "Ace's Pizza Bushwick, 423 Troutman St, Brooklyn, NY 11237, United States",
+                "lat": 40.7073745,
+                "lng": -73.9224991
+              },
+              {
+                "address": "Ace's Pizza Rock Center, 30 Rockefeller Center, New York, NY 10112, United States",
+                "lat": 40.7593578,
+                "lng": -73.9804732
+              }
+            ],
+            "gallery": []
+          }
         },
         {
           "id": "1788986701286",
           "set": {
-            "lat": 40.800798,
-            "lng": -73.967649
+            "locations": [
+              {
+                "address": "Mama's TOO! Pizzeria West Village, 325 Bleecker St, New York, NY 10014, United States",
+                "lat": 40.733217,
+                "lng": -74.0040346
+              }
+            ],
+            "gallery": []
           },
-          "unset": []
-        },
-        {
-          "id": "1788986852359",
-          "set": {
-            "lat": 40.7600186,
-            "lng": -73.9809335
-          },
-          "unset": []
-        },
-        {
-          "id": "1788987000946",
-          "set": {
-            "lat": 40.7420513,
-            "lng": -74.0048973
-          },
-          "unset": []
+          "unset": [],
+          "full": {
+            "id": "1788986701286",
+            "name": "Mama’s TOO!",
+            "category": "dining",
+            "day": "",
+            "address": "Mama's TOO! Upper West Side, 2750 Broadway, New York, NY 10025, United States",
+            "desc": "The Exact Coordinates\nDo not wander aimlessly around the Upper West Side. This absolute masterpiece of modern pizza engineering is located at 2750 Broadway, sitting perfectly between 105th and 106th Streets.\n\nThe Focaccia Architecture\nDo not expect a standard, foldable New York triangle. Their signature square slices are built on a highly hydrated, cold-fermented dough that bakes into a towering, incredibly airy focaccia with a brilliant, structured crunch.\n\nThe Caramelized Crown\nThe absolute best part of the square slice is the perimeter. The chefs push the premium cheese completely to the edges of the heavy steel pans, creating a deeply caramelized, beautifully crispy cheese halo known as a frico.\n\nThe Angry Nonna\nYou absolutely must order their legendary Angry Nonna slice. It is a flawless, vibrant combination of fresh house-made mozzarella, aged provolone, hot soppressata, and Calabrian chili paste, brilliantly finished with a generous drizzle of hot honey.\n\nThe Cupping Pepperoni\nLook closely at the meat on their classic square. They use highly specific, natural-casing pepperoni that reacts to the intense deck oven heat by aggressively curling up into crispy, brilliant little chalices that perfectly hold the savory rendered fat.\n\nThe Culinary Weight\nThis is a gloriously rich, olive-oil-infused culinary milestone. The towering dough and heavy application of premium cheese carry a dense, deeply satisfying weight that will easily fuel a massive day of walking the city.\n\nThe Shared Tasting\nBecause the square slices are so structurally dense and physically filling, split one square and one of their masterful thin-crust round slices with a travel companion. This allows you to beautifully sample two completely distinct dough styles in one visit.\n\nThe House-Made Mozzarella\nNotice the luxurious, milky texture of the cheese. They do not rely on standard commercial blocks; the kitchen meticulously stretches and pulls their own fresh mozzarella daily to ensure an absolutely flawless melt.\n\nThe Reheat Mastery\nWatch the counter staff carefully. Every slice is brilliantly rejuvenated in the roaring hot deck ovens right before serving, ensuring that the bottom crust regains an absolutely flawless, crackling crunch on every single bite.\n\nThe Bleecker Street Expansion\nIf your itinerary keeps you strictly in the West Village, do not worry. They recently opened a stunning, highly acclaimed second location at 320 Bleecker Street, offering the exact same flawless quality in a beautiful downtown setting.\n\nThe Macro Detail\nBefore taking a bite, activate your camera's dedicated macro mode. Get incredibly close to capture the beautiful, honeycomb-like air pockets in the dough and the glistening pools of hot honey.\n\nThe Golden Hour Glow\nTake your beautiful slices to the outdoor seating area. Visit exactly at golden hour to let the warm, natural afternoon light bounce off the Broadway architecture and flawlessly illuminate the vibrant red tomatoes and shining pepperoni.\n\nThe Street Backdrop\nDo not just photograph the slice looking straight down. Hold the pizza up and use a wide aperture to brilliantly frame the towering, colorful slice against the classic, bustling pre-war architecture of the Upper West Side.\n\nThe Riverside Park Pivot\nOnce you finish your incredibly satisfying meal, take a beautiful, scenic walk to burn off the heavy carbohydrates. Head exactly three blocks west to seamlessly enter the beautifully landscaped, sweeping, tree-lined paths of Riverside Park.\n\nThe Subway Approach\nTransit is incredibly effortless. Take the 1 train directly to the 103rd Street station. Emerge from the underground and enjoy a beautiful, incredibly scenic three-block walk north along the vibrant Broadway corridor to hit the storefront.",
+            "summary": "Mama’s TOO! is known for bold, creative pizza with crispy square slices, rich toppings, and specialties like Angry Nonna and Cacio e Pepe.",
+            "image": "images/120.jpg",
+            "cost": null,
+            "packageId": null,
+            "website": "https://www.mamastoo.com",
+            "lat": 40.8008119,
+            "lng": -73.9676495,
+            "rating": null,
+            "locations": [
+              {
+                "address": "Mama's TOO! Pizzeria West Village, 325 Bleecker St, New York, NY 10014, United States",
+                "lat": 40.733217,
+                "lng": -74.0040346
+              }
+            ],
+            "gallery": []
+          }
         },
         {
           "id": "1788987229154",
           "set": {
-            "lat": 40.7561558,
-            "lng": -73.9701715
+            "gallery": []
           },
-          "unset": []
+          "unset": [],
+          "full": {
+            "id": "1788987229154",
+            "name": "Ess-a-Bagel",
+            "category": "dining",
+            "day": "",
+            "address": "115 Broadway, New York, NY 10006",
+            "desc": "The Exact Coordinates\nDo not wander aimlessly. This legendary, bustling beacon of New York baking history is anchored proudly at 831 3rd Avenue, sitting perfectly between 50th and 51st Streets in the heart of Midtown East.\n\nThe Austrian Origins\nFounded in 1976 by an Austrian baking family, this storefront quickly became an absolute culinary institution that helped permanently define the massive, doughy aesthetic of the modern New York bagel.\n\nThe Dough Architecture\nThese are absolute giants of the bagel world. They are meticulously hand-rolled to be incredibly thick, dense, and towering, featuring a brilliant, crackling crust wrapped beautifully around a flawlessly chewy interior.\n\nThe Kettle Boil\nThe secret to the texture is uncompromising tradition. The dough is submerged in a roaring kettle of boiling water before hitting the heat, which is the absolute key to achieving that beautiful, shiny, blistered exterior crust.\n\nThe Burlap Bake\nThe bagels are initially baked upside down on traditional wooden boards wrapped in wet burlap, a masterful, old-school New York technique that perfectly steams the dough for a flawless, airy rise.\n\nThe Schmear Display\nStep up to the glass counter and admire the sheer scale of the operation. Massive, towering mounds of vibrantly colored, house-whipped cream cheeses range perfectly from rich, savory scallion to brilliant, sweet blueberry.\n\nThe Nova Masterpiece\nYou absolutely must order a classic Nova lox sandwich. The counter staff performs a beautiful, lightning-fast culinary theater, layering massive, delicate sheets of premium, brilliantly pink smoked salmon directly onto the hot dough.\n\nThe Toaster Protocol\nEmbrace the absolute freshness of the baking schedule. If the bagels are still warm from the heavy deck ovens, skip the toaster entirely to beautifully experience the flawless, pillowy texture exactly as the master bakers intended.\n\nThe Culinary Weight\nA fully loaded sandwich from this counter is a glorious, structurally dense meal. It carries a heavy, deeply satisfying payload engineered perfectly to effortlessly fuel a massive day of exploring the soaring Midtown canyons.\n\nThe Morning Theater\nVisit during the peak 8:30 AM weekday rush to witness a masterclass in urban efficiency. The incredibly fast, beautifully choreographed speed of the staff handling massive lines of office workers is a brilliant display of city energy.\n\nThe Cross-Section Detail\nBefore taking your first bite, activate your camera's dedicated macro mode. Get incredibly close to the halved sandwich to beautifully capture the contrasting layers of the crisp crust, the aerated dough, and the thick, creamy schmear.\n\nThe Storefront Backdrop\nDo not just photograph the food looking down. Step outside and use the classic, brightly lit red-and-yellow awning as a beautiful, iconic, and deeply nostalgic backdrop to frame your freshly wrapped sandwich against the bustling avenue.\n\nThe Sweet Contrast\nIf you prefer a sweeter flavor profile, their pumpernickel raisin is an absolute masterpiece, offering a deeply aromatic, rich, and complex color that pairs beautifully with a simple spread of high-grade, sweet butter.\n\nThe Greenacre Park Pivot\nOnce you secure your hot bagels, walk exactly one block east on 51st Street. You will seamlessly transition into Greenacre Park, a stunning, beautifully landscaped hidden pocket park featuring a massive, roaring 25-foot waterfall for a perfectly peaceful urban picnic.\n\nThe Subway Approach\nTransit is incredibly effortless. Take the 6 train directly to the 51st Street station, or the E and M trains to Lexington Avenue-53rd Street. Emerge from the underground and enjoy a beautiful, incredibly short walk south to hit the bustling storefront.",
+            "summary": "Ess-a-Bagel is a NYC institution, known for fresh kettle-boiled bagels, generous cream cheese spreads, lox, and classic deli sandwiches.",
+            "image": "images/123.jpg",
+            "cost": null,
+            "packageId": null,
+            "website": "https://www.ess-a-bagel.com",
+            "lat": 40.7089388,
+            "lng": -74.0114723,
+            "rating": null,
+            "locations": [
+              {
+                "label": "New York",
+                "address": "108 W 32nd St, New York, NY 10001",
+                "lat": 40.7486317,
+                "lng": -73.9893492
+              },
+              {
+                "label": "New York",
+                "address": "324 1st Ave, New York, NY 10009",
+                "lat": 40.7341032,
+                "lng": -73.9803752
+              },
+              {
+                "label": "New York",
+                "address": "770 3rd Ave, New York, NY 10017",
+                "lat": 40.7543029,
+                "lng": -73.9720967
+              },
+              {
+                "label": "Brooklyn",
+                "address": "55 Water St, Brooklyn, NY 11201",
+                "lat": 40.7035408,
+                "lng": -73.9919894
+              }
+            ],
+            "gallery": []
+          }
         },
         {
           "id": "1788987445191",
           "set": {
+            "gallery": []
+          },
+          "unset": [],
+          "full": {
+            "id": "1788987445191",
+            "name": "Magnolia Bakery",
+            "category": "dining",
+            "day": "",
+            "address": "401 Bleecker St, New York, NY 10014",
+            "desc": "The Exact Coordinates\nThe original, legendary storefront is anchored beautifully at 401 Bleecker Street, occupying the picturesque corner of West 11th Street in the historic West Village.\n\nThe 1996 Origins\nBefore the global cupcake boom, this began as a tiny, highly authentic neighborhood bakery in 1996. It completely redefined modern baking by reintroducing classic, homestyle American desserts to the city.\n\nThe Television Phenomenon\nThe location was forever cemented in pop culture history in 2000. It became an absolute global destination after a brilliantly simple, iconic scene of characters eating buttercream cupcakes outside was featured on Sex and the City.\n\nThe Banana Pudding\nDo not limit yourself to the baked goods. You absolutely must order the signature banana pudding, a flawless, highly guarded, layered masterpiece of fresh bananas, Nilla wafers, and rich vanilla pudding folded seamlessly into fresh whipped cream.\n\nThe Signature Swirl\nWatch the bakers actively working behind the counter. They utilize a highly specific, lightning-fast flick of the wrist to create the bakery's signature, perfectly imperfect pastel buttercream swirl.\n\nThe Vintage Aesthetic\nThe interior is a beautifully preserved slice of Americana. It features incredibly warm pastel-colored walls, classic checkered floors, and glowing vintage display cases loaded with towering cakes.\n\nThe Macro Calculation\nWhile it is a sugary treat, the banana pudding is an absolute New York culinary milestone. Factor this highly worthwhile, delicious carbohydrate payload directly into your daily hypertrophy targets so you can enjoy it completely guilt-free.\n\nThe Shared Tasting\nTo experience the absolute best of both worlds, secure a classic pastel vanilla cupcake and a small cup of the banana pudding to split with Beatrix. This allows you to perfectly sample both legendary flavor profiles in one visit.\n\nThe Window Display\nBefore stepping inside, admire the masterful front windows. The staff curates absolutely brilliant, seasonally rotating displays featuring towering, meticulously decorated cakes and beautiful vintage baking hardware.\n\nThe Corner Architecture\nDo not just photograph the food. Step across the cobblestones of West 11th Street to capture the beautiful corner storefront with its iconic, glowing awnings framed beautifully against the historic West Village brick.\n\nThe Street Backdrop\nThe exact wooden park bench from the television show is long gone, but you can still photograph your colorful cupcakes brilliantly framed against the picturesque, tree-lined street just outside the door.\n\nThe Smartphone Macro\nBefore taking a bite, pull out your Samsung Galaxy S25 Plus and activate the dedicated macro mode. Get incredibly close to the frosting to capture the thick, sweeping texture of the signature buttercream swirl and the sparkling sugar crystals.\n\nThe Golden Hour Glow\nVisit exactly at golden hour. The low, warm afternoon light perfectly illuminates the quiet, leafy West Village streets, giving your pastry photos a beautiful, cinematic glow.\n\nThe Seasonal Offerings\nAlways look for the rotating menu. They brilliantly adapt their famous puddings and cupcakes with premium, seasonal ingredients, introducing flawless variations like fresh summer berries or rich autumn pumpkin.\n\nThe Subway Approach\nTransit is incredibly effortless. Take the 1 train directly to the Christopher Street–Stonewall station. Emerge from the stairs, and enjoy a beautiful, incredibly scenic four-block walk north through the historic Village.",
+            "summary": "Magnolia Bakery is famous for its classic cupcakes, cakes, and world-famous banana pudding, made with creamy vanilla pudding, bananas, and wafers.",
+            "image": "images/124.jpg",
+            "cost": null,
+            "packageId": null,
+            "website": "http://www.magnoliabakery.com",
             "lat": 40.7358879,
-            "lng": -74.005
-          },
-          "unset": []
-        },
-        {
-          "id": "1788987757140",
-          "set": {
-            "lat": 40.7870846,
-            "lng": -73.9771627
-          },
-          "unset": []
+            "lng": -74.005,
+            "rating": null,
+            "locations": [
+              {
+                "label": "New York",
+                "address": "1240 6th Ave, New York, NY 10020",
+                "lat": 40.7592602,
+                "lng": -73.9805486
+              },
+              {
+                "label": "New York",
+                "address": "200 Columbus Ave, New York, NY 10023",
+                "lat": 40.7756899,
+                "lng": -73.9803082
+              },
+              {
+                "label": "New York",
+                "address": "107 E 42nd St, New York, NY 10170",
+                "lat": 40.7516533,
+                "lng": -73.9761497
+              },
+              {
+                "label": "New York",
+                "address": "200 Hudson Yards #4, New York, NY 10001",
+                "lat": 40.7559064,
+                "lng": -74.0005322
+              },
+              {
+                "label": "New York",
+                "address": "421 8th Ave, New York, NY 10001",
+                "lat": 40.7513442,
+                "lng": -73.9962677
+              },
+              {
+                "label": "New York",
+                "address": "1000 3rd Ave, New York, NY 10022",
+                "lat": 40.7619777,
+                "lng": -73.9672689
+              }
+            ],
+            "gallery": []
+          }
         },
         {
           "id": "1788987911764",
           "set": {
-            "lat": 40.756498,
-            "lng": -73.985397
+            "locations": [
+              {
+                "address": "Tony's Di Napoli, 1081 3rd Ave, New York, NY 10065, United States",
+                "lat": 40.7643725,
+                "lng": -73.9642919
+              }
+            ],
+            "gallery": []
           },
-          "unset": []
+          "unset": [],
+          "full": {
+            "id": "1788987911764",
+            "name": "Tony’s Di Napoli",
+            "category": "dining",
+            "day": "",
+            "address": "Tony's Di Napoli, 147 W 43rd St, New York, NY 10036, United States",
+            "desc": "The Exact Coordinates\nDo not wander aimlessly. This iconic, bustling cathedral of Italian-American dining is anchored beautifully at 147 West 43rd Street, sitting perfectly in the vibrant, glowing heart of the Theater District.\n\nThe Family-Style Architecture\nDo not expect standard, individual plates. The entire menu is brilliantly engineered around massive, family-style platters designed to perfectly recreate the generous, grand scale of a traditional New York Sunday supper.\n\nThe Chicken Parmigiana\nYou absolutely must order their signature Chicken Parmigiana. The culinary team masterfully bakes a towering, crispy cutlet beneath a flawless, bubbling crown of rich mozzarella and a sweet, deeply savory marinara sauce.\n\nThe Shared Tasting\nBecause the portions are gloriously monumental, beautifully split a main course and a massive bowl of classic rigatoni alla vodka with a travel companion to seamlessly sample the absolute best of the menu in a single visit.\n\nThe Broadway Gallery\nStep inside and admire the stunning, meticulously curated interior. The walls are completely covered in hundreds of beautiful, framed caricatures and portraits of legendary Broadway stars and celebrities who frequent the dining room.\n\nThe Theatrical Energy\nVisit during the peak 6:30 PM pre-theater rush to witness a masterclass in urban dining. The incredibly fast, beautifully choreographed speed of the waitstaff maneuvering massive platters through the packed room is a brilliant display of city energy.\n\nThe Garlic Bread Foundation\nDo not ignore the complimentary bread basket. It is a towering, beautifully baked masterpiece of fresh Italian bread, arriving warm to the table and setting a flawless, savory foundation to soak up the rich pasta sauces to come.\n\nThe Tableside Theater\nWatch the expert waitstaff carefully. They perform a brilliant, rhythmic culinary theater, expertly transferring the towering mountains of pasta and rich meats from the central serving platter directly to your individual plates with absolute precision.\n\nThe Culinary Weight\nThese massive, richly layered Italian dishes carry a dense, deeply satisfying payload. They are perfectly engineered to effortlessly fuel a massive evening of exploring the soaring skyscrapers and endless entertainment of the surrounding Midtown canyons.\n\nThe Dessert Monument\nYou must save room for the finale. Their signature dessert is a towering, flawlessly constructed strawberry shortcake, built with incredibly fluffy sponge, mountains of fresh whipped cream, and vibrantly sweet, brilliantly red berries.\n\nThe Macro Detail\nBefore taking your first bite, activate your camera's dedicated macro mode. Get incredibly close to the Chicken Parmigiana to beautifully capture the glistening, savory marinara and the heavy, shining cheese pull as the mozzarella stretches.\n\nThe Action Shot\nFor a brilliant, cinematic food video, use a slow-motion frame rate to flawlessly capture the waitstaff lifting a massive, steaming forkful of linguine from the main platter, perfectly highlighting the incredible, generous scale of the dish.\n\nThe Tungsten Glow\nThe bustling dining room is bathed in beautifully warm, classic New York tungsten lighting. Lean into this nostalgic, grand atmosphere by framing your food against the glowing chandeliers and the iconic, deeply colored artwork on the walls.\n\nThe Times Square Pivot\nOnce you finish your incredibly satisfying meal, you are standing directly in the center of global entertainment. Walk exactly half a block west to seamlessly transition into the sweeping, brilliantly illuminated neon canyons of Times Square.\n\nThe Subway Approach\nTransit is incredibly effortless. Take the 1, 2, 3, N, Q, R, or W train directly to the massive Times Square–42nd Street station. Emerge from the underground and enjoy a beautiful, incredibly short walk through the vibrant theater crowds to hit the awning.",
+            "summary": "Tony’s Di Napoli is known for family-style Italian dining, with generous portions of pasta, seafood, chicken, veal, and classic red-sauce dishes.",
+            "image": "images/126.jpg",
+            "cost": null,
+            "packageId": null,
+            "website": "https://www.tonysnyc.com/",
+            "lat": 40.756498,
+            "lng": -73.985397,
+            "rating": null,
+            "locations": [
+              {
+                "address": "Tony's Di Napoli, 1081 3rd Ave, New York, NY 10065, United States",
+                "lat": 40.7643725,
+                "lng": -73.9642919
+              }
+            ],
+            "gallery": []
+          }
         },
         {
           "id": "1788988145233",
           "set": {
+            "locations": [
+              {
+                "address": "Carmine's, 2450 Broadway, New York, NY 10024",
+                "lat": 40.7911041,
+                "lng": -73.9740198
+              }
+            ],
+            "gallery": []
+          },
+          "unset": [],
+          "full": {
+            "id": "1788988145233",
+            "name": "Carmine’s – Times Square",
+            "category": "dining",
+            "day": "",
+            "address": "Carmine's - 44th Street - NYC, 200 W 44th St, New York, NY 10036, United States",
+            "desc": "The Exact Coordinates\nDo not wander aimlessly. This legendary, roaring cathedral of Southern Italian dining is anchored beautifully at 200 West 44th Street, sitting precisely in the vibrant, glowing epicenter of the Theater District.\n\nThe 1940s Aesthetic\nStep inside and admire the stunning, meticulously designed interior. The soaring ceilings, dark polished woods, and warm vintage chandeliers perfectly recreate the grand, nostalgic atmosphere of a classic 1940s New York supper club.\n\nThe Family-Style Architecture\nDo not expect standard, individual plates. The entire culinary program is brilliantly engineered around massive, monumental platters designed to perfectly replicate a traditional, incredibly generous Italian-American Sunday feast.\n\nThe Meatball Monument\nYou absolutely must order the classic spaghetti and meatballs. The culinary team masterfully crafts towering, incredibly dense meatballs that arrive completely blanketed in a rich, flawless, deeply savory house marinara.\n\nThe Chicken Scarpariello\nIf you want to look beyond the classic Parmigiana, this dish is an absolute masterpiece. It features perfectly roasted chicken on the bone, beautifully tossed with bright lemon, fresh rosemary, and heavily caramelized garlic.\n\nThe Shared Tasting\nBecause the portions are gloriously colossal, beautifully split a massive platter of pasta and a towering salad with a travel companion. This allows you to seamlessly sample the absolute best of the menu in a single visit without ordering excess.\n\nThe Theatrical Energy\nVisit during the peak 5:30 PM pre-theater rush to witness an absolute masterclass in urban dining. The incredibly fast, beautifully choreographed speed of the waitstaff maneuvering massive, steaming platters through the packed room is a brilliant display of city energy.\n\nThe Garlic Bread Foundation\nDo not ignore the complimentary bread basket. It arrives to the table as a towering, beautifully baked foundation of fresh, warm Italian bread, perfectly engineered to soak up the rich, vibrant pasta sauces left on your plate.\n\nThe Culinary Weight\nThese massive, richly layered Italian dishes carry a dense, deeply satisfying payload. They are perfectly designed to effortlessly fuel a massive evening of exploring the soaring skyscrapers and endless entertainment of the surrounding Midtown canyons.\n\nThe Titanic Finale\nYou must save room for their legendary dessert. The Titanic is a towering, flawlessly constructed architectural marvel built with a massive chocolate torte, mountains of premium ice cream, and cascades of fresh whipped cream and hot fudge.\n\nThe Tableside Theater\nWatch the expert waitstaff carefully. They perform a brilliant, rhythmic culinary theater, expertly transferring the towering mountains of pasta and rich meats from the central serving platter directly to your individual plates with absolute precision.\n\nThe Macro Detail\nBefore taking your first bite, activate your smartphone's dedicated macro mode. Get incredibly close to the towering pasta platters to beautifully capture the glistening, savory marinara and the brilliant, textured grate of fresh Romano cheese.\n\nThe Action Shot\nFor a brilliant, cinematic food video, use a slow-motion frame rate to flawlessly capture the waitstaff lifting a massive, steaming forkful of linguine directly from the main platter, perfectly highlighting the incredible, generous scale of the dish.\n\nThe Times Square Pivot\nOnce you finish your incredibly satisfying meal, you are standing directly in the center of global entertainment. Walk exactly a few steps east to seamlessly transition into the sweeping, brilliantly illuminated neon canyons of Times Square.\n\nThe Subway Approach\nTransit is incredibly effortless. Take the 1, 2, 3, N, Q, R, or W train directly to the massive Times Square–42nd Street station. Emerge from the underground and enjoy a beautiful, incredibly short walk through the vibrant theater crowds to hit the iconic awning.",
+            "summary": "Carmine’s is a classic Italian-American restaurant known for generous family-style portions, hearty pasta, seafood, meat dishes, and desserts.",
+            "image": "images/127.jpg",
+            "cost": null,
+            "packageId": null,
+            "website": "https://carminesnyc.com/locations/times-square",
             "lat": 40.7575108,
-            "lng": -73.9867126
-          },
-          "unset": []
-        },
-        {
-          "id": "1788988381088",
-          "set": {
-            "lat": 40.7239873,
-            "lng": -73.5404668
-          },
-          "unset": []
-        },
-        {
-          "id": "1788988581900",
-          "set": {
-            "lat": 40.7142296,
-            "lng": -73.5595107
-          },
-          "unset": []
+            "lng": -73.9867126,
+            "rating": null,
+            "locations": [
+              {
+                "address": "Carmine's, 2450 Broadway, New York, NY 10024",
+                "lat": 40.7911041,
+                "lng": -73.9740198
+              }
+            ],
+            "gallery": []
+          }
         },
         {
           "id": "1788989148879",
           "set": {
+            "gallery": []
+          },
+          "unset": [],
+          "full": {
+            "id": "1788989148879",
+            "name": "Flaming Grill & Supreme Buffet",
+            "category": "dining",
+            "day": "",
+            "address": "Flaming Grill and Supreme Buffet, 1773 Grand Ave, Baldwin, NY 11510, United States",
+            "desc": "The Exact Coordinates\nDo not wander aimlessly. This monumental, sprawling cathedral of global culinary abundance is anchored beautifully within the expansive, vibrant retail corridors of New York, operating as a glowing beacon of endless dining.\n\nThe Architectural Scale\nThis is not a cramped dining room. The building is a massive, beautifully designed culinary hall featuring soaring ceilings, brilliant ambient lighting, and sprawling, gleaming buffet islands that perfectly showcase an incredible abundance of food.\n\nThe Hibachi Theater\nThe absolute star of the dining room is the massive, roaring hibachi grill. Watch the open kitchen carefully as master chefs brilliantly toss fresh, vibrant vegetables and premium meats over towering open flames in a stunning display of culinary theater.\n\nThe Sushi Gallery\nStep up to the beautifully illuminated glass displays. The chefs perform a brilliant, continuous culinary dance, meticulously rolling fresh, jewel-toned maki and slicing delicate, brilliantly colored sashimi in a spotless, open-concept sushi bar.\n\nThe Wok Mastery\nObserve the heavy, traditional woks resting over the roaring fires. The kitchen meticulously maintains a continuous, high-heat cooking cycle, creating the deeply savory, irreplaceable flavor profile known as wok hei in every massive tray of noodles.\n\nThe Seafood Colossus\nApproach the stunning, brightly lit cold bars. The culinary team masterfully displays towering tiers of premium chilled seafood, featuring endless, beautifully arranged plates of fresh shellfish and perfectly seasoned cold salads resting on pristine ice.\n\nThe Carving Station\nLook for the brilliant, warmly lit carving stations. The culinary team masterfully slices towering, flawlessly roasted cuts of beef and deeply caramelized poultry, serving them seamlessly alongside rich, deeply savory house-made gravies.\n\nThe Dim Sum Baskets\nDo not ignore the towering bamboo baskets. The kitchen meticulously maintains a roaring, continuous steam cycle, presenting beautifully delicate dumplings and perfectly fluffy, warm bao buns that deliver a flawless, traditional savory bite.\n\nThe Strategic Plating\nApproach the massive islands methodically. Build a flawless foundation of light, chilled seafood and fresh sushi before seamlessly transitioning to the rich, deeply savory hot dishes and complex, sizzling hibachi plates.\n\nThe Shared Tasting\nBecause the sheer volume of options is gloriously colossal, beautifully coordinate plate selections with a travel companion. This allows for a seamless, perfectly balanced sampling of the absolute best of the global menu in a single visit without generating excess waste.\n\nThe Culinary Weight\nThese massive, richly layered plates carry a dense, deeply satisfying payload. They are perfectly engineered to effortlessly fuel a massive afternoon of exploring the expansive retail avenues and sprawling parks of the surrounding New York landscape.\n\nThe Dessert Monument\nAlways save room for the grand finale. The dessert pavilion is a towering, flawlessly constructed architectural marvel built with beautifully layered cakes, mountains of fresh, vibrant fruit, and cascades of rich, cold ice cream.\n\nThe Chocolate Fountain\nThe centerpiece of the dessert station is an absolute visual triumph. A towering, brilliantly cascading chocolate fountain flows continuously, allowing you to flawlessly coat fresh strawberries and soft marshmallows in a rich, glossy layer of warm cocoa.\n\nThe Macro Detail\nBefore taking the first bite, activate your camera's dedicated macro mode. Get incredibly close to the towering plates to beautifully capture the glistening, savory sauces of the hibachi grill and the brilliant, vibrant colors of the fresh sushi rolls.\n\nThe Transit Approach\nTransit to the sprawling retail complexes is beautifully efficient. Effortlessly board the regional bus lines or utilize the massive, brilliantly illuminated parking concourses designed to easily handle the incredible volume of diners visiting this culinary destination.",
+            "summary": "Flaming Grill & Supreme Buffet serves Chinese, Japanese, American, and international dishes, including sushi, hibachi, seafood, and desserts.",
+            "image": "images/130.jpg",
+            "cost": null,
+            "packageId": null,
+            "website": "http://www.flaminggrillbaldwin.com/",
             "lat": 40.7142296,
-            "lng": -73.5595107
-          },
-          "unset": []
-        },
-        {
-          "id": "1789064877380",
-          "set": {
-            "lat": 40.7248735,
-            "lng": -73.5227245
-          },
-          "unset": []
+            "lng": -73.5595107,
+            "rating": null,
+            "gallery": []
+          }
         },
         {
           "id": "1789065190867",
           "set": {
+            "locations": [
+              {
+                "address": "The Monster Crab AYCE Seafood & Bar, mall lower level, 211-35 26th Ave Bay terrace, Bayside, NY 11360, United States",
+                "lat": 40.7787464,
+                "lng": -73.7785119
+              },
+              {
+                "address": "The Monster Crab AYCE Seafood, 40-01 Northern Blvd, Long Island City, NY 11101, United States",
+                "lat": 40.7787464,
+                "lng": -73.7785119
+              }
+            ],
+            "gallery": []
+          },
+          "unset": [],
+          "full": {
+            "id": "1789065190867",
+            "name": "The Monster Crab",
+            "category": "dining",
+            "day": "",
+            "address": "The Monster Crab AYCE Seafood & Bar, 242 Voice Rd, Carle Place, NY 11514, United States",
+            "desc": "The Exact Coordinates\nDo not wander aimlessly. This Cajun-style seafood spot is at 242 Voice Road in Carle Place, Nassau County, on Long Island.\n\nThe Nautical Aesthetic\nStep inside and admire the stunning, meticulously designed interior. The dining room features soaring ceilings, heavily distressed maritime wood, and glowing, classic nautical fixtures that brilliantly recreate the energy of a bustling coastal wharf.\n\nThe Bag Architecture\nDo not expect standard, flat plates. The main event arrives directly to the table in massive, heavy-duty, translucent steam bags—a flawless, highly engineered presentation method designed completely to lock in roaring heat and deeply infuse the rich spices.\n\nThe Seafood Colossus\nThe absolute star of the menu is the massive, customizable boil. Expect towering, flawlessly steamed clusters of premium snow crab legs, colossal shrimp, and thick, sweet lobster tails all resting in a glorious sea of rich flavor.\n\nThe Signature Spice\nYou absolutely must order the house-special seasoning blend. It is an absolute culinary triumph, brilliantly merging deeply savory, heavily caramelized garlic butter with a vibrant, flawlessly calibrated Cajun heat.\n\nThe Tactile Theater\nEmbrace the brilliant, interactive dining architecture. The establishment completely dispenses with formal cutlery, encouraging a flawlessly hands-on, highly energetic experience equipped perfectly with thick, custom bibs and heavy steel shell crackers.\n\nThe Vegetable Foundation\nDo not ignore the brilliant accompaniments. The bottom of every massive steam bag contains a beautiful, savory foundation of sweet corn on the cob and tender red potatoes, engineered perfectly to absorb the massive, rich pools of spiced butter.\n\nThe Deep-Fried Mastery\nIf you want to look beyond the boils, the kitchen executes an absolute masterclass in golden, heavy frying. The perfectly breaded, brilliantly crispy soft-shell crab and catfish baskets deliver a flawless, crackling crunch that perfectly complements the steamed shellfish.\n\nThe Shared Tasting\nBecause the portions are gloriously colossal, beautifully split a massive grand combination bag with a travel companion. This allows for a seamless, perfectly balanced sampling of the absolute best of the ocean in a single, towering order.\n\nThe Culinary Weight\nThese massive, richly layered seafood feasts carry a dense, deeply satisfying payload. They are perfectly engineered to fuel an evening of exploring the surrounding Nassau County area.\n\nThe Steam Plume\nWatch the table presentation carefully. When the server finally unties the heavy bag, it releases a towering, brilliant plume of intensely fragrant, heavily spiced steam—a completely flawless, aromatic moment of dining theater.\n\nThe Action Shot\nFor a brilliant, cinematic food video, use a slow-motion frame rate to flawlessly capture the exact moment the massive crab legs are cracked open, perfectly highlighting the incredible, delicate white meat sliding effortlessly from the vibrant red shell.\n\nThe Macro Detail\nBefore consuming the masterpiece, activate the camera's dedicated macro mode. Get incredibly close to the towering seafood to beautifully capture the glistening, deeply savory pools of garlic butter completely coating the pristine shellfish.\n\nThe Roosevelt Field Pivot\nOnce you finish the meal, the big retail complex of Roosevelt Field in nearby Garden City is a short drive away if you want to walk off the boil among the shops.\n\nThe Transit Approach\nCarle Place has its own LIRR station, so a train from Penn Station followed by a short taxi or rideshare is workable. Driving is easier if you have a car; check the map for the exact distance from the station.",
+            "summary": "The Monster Crab serves Cajun-style seafood boils featuring crab, shrimp, lobster, crawfish, and flavorful sauces.",
+            "image": "images/132.jpg",
+            "cost": null,
+            "packageId": null,
+            "website": "https://themonstercrab.com",
             "lat": 40.7463493,
-            "lng": -73.6197067
-          },
-          "unset": []
-        },
-        {
-          "id": "1789065455629",
-          "set": {
-            "lat": 40.6842964,
-            "lng": -73.4301981
-          },
-          "unset": []
+            "lng": -73.6197067,
+            "rating": null,
+            "locations": [
+              {
+                "address": "The Monster Crab AYCE Seafood & Bar, mall lower level, 211-35 26th Ave Bay terrace, Bayside, NY 11360, United States",
+                "lat": 40.7787464,
+                "lng": -73.7785119
+              },
+              {
+                "address": "The Monster Crab AYCE Seafood, 40-01 Northern Blvd, Long Island City, NY 11101, United States",
+                "lat": 40.7787464,
+                "lng": -73.7785119
+              }
+            ],
+            "gallery": []
+          }
         },
         {
           "id": "1789065590540",
           "set": {
-            "lat": 40.7260856,
-            "lng": -73.5142409
+            "locations": [
+              {
+                "address": "Sexy Crab Cajun Seafood, Sushi & Bar - All You Can Eat Hicksville, 828 S Oyster Bay Rd, Hicksville, NY 11801, United States",
+                "lat": 40.7127281,
+                "lng": -74.0060152,
+                "approxLocation": true
+              }
+            ],
+            "gallery": []
           },
-          "unset": []
+          "unset": [],
+          "full": {
+            "id": "1789065590540",
+            "name": "Sexy Crab Cajun Seafood, Sushi & Bar",
+            "category": "dining",
+            "day": "",
+            "address": "Sexy Crab Cajun Seafood, Sushi & Bar-All You Can Eat - Levittown, 3345 Hempstead Tpke, Levittown, NY 11756, United States",
+            "desc": "The Exact Coordinates\nDo not wander aimlessly. This monumental, highly spirited cathedral of Cajun seafood and Japanese fusion is anchored beautifully within the vibrant commercial corridors of the city, standing as a glowing beacon of massive culinary abundance.\n\nThe Neon Aesthetic\nStep inside and admire the stunning, meticulously designed interior. The dining room features soaring ceilings, heavily distressed maritime accents, and brilliant, glowing neon lighting that perfectly recreates the high-octane energy of a bustling, modern coastal club.\n\nThe Bag Architecture\nDo not expect standard, flat plates for the main event. The signature boils arrive directly to the table in massive, heavy-duty, translucent steam bags—a flawless, highly engineered presentation method designed completely to lock in roaring heat and deeply infuse the rich spices.\n\nThe Sushi Gallery\nStep up to the beautifully illuminated sushi bar. The master chefs perform a brilliant culinary dance, meticulously rolling fresh, jewel-toned maki and slicing delicate, brilliantly colored sashimi to perfectly balance the hot, heavy Cajun spices.\n\nThe Signature Spice\nYou absolutely must order the house-special seasoning blend. It is an absolute culinary triumph, brilliantly merging deeply savory, heavily caramelized garlic butter with a vibrant, flawlessly calibrated Cajun heat.\n\nThe Seafood Colossus\nThe absolute star of the menu is the massive, customizable boil. Expect towering, flawlessly steamed clusters of premium snow crab legs, colossal shrimp, and thick, sweet lobster tails, all resting in a glorious sea of rich, heavily spiced flavor.\n\nThe Tactile Theater\nEmbrace the brilliant, interactive dining architecture. The establishment completely dispenses with formal cutlery for the boils, encouraging a flawlessly hands-on, highly energetic experience equipped perfectly with thick, custom bibs and heavy steel shell crackers.\n\nThe Deep-Fried Mastery\nIf you want to look beyond the steam bags, the kitchen executes an absolute masterclass in golden, heavy frying. The perfectly breaded, brilliantly crispy calamari and catfish baskets deliver a flawless, crackling crunch that complements the delicate raw fish perfectly.\n\nThe Cocktail Program\nThe massive, sweeping bar is an absolute design triumph. Backlit shelves brilliantly showcase an incredible library of premium spirits, allowing mixologists to craft stunning, massive, vibrantly garnished tropical cocktails served in heavy, beautifully shaped glassware.\n\nThe Shared Tasting\nBecause the portions are gloriously colossal, beautifully split a massive grand combination boil and a towering specialty sushi roll with a travel companion. This allows for a seamless, perfectly balanced sampling of the absolute best of both culinary worlds in a single, towering order.\n\nThe Culinary Weight\nThese massive, richly layered feasts carry a dense, deeply satisfying payload. They are perfectly engineered to effortlessly fuel a massive evening of exploring the expansive, historic neighborhoods and sweeping parks of the surrounding boroughs.\n\nThe Steam Plume\nWatch the table presentation carefully. When the server finally unties the heavy seafood bag, it releases a towering, brilliant plume of intensely fragrant, heavily spiced steam—a completely flawless, aromatic moment of dining theater.\n\nThe Macro Detail\nBefore consuming the masterpiece, activate the smartphone's dedicated macro mode. Get incredibly close to the towering seafood to beautifully capture the glistening, deeply savory pools of garlic butter completely coating the pristine shellfish and the bright orange of the spicy mayo on the sushi.\n\nThe Action Shot\nFor a brilliant, cinematic food video, use a slow-motion frame rate to flawlessly capture the exact moment the massive crab legs are cracked open, perfectly highlighting the incredible, delicate white meat sliding effortlessly from the vibrant red shell.\n\nThe Transit Approach\nTransit to this sprawling culinary complex is beautifully efficient. Effortlessly board the regional subway lines or utilize the massive, brilliantly illuminated transit routes designed to easily handle the incredible volume of diners visiting this high-energy destination.",
+            "summary": "Sexy Crab serves Cajun seafood boils, sushi, sashimi, po’ boys, and all-you-can-eat seafood with customizable sauces and spice levels.",
+            "image": "images/134.jpg",
+            "cost": null,
+            "packageId": null,
+            "website": "https://www.sexycrabny.com",
+            "lat": 40.7260856,
+            "lng": -73.5142409,
+            "rating": null,
+            "locations": [
+              {
+                "address": "Sexy Crab Cajun Seafood, Sushi & Bar - All You Can Eat Hicksville, 828 S Oyster Bay Rd, Hicksville, NY 11801, United States",
+                "lat": 40.7127281,
+                "lng": -74.0060152,
+                "approxLocation": true
+              }
+            ],
+            "gallery": []
+          }
         },
         {
           "id": "1789065750254",
           "set": {
-            "lat": 40.7518497,
-            "lng": -73.9850613
+            "locations": [
+              {
+                "address": "Culture 307, 307 W 38th St, New York, NY 10018, United States",
+                "lat": 40.7550216,
+                "lng": -73.9920584
+              },
+              {
+                "address": "Culture 36, 247 W 36th St., New York, NY 10018, United States",
+                "lat": 40.7530977,
+                "lng": -73.991342
+              }
+            ],
+            "gallery": []
           },
-          "unset": []
+          "unset": [],
+          "full": {
+            "id": "1789065750254",
+            "name": "Culture Espresso",
+            "category": "dining",
+            "day": "",
+            "address": "Culture Espresso, 72 W 38th St, New York, NY 10018, United States",
+            "desc": "The Exact Coordinates\nDo not wander aimlessly through the bustling Midtown crowds. This brilliant, highly revered sanctuary of modern coffee culture is anchored beautifully at 72 West 38th Street, sitting perfectly between 5th and 6th Avenues.\n\nThe Garment District Heritage\nThe shop is brilliantly nestled within the historic, fast-paced Garment District. It serves as an absolute culinary cornerstone, perfectly fueling the high-energy, creative professionals who navigate the towering fashion houses of the surrounding neighborhood.\n\nThe Chocolate Chip Masterpiece\nYou absolutely must order their legendary chocolate chip cookie. It is a completely flawless, highly acclaimed culinary milestone, consistently recognized as a towering triumph of New York baking that perfectly balances a structured, crispy edge with a brilliantly gooey center.\n\nThe Continuous Bake\nWatch the open bakery space carefully. The kitchen meticulously maintains a roaring, continuous baking cycle throughout the entire day, ensuring that every single cookie handed over the counter is brilliantly warm and glistening with heavily melted chocolate.\n\nThe Espresso Architecture\nDo not expect a standard, automated pull. The expert baristas utilize massive, highly engineered commercial espresso machines, brilliantly dialing in premium, meticulously roasted beans to extract a flawless, deeply complex, and brilliantly crema-topped shot.\n\nThe Microfoam Mastery\nThe milk-based beverages are an absolute masterclass in texture. Order a flat white or a cortado to experience a beautifully poured, flawlessly velvety microfoam that arrives completely crowned with stunning, high-contrast latte art.\n\nThe Vintage Aesthetic\nStep inside and admire the stunning, meticulously designed interior. The space is beautifully anchored by a massive, glowing antique crystal chandelier and classic, highly ornate wallpaper, perfectly evoking the grand, nostalgic atmosphere of a historic European coffee house.\n\nThe Shared Tasting\nBecause the baked goods are gloriously dense and massive, beautifully split a hot chocolate chip cookie and a flawless oatmeal cranberry cookie with a travel companion. This allows for a seamless, perfectly balanced sampling of the absolute best pastries in a single visit.\n\nThe Culinary Weight\nThese massive, richly baked cookies carry a dense, deeply satisfying payload. They are perfectly engineered to effortlessly fuel a massive afternoon of exploring the expansive, soaring skyscrapers and historic avenues of the surrounding Midtown canyons.\n\nThe Morning Theater\nVisit during the peak 8:30 AM coffee rush to witness a masterclass in urban efficiency. The incredibly fast, beautifully choreographed speed of the barista team handling massive lines of commuters is a brilliant, highly spirited display of true New York energy.\n\nThe Macro Detail\nBefore taking the first bite, activate the camera's dedicated macro mode. Get incredibly close to the freshly broken cookie to beautifully capture the glistening, deeply rich pools of melted chocolate and the flawless, golden crumb structure of the warm dough.\n\nThe Action Shot\nFor a brilliant, cinematic coffee video, use a fast shutter speed or a slow-motion frame rate to flawlessly freeze the exact moment the barista pours the cascading, brilliant white ribbon of steamed milk into the rich, dark espresso.\n\nThe Chandelier Glow\nThe bustling cafe is bathed in beautifully warm, classic ambient lighting. Lean into this grand atmosphere by holding your beautifully crafted cup up and framing it directly against the brilliant, sparkling crystal drops of the iconic overhead chandelier.\n\nThe Bryant Park Pivot\nOnce you secure your hot coffee and warm cookies, take a beautiful, scenic walk to enjoy your urban picnic. Head exactly two blocks north to seamlessly transition into the sweeping, meticulously landscaped, and brilliantly historic lawns of Bryant Park.\n\nThe Subway Approach\nTransit is incredibly effortless. Take the B, D, F, M, or 7 train directly to the massive, beautifully connected 42nd Street–Bryant Park station. Emerge from the underground and enjoy a brilliant, incredibly short walk south to hit the glowing storefront.",
+            "summary": "Culture Espresso is a specialty coffee shop known for quality espresso, fresh-baked goods, and its popular gooey chocolate chip cookies.",
+            "image": "images/135.jpg",
+            "cost": null,
+            "packageId": null,
+            "website": "http://www.cultureespresso.com",
+            "lat": 40.7518497,
+            "lng": -73.9850613,
+            "rating": null,
+            "locations": [
+              {
+                "address": "Culture 307, 307 W 38th St, New York, NY 10018, United States",
+                "lat": 40.7550216,
+                "lng": -73.9920584
+              },
+              {
+                "address": "Culture 36, 247 W 36th St., New York, NY 10018, United States",
+                "lat": 40.7530977,
+                "lng": -73.991342
+              }
+            ],
+            "gallery": []
+          }
         },
         {
           "id": "1789066021788",
           "set": {
-            "lat": 40.7524141,
-            "lng": -73.9925766
+            "locations": [
+              {
+                "address": "Liberty Bagels Grand Central, 5 E 47th St, New York, NY 10017",
+                "lat": 40.7519075,
+                "lng": -73.9902101
+              },
+              {
+                "address": "Liberty Bagels Wall Street, 32 Broadway, New York, NY 10004",
+                "lat": 40.7058688,
+                "lng": -74.013024
+              },
+              {
+                "address": "Liberty Bagels 7 Ave, 462 7th Ave, New York, NY 10018",
+                "lat": 40.7519075,
+                "lng": -73.9902101
+              },
+              {
+                "address": "Liberty Bagels 5th Ave, 16 E 58th St, New York, NY 10022",
+                "lat": 40.7631664,
+                "lng": -73.972521
+              },
+              {
+                "address": "Liberty Bagels NOHO SOHO, 650 Broadway, New York, NY 10012",
+                "lat": 40.726927,
+                "lng": -73.9957148
+              },
+              {
+                "address": "Liberty Bagels Flatiron, 24 W 23rd St, New York, NY 10010",
+                "lat": 40.7417569,
+                "lng": -73.990752
+              },
+              {
+                "address": "Liberty Bagels Jackson Heights, 82-10 Roosevelt Ave, Jackson Heights, NY 11372",
+                "lat": 40.7561828,
+                "lng": -73.8808913
+              }
+            ],
+            "gallery": []
           },
-          "unset": []
+          "unset": [],
+          "full": {
+            "id": "1789066021788",
+            "name": "Liberty Bagels",
+            "category": "dining",
+            "day": "",
+            "address": "Liberty Bagels Midtown, 260 W 35th St, New York, NY 10001, United States",
+            "desc": "The Exact Coordinates\nDo not wander aimlessly. This monumental, highly celebrated beacon of classic New York baking is anchored beautifully at 260 West 35th Street, sitting perfectly between 7th and 8th Avenues in bustling Midtown.\n\nThe Hand-Rolled Heritage\nDo not expect a machine-made product. The master bakers meticulously hand-roll massive, towering rings of dough, preserving an absolute cornerstone of historic, old-school New York culinary architecture.\n\nThe Kettle Boil\nThe secret to the flawless texture is uncompromising tradition. The massive dough rings are submerged in a roaring kettle of boiling water before baking, creating a brilliantly crackling exterior crust wrapped around a perfectly chewy interior.\n\nThe Liberty Architecture\nYou absolutely must order their signature Liberty Bagel. It is a stunning, brilliantly vibrant rainbow bagel, engineered beautifully with vivid layers of colored dough that twist flawlessly into a spectacular, edible piece of pop art.\n\nThe Schmear Gallery\nStep up to the brightly illuminated glass counter and admire the sheer scale of the operation. Massive, towering mounds of vibrantly colored, house-whipped cream cheeses range perfectly from rich, savory scallion and jalapeño to brilliant, sweet birthday cake.\n\nThe Lox Monument\nFor a deeply savory experience, order the classic Nova sandwich. The counter staff performs a beautiful culinary theater, layering massive, delicate sheets of premium, brilliantly pink smoked salmon directly onto the hot dough alongside crisp red onions and capers.\n\nThe Toaster Protocol\nEmbrace the absolute freshness of the continuous baking schedule. If the bagels are still brilliantly warm from the heavy deck ovens, skip the toaster entirely to beautifully experience the flawless, pillowy texture exactly as the master bakers intended.\n\nThe Shared Tasting\nBecause the bagels are gloriously dense and massive, beautifully split a vibrant, sweet Liberty bagel and a heavy, savory everything bagel with a travel companion. This allows for a seamless, perfectly balanced sampling of the absolute best of the menu in a single visit.\n\nThe Culinary Weight\nA fully loaded sandwich from this counter is a glorious, structurally dense meal. It carries a heavy, deeply satisfying payload engineered perfectly to effortlessly fuel a massive day of exploring the soaring skyscrapers of the surrounding Midtown canyons.\n\nThe Morning Theater\nVisit during the peak 8:30 AM weekday rush to witness a masterclass in urban efficiency. The incredibly fast, beautifully choreographed speed of the staff handling massive lines of fast-moving commuters is a brilliant, highly spirited display of true city energy.\n\nThe Cross-Section Detail\nBefore taking the first bite, activate the camera's dedicated macro mode. Get incredibly close to the halved sandwich to beautifully capture the stunning, high-contrast layers of the vivid rainbow dough wrapping perfectly around the thick, white cream cheese.\n\nThe Action Shot\nFor a brilliant, cinematic food video, use a slow-motion frame rate to flawlessly capture the exact moment the staff decisively slices the towering, overstuffed sandwich in half with a heavy, professional baker's blade.\n\nThe Storefront Backdrop\nDo not just photograph the food looking straight down at a table. Step outside and use the classic, brightly lit blue-and-red awning as a beautiful, iconic, and deeply nostalgic Midtown backdrop to frame your freshly wrapped sandwich.\n\nThe Herald Square Pivot\nOnce you secure your hot bagels, take a beautiful, scenic walk to enjoy your meal. Head exactly one block east on 35th Street to seamlessly transition into the sweeping, brilliantly energetic, and historic retail epicenters of Herald Square and the legendary Macy's storefront.\n\nThe Subway Approach\nTransit is incredibly effortless. Take the A, C, E, or 1, 2, 3 train directly to the massive, historic 34th Street–Penn Station complex. Emerge from the underground and enjoy a beautiful, incredibly short one-block walk north to hit the bustling storefront doors.",
+            "summary": "Liberty Bagels is known for hand-rolled, kettle-boiled NYC bagels, creative flavors, generous cream cheese spreads, and classic breakfast sandwiches.",
+            "image": "images/136.jpg",
+            "cost": null,
+            "packageId": null,
+            "website": "https://libertybagels.com/",
+            "lat": 40.7524141,
+            "lng": -73.9925766,
+            "rating": null,
+            "locations": [
+              {
+                "address": "Liberty Bagels Grand Central, 5 E 47th St, New York, NY 10017",
+                "lat": 40.7519075,
+                "lng": -73.9902101
+              },
+              {
+                "address": "Liberty Bagels Wall Street, 32 Broadway, New York, NY 10004",
+                "lat": 40.7058688,
+                "lng": -74.013024
+              },
+              {
+                "address": "Liberty Bagels 7 Ave, 462 7th Ave, New York, NY 10018",
+                "lat": 40.7519075,
+                "lng": -73.9902101
+              },
+              {
+                "address": "Liberty Bagels 5th Ave, 16 E 58th St, New York, NY 10022",
+                "lat": 40.7631664,
+                "lng": -73.972521
+              },
+              {
+                "address": "Liberty Bagels NOHO SOHO, 650 Broadway, New York, NY 10012",
+                "lat": 40.726927,
+                "lng": -73.9957148
+              },
+              {
+                "address": "Liberty Bagels Flatiron, 24 W 23rd St, New York, NY 10010",
+                "lat": 40.7417569,
+                "lng": -73.990752
+              },
+              {
+                "address": "Liberty Bagels Jackson Heights, 82-10 Roosevelt Ave, Jackson Heights, NY 11372",
+                "lat": 40.7561828,
+                "lng": -73.8808913
+              }
+            ],
+            "gallery": []
+          }
+        },
+        {
+          "id": "1794691501216",
+          "set": {
+            "locations": [
+              {
+                "address": "Luckin Coffee, 800 6th Ave, New York, NY 10001, United States",
+                "lat": 40.7456497,
+                "lng": -73.9905668
+              },
+              {
+                "address": "Luckin Coffee, 901 8th Ave, New York, NY 10019, United States",
+                "lat": 40.7373662,
+                "lng": -73.9839735
+              },
+              {
+                "address": "Luckin Coffee, 102 Fulton St, New York, NY 10038, United States",
+                "lat": 40.7096187,
+                "lng": -74.0067778
+              },
+              {
+                "address": "Luckin Coffee, 100 Maiden Ln, New York, NY 10038, United States",
+                "lat": 40.7096187,
+                "lng": -74.0067778
+              },
+              {
+                "address": "Luckin Coffee, 1375 Broadway, New York, NY 10018, United States",
+                "lat": 40.7305616,
+                "lng": -73.9926382
+              },
+              {
+                "address": "Luckin Coffee, 410 10th Ave, New York, NY 10001, United States",
+                "lat": 40.7456497,
+                "lng": -73.9905668
+              },
+              {
+                "address": "Luckin Coffee, 221 Grand St, New York, NY 10013, United States",
+                "lat": 40.7305616,
+                "lng": -73.9926382
+              },
+              {
+                "address": "Luckin Coffee, 147 3rd Ave, New York, NY 10003, United States",
+                "lat": 40.734018,
+                "lng": -73.9863892
+              },
+              {
+                "address": "Luckin Coffee, 488 Madison Ave, New York, NY 10022, United States",
+                "lat": 40.7588847,
+                "lng": -73.9751138
+              },
+              {
+                "address": "Luckin Coffee, 555 6th Ave, New York, NY 10011, United States",
+                "lat": 40.7456497,
+                "lng": -73.9905668
+              },
+              {
+                "address": "Luckin Coffee, 154 Bleecker St, New York, NY 10012, United States",
+                "lat": 40.7282672,
+                "lng": -73.9996515
+              },
+              {
+                "address": "Luckin Coffee, 2799 Broadway, New York, NY 10025, United States",
+                "lat": 40.8029535,
+                "lng": -73.9679516
+              },
+              {
+                "address": "Luckin coffee, 369 Lexington Ave, New York, NY 10017, United States",
+                "lat": 40.7543029,
+                "lng": -73.9720967
+              },
+              {
+                "address": "Luckin Coffee, 244 8th Ave, New York, NY 10011, United States",
+                "lat": 40.7373662,
+                "lng": -73.9839735
+              },
+              {
+                "address": "Luckin coffee, 261 3rd Ave, New York, NY 10010, United States",
+                "lat": 40.7373662,
+                "lng": -73.9839735
+              },
+              {
+                "address": "Luckin coffee, 401 3rd Ave, New York, NY 10016, United States",
+                "lat": 40.7373662,
+                "lng": -73.9839735
+              },
+              {
+                "address": "Luckin Coffee, Grand Central Terminal Underground, 52 Vanderbilt Ave, New York, NY 10017, United States",
+                "lat": 40.7373662,
+                "lng": -73.9839735
+              },
+              {
+                "address": "Luckin Coffee, 770 3rd Ave, New York, NY 10017, United States",
+                "lat": 40.7543029,
+                "lng": -73.9720967
+              },
+              {
+                "address": "Luckin Coffee, 128 W 32nd St, New York, NY 10001, United States",
+                "lat": 40.7489257,
+                "lng": -73.9899728
+              },
+              {
+                "address": "Luckin Coffee, 180 Varick St, New York, NY 10014, United States",
+                "lat": 40.7274501,
+                "lng": -74.0051394
+              }
+            ]
+          },
+          "unset": [],
+          "full": {
+            "id": "1794691501216",
+            "name": "Luckin Coffee",
+            "category": "dining",
+            "day": "",
+            "website": "https://www.luckincoffee.us/",
+            "address": "Luckin Coffee, 755 Broadway, New York, NY 10003, United States",
+            "summary": "A viral, tech-forward Chinese coffee chain making its New York debut with legendary coconut lattes and efficient digital ordering.",
+            "desc": "The Exact Coordinates\nDo not wander aimlessly around the bustling Village looking for a traditional cafe. This massively viral, highly anticipated tech-forward coffee sanctuary is brilliantly anchored at 755 Broadway, sitting directly at the high-energy intersection of 8th Street.\n\nThe App-First Reality\nLeave your cash and credit cards safely tucked away before stepping up to the counter. This incredibly efficient, futuristic chain operates heavily through their dedicated mobile app or kiosks, meaning you must flawlessly order and pay digitally to secure your drinks.\n\nThe Free Customization Hack\nDo not hesitate to heavily customize your massive beverage before submitting your digital order. You can flawlessly adjust your sugar levels, ice volume, and milk preferences directly in the system to perfectly engineer your exact flavor profile for zero extra cost.\n\nThe Signature Coconut\nYou absolutely must command an order of their legendary, globally celebrated iced coconut latte. This brilliantly engineered beverage flawlessly layers rich, creamy coconut milk and premium espresso for a deeply refreshing, perfectly sweet flavor profile.\n\nThe Velvet Texture\nIf you prefer standard dairy, execute a brilliant pivot to their highly signature velvet latte. The expert baristas flawlessly utilize a deeply rich, carefully formulated milk blend that delivers an incredibly smooth, heavy texture completely unlike traditional lattes.\n\nThe Network Strategy\nEmbrace the massive convenience of their rapidly expanding Manhattan footprint. If the Broadway location is inconvenient for your itinerary, seamlessly pivot your order to their brilliantly designed outposts on 6th Avenue, 8th Avenue, or Maiden Lane.\n\nThe Matcha Contrast\nBalance your heavy coffee intake by securing a massive cup of their iconic coconut matcha latte. The incredibly vibrant, premium green tea flawlessly cuts right through the rich coconut milk, creating a deeply refreshing, highly aesthetic layered beverage.\n\nThe Grab-and-Go Flow\nDo not expect to find a sprawling, deeply cozy seating area for a long, lingering work session. The brilliantly minimalist, highly futuristic storefront is completely engineered for rapid-fire, high-energy takeout, meaning you should be fully prepared to walk with your cup.\n\nThe Combo Economics\nEmbrace the absolutely unprecedented economic value of their digital bundle deals. The menu flawlessly offers brilliant two-drink combos and heavy promotional discounts, allowing you to easily secure massive, high-quality lattes for well under standard Manhattan prices.\n\nThe Sea Salt Pivot\nIf you crave a deeply savory contrast to the sweet milk, command an iced sea salt caramel latte. The brilliant mixologists flawlessly utilize premium Hawaiian pink sea salt to cut right through the heavy caramel syrup, delivering an incredibly complex, perfectly balanced sip.\n\nThe Peak Hour Strategy\nPlan your visit perfectly for the mid-morning slump to completely maximize your efficiency. Bypassing the massive, highly chaotic early morning commuter rush guarantees your digital order will be flawlessly waiting on the counter the absolute second you walk in.\n\nThe Pastry Pairing\nDo not ignore the structural importance of a solid breakfast base. The highly focused bakery menu flawlessly offers brilliant, deeply savory sausage, egg, and cheese croissants to perfectly anchor the heavy caffeine and sugar rush of the signature flavored lattes.\n\nThe Macro Detail\nActivate your camera's dedicated macro mode exactly when the barista hands over your iced coconut latte. Get incredibly close to beautifully capture the flawless, deeply contrasted layers of dark espresso slowly cascading down into the pristine white coconut milk.\n\nThe Action Video\nFor a brilliant, cinematic social media clip, use a fast shutter speed exactly when you execute the necessary stir. Flawlessly capture the heavy, rapid-fire swirling motion of your straw as it perfectly blends the thick espresso and sweet milk into a uniform shade.\n\nThe Washington Square Picnic\nOnce you secure your heavy beverage haul, walk exactly three short blocks south to seamlessly transition into Washington Square Park. Find a sunny, shaded bench to enjoy your massive iced lattes while absorbing the brilliant, high-energy neighborhood atmosphere.",
+            "image": "images/172.jpg",
+            "cost": null,
+            "rating": null,
+            "packageId": null,
+            "gallery": [],
+            "locations": [
+              {
+                "address": "Luckin Coffee, 800 6th Ave, New York, NY 10001, United States",
+                "lat": 40.7456497,
+                "lng": -73.9905668
+              },
+              {
+                "address": "Luckin Coffee, 901 8th Ave, New York, NY 10019, United States",
+                "lat": 40.7373662,
+                "lng": -73.9839735
+              },
+              {
+                "address": "Luckin Coffee, 102 Fulton St, New York, NY 10038, United States",
+                "lat": 40.7096187,
+                "lng": -74.0067778
+              },
+              {
+                "address": "Luckin Coffee, 100 Maiden Ln, New York, NY 10038, United States",
+                "lat": 40.7096187,
+                "lng": -74.0067778
+              },
+              {
+                "address": "Luckin Coffee, 1375 Broadway, New York, NY 10018, United States",
+                "lat": 40.7305616,
+                "lng": -73.9926382
+              },
+              {
+                "address": "Luckin Coffee, 410 10th Ave, New York, NY 10001, United States",
+                "lat": 40.7456497,
+                "lng": -73.9905668
+              },
+              {
+                "address": "Luckin Coffee, 221 Grand St, New York, NY 10013, United States",
+                "lat": 40.7305616,
+                "lng": -73.9926382
+              },
+              {
+                "address": "Luckin Coffee, 147 3rd Ave, New York, NY 10003, United States",
+                "lat": 40.734018,
+                "lng": -73.9863892
+              },
+              {
+                "address": "Luckin Coffee, 488 Madison Ave, New York, NY 10022, United States",
+                "lat": 40.7588847,
+                "lng": -73.9751138
+              },
+              {
+                "address": "Luckin Coffee, 555 6th Ave, New York, NY 10011, United States",
+                "lat": 40.7456497,
+                "lng": -73.9905668
+              },
+              {
+                "address": "Luckin Coffee, 154 Bleecker St, New York, NY 10012, United States",
+                "lat": 40.7282672,
+                "lng": -73.9996515
+              },
+              {
+                "address": "Luckin Coffee, 2799 Broadway, New York, NY 10025, United States",
+                "lat": 40.8029535,
+                "lng": -73.9679516
+              },
+              {
+                "address": "Luckin coffee, 369 Lexington Ave, New York, NY 10017, United States",
+                "lat": 40.7543029,
+                "lng": -73.9720967
+              },
+              {
+                "address": "Luckin Coffee, 244 8th Ave, New York, NY 10011, United States",
+                "lat": 40.7373662,
+                "lng": -73.9839735
+              },
+              {
+                "address": "Luckin coffee, 261 3rd Ave, New York, NY 10010, United States",
+                "lat": 40.7373662,
+                "lng": -73.9839735
+              },
+              {
+                "address": "Luckin coffee, 401 3rd Ave, New York, NY 10016, United States",
+                "lat": 40.7373662,
+                "lng": -73.9839735
+              },
+              {
+                "address": "Luckin Coffee, Grand Central Terminal Underground, 52 Vanderbilt Ave, New York, NY 10017, United States",
+                "lat": 40.7373662,
+                "lng": -73.9839735
+              },
+              {
+                "address": "Luckin Coffee, 770 3rd Ave, New York, NY 10017, United States",
+                "lat": 40.7543029,
+                "lng": -73.9720967
+              },
+              {
+                "address": "Luckin Coffee, 128 W 32nd St, New York, NY 10001, United States",
+                "lat": 40.7489257,
+                "lng": -73.9899728
+              },
+              {
+                "address": "Luckin Coffee, 180 Varick St, New York, NY 10014, United States",
+                "lat": 40.7274501,
+                "lng": -74.0051394
+              }
+            ],
+            "lat": 40.7305616,
+            "lng": -73.9926382
+          }
+        },
+        {
+          "id": "1794755600117",
+          "set": {
+            "lat": 40.7073223,
+            "lng": -74.010253
+          },
+          "unset": [],
+          "full": {
+            "id": "1794755600117",
+            "name": "Federal Hall National Memorial",
+            "category": "skyscrapers",
+            "day": "",
+            "website": "https://www.nps.gov/feha/index.htm",
+            "address": "Federal Hall National Memorial, 15 Pine St, New York, NY 10005, United States",
+            "summary": "A highly historic, completely free neoclassical landmark on Wall Street standing directly on the site where George Washington was inaugurated.",
+            "desc": "The Exact Coordinates\nDo not wander aimlessly around the dense, chaotic Financial District grid. This highly historic, brilliantly preserved neoclassical sanctuary is anchored directly at the bustling intersection of Wall and Broad Streets.\n\nThe Free Museum Hack\nEmbrace the massive value of this world-class federal infrastructure. Accessing the incredibly historic, deeply significant museum exhibits and the stunning interior rotunda is completely complimentary and open to the public without a ticket.\n\nThe Washington Vantage\nYou absolutely must position yourself directly beneath the massive bronze statue of George Washington on the front steps. This brilliantly engineered monument flawlessly marks the exact location where he took the first presidential oath.\n\nThe Architectural Pedigree\nTake a moment to simply admire the incredibly resilient, highly historic engineering. The brilliantly constructed 1842 Customs House features a massive domed rotunda and soaring marble columns that completely dominate the interior space.\n\nThe Inauguration Bible\nExecute a brilliant historical pivot by seeking out the dedicated exhibit vaults. The museum flawlessly displays the actual, highly protected Washington Inaugural Bible, offering a deeply significant connection to the birth of the nation.\n\nThe Guided Tour Protocol\nDo not hesitate to heavily utilize the incredibly knowledgeable National Park Service rangers. You can flawlessly secure a completely complimentary, highly detailed guided talk that brilliantly unpacks the massive history of the site.\n\nThe Vault Inspection\nPrepare for a deeply immersive, highly tactile architectural experience. The brilliant curators allow you to completely explore the massive, highly secure underground bank vaults leftover from the building's era as a US Sub-Treasury.\n\nThe Wall Street Contrast\nUtilize this highly historic, brilliantly climate-controlled environment as a massive tactical retreat. When the brutal heat and crushing corporate foot traffic of Wall Street become completely overwhelming, seamlessly pivot inside to decompress.\n\nThe Grand Staircase\nDo not ignore the structural utility of the massive front steps. These incredibly wide, beautifully designed stone stairs serve as a highly coveted, deeply relaxing seating area for prime people-watching in the Financial District.\n\nThe Security Reality\nExecute absolute precision when approaching the main entrance doors. Because it is a highly secure federal facility, you must flawlessly navigate a brisk, airport-style bag check before entering the massive marble rotunda.\n\nThe Restroom Strategy\nDo not ignore the highly strategic value of premium civic infrastructure. The massive, beautifully maintained public restrooms located inside the lower level are incredibly clean, offering a completely free, highly comfortable pit stop.\n\nThe Wide-Angle Capture\nSwitch your smartphone camera to its dedicated 0.5x ultra-wide lens exactly when you reach the center of the rotunda. A sweeping shot flawlessly frames the massive marble flooring and the towering, beautifully intricate domed ceiling.\n\nThe Bronze Portrait\nFor a brilliant, cinematic social media image, utilize a low angle directly in front of the building. Flawlessly capture the towering George Washington statue contrasted heavily against the massive, modern glass skyscrapers.\n\nThe Trinity Church Pivot\nOnce you completely finish your historical exploration, take a highly strategic walk straight west down Wall Street. Transition seamlessly into the deeply historic Trinity Church cemetery to flawlessly continue your colonial architecture tour.\n\nThe Transit Approach\nNavigating to this historic sanctuary is incredibly effortless from anywhere in Manhattan. Simply ride the 4 or 5 train directly to the Wall Street station, emerging from the underground for a brilliant, thirty-second walk to the steps.",
+            "image": "images/110.jpg",
+            "cost": null,
+            "rating": null,
+            "packageId": null,
+            "gallery": [],
+            "lat": 40.7073223,
+            "lng": -74.010253
+          }
+        },
+        {
+          "id": "1794756548041",
+          "set": {
+            "lat": 40.754222,
+            "lng": -73.9845689
+          },
+          "unset": [],
+          "full": {
+            "id": "1794756548041",
+            "name": "Bryant Park",
+            "category": "outdoors",
+            "day": "",
+            "website": "https://bryantpark.org/",
+            "address": "Bryant Park, New York, NY 10018, United States",
+            "summary": "A deeply peaceful, meticulously manicured Midtown sanctuary located directly behind the Public Library, featuring lush lawns and free activities.",
+            "desc": "The Exact Coordinates\nDo not wander aimlessly around the chaotic corporate grid of Midtown. This brilliantly engineered, deeply peaceful urban sanctuary is flawlessly anchored between 40th and 42nd Streets, sitting directly behind the massive New York Public Library.\n\nThe Free Restroom Hack\nEmbrace the massive value of this world-class civic infrastructure. You absolutely must utilize the park's legendary public restrooms; they are incredibly luxurious, completely free, and brilliantly maintained with fresh flowers and classical music.\n\nThe Bistro Chair Strategy\nDo not struggle to find seating on the grass. The brilliant park curators flawlessly scatter thousands of iconic, deeply nostalgic green folding bistro chairs throughout the space, allowing you to completely customize your seating arrangement anywhere.\n\nThe Winter Village Pivot\nIf you are traveling in the colder months, prepare for a massive seasonal transformation. The sprawling central lawn flawlessly pivots into a highly immersive, deeply cinematic European-style holiday market featuring incredible local artisan shops.\n\nThe Ice Skating Reality\nExecute absolute precision when budgeting your winter itinerary. The massive, beautifully engineered ice skating rink anchoring the Winter Village is completely free to use if you flawlessly execute the strategy of bringing your own pair of skates.\n\nThe Reading Room Sanctuary\nEmbrace the incredibly forward-thinking civic utility built into the space. The park flawlessly operates a completely complimentary outdoor reading room, allowing you to secure daily newspapers and heavy books to enjoy beneath the soaring tree canopy.\n\nThe Table Tennis Integration\nIf you crave high-energy physical activity, command a spot at the permanent outdoor tables. The venue brilliantly provides completely free ping pong equipment to the public, allowing you to flawlessly execute a highly competitive match in the fresh air.\n\nThe Lawn Protocol\nExecute absolute precision when attempting to use the massive central green space. The incredibly pristine, meticulously manicured turf is heavily protected, so you must flawlessly obey the brilliant digital signage indicating if the lawn is open to the public.\n\nThe NYPL Extension\nOnce you completely finish your outdoor relaxation, take a highly strategic walk straight east. Transition seamlessly into the massive, deeply historic New York Public Library to flawlessly continue your brilliant, highly scenic architectural tour indoors.\n\nThe Food Kiosk Fuel\nSkip the incredibly chaotic, heavily priced sit-down restaurants in the immediate area. The brilliant perimeter of the park is flawlessly lined with highly curated food kiosks offering massive Belgian waffles, premium espresso, and deep-dish pizza.\n\nThe Times Square Contrast\nUtilize this highly historic, brilliantly shaded environment as a massive tactical retreat. When the brutal heat and crushing neon foot traffic of Times Square become completely overwhelming, seamlessly pivot two blocks east to visually and physically decompress.\n\nThe Summer Movie Night\nIf you are visiting in the warm season, plan your Monday evening perfectly. The massive central lawn flawlessly transforms into an incredibly vibrant outdoor cinema, offering completely free, highly celebrated classic movie screenings under the stars.\n\nThe Macro Detail\nActivate your camera's dedicated macro mode exactly when you approach the Josephine Shaw Lowell Memorial Fountain. Get incredibly close to beautifully capture the glistening, perfectly sculpted dark granite as the heavy water cascades down the tiers.\n\nThe Carousel Visual\nTake a moment to simply admire the incredibly detailed, highly cinematic engineering on the southern edge. The brilliantly designed Le Carrousel flawlessly utilizes classic French cabaret music and beautifully painted animals for a deeply nostalgic aesthetic.\n\nThe Transit Approach\nNavigating to this massive urban oasis is incredibly effortless from anywhere in Manhattan. Simply ride the B, D, F, M, or 7 train directly to the bustling 42nd Street-Bryant Park station, emerging from the underground directly into the tree canopy.",
+            "image": "images/102.jpg",
+            "cost": null,
+            "rating": null,
+            "packageId": null,
+            "gallery": [],
+            "lat": 40.754222,
+            "lng": -73.9845689
+          }
         }
       ]
     },
     "myList": [
       {
-        "id": "ml-1789851649885i8uokizh6ln",
+        "id": "ml-1794773288366013r8i9wpb4d",
         "placeId": "s2",
         "day": "",
         "note": ""
       },
       {
-        "id": "ml-1789851649885id86xjgsh8f",
+        "id": "ml-17947732896159x05tena43i",
         "placeId": "1788127853367",
         "day": "",
         "note": ""
       },
       {
-        "id": "ml-1789851649885cnnkyrwlpg6",
-        "placeId": "s1",
+        "id": "ml-1794773294766ewzoar2k6zg",
+        "placeId": "1788895772155",
         "day": "",
         "note": ""
       },
       {
-        "id": "ml-178985164988533q430yd3jh",
-        "placeId": "1788195131854",
+        "id": "ml-17947733014478ol2b05rcyu",
+        "placeId": "1788470186066",
         "day": "",
         "note": ""
       },
       {
-        "id": "ml-1789851649885h2rqqw75ac7",
-        "placeId": "1788199698262",
+        "id": "ml-1794773302576iaq9sovyry",
+        "placeId": "1788723795881",
         "day": "",
         "note": ""
       },
       {
-        "id": "ml-1789851649885ts0fyh6f3ro",
-        "placeId": "1788179669671",
+        "id": "ml-1794773303596cifmpeicezt",
+        "placeId": "1788983946017",
         "day": "",
         "note": ""
+      }
+    ],
+    "baseNames": {
+      "s2": "Statue of Liberty",
+      "s3": "New York Crown",
+      "1788127853367": "Ellis Island National Museum of Immigration",
+      "s1": "Empire State Building Observatory",
+      "1788179669671": "Times Square",
+      "1788195131854": "Brooklyn Bridge",
+      "1788196267169": "Grand Central Terminal",
+      "1788197283793": "Central Park",
+      "1788197581955": "The High Line",
+      "1788197817249": "Little Island",
+      "1788199698262": "The Metropolitan Museum of Art (The Met)",
+      "1788207781358": "The Museum of Modern Art (MoMA)",
+      "1788208427264": "9/11 Memorial & Museum",
+      "1788209020575": "Edge NYC Observatory",
+      "1788209444903": "One World Observatory",
+      "1788209854164": "Top of the Rock Observatory",
+      "1788210119109": "American Museum of Natural History",
+      "1788210434835": "Intrepid Museum",
+      "1788210762631": "Vessel",
+      "1788211021015": "St. Patrick's Cathedral",
+      "1788295416885": "Madame Tussauds New York",
+      "1788295918065": "Mercer Labs – Museum of Art and Technology",
+      "1788297048914": "Circle Line NYC Landmarks Cruise",
+      "1788461113442": "Museum of Broadway",
+      "1788463783002": "RiseNY",
+      "1788464505629": "Rockefeller Center",
+      "1788464770925": "Luna Park at Coney Island",
+      "1788466050759": "SPYSCAPE",
+      "1788466922365": "Radio City Music Hall",
+      "1788467215986": "DUMBO",
+      "1788467514276": "Carnegie Hall",
+      "1788468090767": "SEA LIFE Aquarium New Jersey",
+      "1788468580495": "Little Italy",
+      "1788468814209": "Chinatown",
+      "1788469643088": "Summit One Vanderbilt",
+      "1788470015231": "Oculus Plaza",
+      "1788470186066": "Charging bull statue",
+      "1788470430144": "The Morgan Library and Museum",
+      "1788470549533": "New York Public Library",
+      "1788470776017": "Flatiron Building",
+      "1788470934968": "Washington Square Park",
+      "1788471146363": "Chelsea Market",
+      "1788471449030": "Broadway Shows",
+      "1788622003718": "Gorge at Katz’s Delicatessen",
+      "1788622634655": "Time Out Market New York",
+      "1788622978482": "One Times Square Skywalk",
+      "1788624365119": "The Plaza Hotel",
+      "1788624789641": "230 Fifth Rooftop Bar",
+      "1788625171675": "Old City Hall Station",
+      "1788629109266": "Roosevelt Island Tramway",
+      "1788716279125": "The Elevated Acre",
+      "1788717674418": "The Beekman (Temple Court Building)",
+      "1788718029044": "The 'Ghostbusters' Firehouse",
+      "1788718323034": "Ford Foundation Center for Social Justice (Atrium Garden)",
+      "1788718610987": "Trinity Place Bar & Restaurant (Bank Vault Bar)",
+      "1788718890126": "Le Boudoir",
+      "1788719088794": "Chinatown Ice Cream Factory",
+      "1788719557018": "New York Transit Museum",
+      "1788720311468": "Pier 54: The Titanic’s Arrival Destination",
+      "1788720569311": "Brooklyn Botanic Garden",
+      "1788722089918": "Greenacre Park",
+      "1788721807480": "Marilyn Monroe’s Subway Grate",
+      "1788722953888": "House of Wax",
+      "1788723221034": "Gimbel's Bridge",
+      "1788723484494": "New York Federal Gold Vault",
+      "1788723670418": "Berlin Wall Section NY",
+      "1788723795881": "Fearless Girl Statue",
+      "1788724055926": "High Bridge",
+      "1788724470230": "United Palace Theatre",
+      "1788724805324": "Bryant Park Bathroom",
+      "1788725048434": "Times Square Hum",
+      "1788725580933": "The Woolworth Building",
+      "1788725827225": "Holiday Nostalgia Train",
+      "1788726238221": "Long Lines Building",
+      "1788726722834": "Macy's",
+      "1788726887707": "REACH: New York",
+      "1788728055119": "Titanic Memorial Lighthouse",
+      "1788728220857": "Grand Central Oyster Bar",
+      "1788813671557": "Crabs of Cleopatra’s Needle",
+      "1788814110975": "Pomander Walk",
+      "1788814461835": "Brooklyn Ice Cream Factory",
+      "1788815108107": "Private Passage",
+      "1788815474719": "Green-Wood Cemetery",
+      "1788815777032": "The Hangman's Elm",
+      "1788816187575": "The Daily News Building Globe",
+      "1788816465896": "General Grant National Memorial",
+      "1788816662625": "Irish Hunger Memorial",
+      "1788890634915": "The New Yorker Hotel",
+      "1788892273508": "Paley Park",
+      "1788893298997": "Roosevelt Island Octagon Tower",
+      "1788893615398": "Giant Needle and Button",
+      "1788893800644": "The Location of Paul's Boutique",
+      "1788894472996": "Staple Street Skybridge",
+      "1788894710883": "Roosevelt Island Lighthouse",
+      "1788895772155": "The Oldest Fence in New York",
+      "1788896238118": "The Standard Oil Building",
+      "1788896446950": "Jeffrey's Hook Light",
+      "1788897704351": "Survivor Tree",
+      "1788898024590": "Economy Candy",
+      "1788898664930": "2 Bros Pizza",
+      "1788901656901": "Mei Lai Wah",
+      "1788901824295": "Physical Graffiti Building",
+      "1788902028258": "Kuih Café",
+      "1788903102586": "New York Cancer Hospital",
+      "1788903524804": "Pier 26 Tide Deck",
+      "1788980763947": "Jacob's Pickles",
+      "1788981405898": "Brooklyn Heights Promenade",
+      "1788983946017": "New York Stock Exchange",
+      "1788984427219": "Chrysler Building",
+      "1788984571616": "Sarge’s Delicatessen & Diner",
+      "1788984845098": "Burlington",
+      "1788985102194": "Trump Tower",
+      "1788985397281": "Hamburger America",
+      "1788985608948": "L’Industrie Pizzeria",
+      "1788986171848": "Ace’s Pizza",
+      "1788986492671": "Bleecker Street Pizza",
+      "1788986701286": "Mama’s TOO!",
+      "1788986852359": "Lil Zeus Lunch Box",
+      "1788987000946": "Very Fresh Noodles",
+      "1788987229154": "Ess-a-Bagel",
+      "1788987445191": "Magnolia Bakery",
+      "1788987757140": "Maison Pickle",
+      "1788987911764": "Tony’s Di Napoli",
+      "1788988145233": "Carmine’s – Times Square",
+      "1788988381088": "Texas Roadhouse",
+      "1788988581900": "Westlight",
+      "1788989148879": "Flaming Grill & Supreme Buffet",
+      "1789064877380": "K-CITY BBQ Hot Pot & Sushi",
+      "1789065190867": "The Monster Crab",
+      "1789065455629": "Cinnabar",
+      "1789065590540": "Sexy Crab Cajun Seafood, Sushi & Bar",
+      "1789065750254": "Culture Espresso",
+      "1789066021788": "Liberty Bagels",
+      "1794675946260": "UMI Hotpot Sushi & Seafood Buffet",
+      "1794676695472": "The Roof at PUBLIC Hotel",
+      "1794677012547": "Paradise Lost",
+      "1794677426143": "Cantina Rooftop",
+      "1794677705116": "Jin Mei Dumpling",
+      "1794677902709": "Queensboro Plaza",
+      "1794678087504": "Tick Tock Diner NY",
+      "1794678231880": "Legasea Bar & Grill",
+      "1794678822673": "Sunday Morning Cinnamon Rolls & Coffee",
+      "1794679009969": "Nespresso Boutique Flatiron",
+      "1794679328441": "Jhoanes Bakery & Coffee",
+      "1794679619286": "Pasta de Pasta",
+      "1794683426137": "Dyker Heights Christmas Lights",
+      "1794683585148": "Carnitas Ramirez",
+      "1794683893557": "Koronet Pizza",
+      "1794684209428": "Dalmatian and Taxi Sculpture \"Spot\"",
+      "1794684610187": "Shu Jiao Fu Zhou",
+      "1794684818829": "Sun Hing Lung",
+      "1794685028531": "Wah Fung No.1 Fast Food",
+      "1794685277993": "Gotham Burger Social Club",
+      "1794685590677": "Tudor City Bridge",
+      "1794685784130": "Pier 35",
+      "1794685975265": "North 5th Street Pier and Park",
+      "1794686245815": "Squibb Park Bridge",
+      "1794686412790": "Salt Hank’s",
+      "1794686767107": "Balloon Museum NYC - DAYDREAM",
+      "1794687206644": "King Dumplings",
+      "1794687925047": "7th Street Burger",
+      "1794688111056": "Golden Diner",
+      "1794688343301": "Gray's Papaya",
+      "1794688511857": "Velvet Cowboy",
+      "1794688722674": "Pier 57 Rooftop Park",
+      "1794688967154": "tm:rw",
+      "1794689218346": "Winter Garden At Brookfield Place",
+      "1794690800120": "Mixue Ice Cream & Tea",
+      "1794691501216": "Luckin Coffee",
+      "1794755600117": "Federal Hall National Memorial",
+      "1794756548041": "Bryant Park"
+    },
+    "pinned": [
+      {
+        "id": "s2",
+        "name": "Statue of Liberty",
+        "category": "sightseeing",
+        "day": "",
+        "address": "Liberty Island, New York, NY 10004",
+        "desc": "The Only Official Vendor\nStatue City Cruises is the only authorized ticket provider. Ignore the aggressive ticket sellers in Battery Park; they are pushing third-party harbor cruises that will not actually let you off the boat onto the island.\n\nThe Starboard Advantage\nWhen departing from Manhattan, secure a spot on the starboard (right) side of the ferry. This position gives you the absolute best unobstructed approach photos of the statue as the boat arcs toward the dock.\n\nThe Pedestal Upgrade\nA standard \"General Admission\" ticket only lets you walk the island grounds. If you want to go inside the monument's base and access the stone balconies, you must specifically select a \"Pedestal Reserve\" ticket, which has limited inventory.\n\nThe 8:30 AM Strategy\nBook the absolute first ferry of the day. Mid-day airport-style security lines at Castle Clinton in Battery Park can easily add an agonizing 60 to 90 minutes of standing in the sun before you even board the boat.\n\nThe Locker Quarter Hack\nLarge daypacks are strictly prohibited inside the monument. If you have pedestal or crown access, you must use the lockers in the security tent. They require a physical $0.25 coin deposit, and there are no change machines.\n\nTelephoto Ferry Stabilization\nIf you are shooting the approach with a heavy telephoto lens (like a 100-400mm) from the moving ferry, ensure your lens's Optical SteadyShot is engaged and keep your shutter speed above 1/1000s to completely freeze the boat's engine vibration.\n\nThe Standalone Museum\nDo not skip the new Statue of Liberty Museum located on the backside of the island. It is fully included in your general admission ticket, is highly interactive, and houses the monument's massive original 1886 copper torch.\n\nNew Jersey Departure Hack\nYou can depart from either New York or New Jersey. The Liberty State Park (NJ) departure line is notoriously shorter, has ample on-site parking, and generally moves much faster than the chaotic Manhattan side.\n\nThe Rear Viewpoint\nMost tourists crowd the front plaza upon disembarking. Walk all the way around to the back of the monument for a stunning, completely uncrowded perspective of the statue looking out toward the Manhattan skyline.\n\nStrict Ferry Sequencing\nYour ticket automatically includes Ellis Island, but ferries follow a strict one-way loop: Battery Park to Liberty, then to Ellis, then back to Manhattan. You cannot backtrack to Liberty Island once you leave it.\n\nOffline Your QR Codes\nCell service can be surprisingly spotty around the heavy stone of Castle Clinton and out on the water. Screenshot your digital QR codes before you leave your hotel so you aren't stuck waiting for an email to load at the gate.\n\nTime Budget Math\nDo not attempt to squeeze this into a two-hour window. Between the two ferry rides, dual security checkpoints, and exploring both islands, budget a strict minimum of 4.5 to 5 hours for the full experience.\n\nFood & Hydration Logistics\nThe food at the Crown Cafe on the island is basic and heavily marked up. Pack your own snacks and water in a clear container to eat on the ferry or on the island's grassy park areas.\n\nThe Free Alternative\nIf you only want water-level photos of the monument and do not actually care about stepping foot on Liberty Island, just ride the free Staten Island Ferry. It passes incredibly close and costs absolutely nothing.\n\nThe Audio Tour App\nAn excellent official audio tour is included with every single ticket. Instead of using the provided public headsets, download the official National Park Service app beforehand so you can listen seamlessly on your own earbuds.",
+        "summary": "An iconic 19th-century copper statue standing guard over New York Harbor, complete with a dedicated museum and historic grounds.",
+        "image": "images/1.jpg",
+        "cost": null,
+        "packageId": "pkg-1788129485954n4a8xunrpce",
+        "lat": 40.6898508,
+        "lng": -74.0476674,
+        "website": "https://statuecitycruises.com/"
+      },
+      {
+        "id": "1788127853367",
+        "name": "Ellis Island National Museum of Immigration",
+        "category": "museums-culture",
+        "day": "",
+        "address": "Ellis Island, New York, NY 10004",
+        "desc": "The Audio Tour Hack\nThe official audio guide is automatically included with every ferry ticket. Do not skip it. Pick up your headset on the first floor immediately upon arrival before navigating the exhibits.\n\nReverse the Route\nMost visitors bottleneck at the 1st-floor Baggage Room. Grab your audio guide and immediately bypass the crowds to the 2nd-floor Registry Room, then explore the museum from the top down.\n\nThe Balcony Photo Trick\nFor the most iconic, symmetrical photograph of the colossal Registry Room, do not shoot from the main floor. Head straight up to the 3rd-floor balcony on the east side and use a wide-angle lens.\n\nThe Abandoned Hospital Tour\nThe unrestored hospital complex on the island's south side is off-limits to general admission. To see it, you must book the specific \"Hard Hat Tour\" ticket in advance, which is strictly limited to ages 13 and up.\n\nGenealogy Time Sink\nIf you plan to search the American Family Immigration History Center for passenger records, allocate an absolute minimum of 90 extra minutes. Note that there is a fee to print physical copies of the manifests.\n\nThe Seawall Picnic\nThe on-island cafeteria is notoriously overpriced and crowded. Pack your own lunch and eat outside along the northern seawall, which offers one of the best unobstructed views of the Lower Manhattan skyline.\n\nThe \"Kissing Post\"\nDon't miss the wooden pillar on the first floor known as the Kissing Post. This was the exact physical location where approved immigrants were finally allowed to reunite with their waiting family members.\n\nThe Guastavino Ceilings\nLook up when inside the Registry Room. The vaulted, herringbone-patterned terracotta ceiling was built by the famous Guastavino brothers. It is an architectural masterpiece best captured by pointing your camera straight up.\n\nWall of Honor Lighting\nThe American Immigrant Wall of Honor is located outside, directly behind the main building. Because it faces east toward the harbor, it is best photographed in the mid-morning when the sun illuminates the engraved names.\n\nFerry Route Reality\nThe ferry follows a strict one-way loop: Battery Park to Liberty, then to Ellis, then back to Manhattan. You cannot go back to Liberty Island once you arrive at Ellis Island, so manage your time carefully.\n\nThe Introductory Film\nBefore walking the halls, catch a screening of the documentary \"Island of Hope, Island of Tears\" in the museum theater. It provides crucial emotional and historical context for the rest of your visit.\n\nAuthentic Baggage Graffiti\nWhen viewing the restored trunks in the 1st-floor Baggage Room, look closely for original chalk marks and graffiti. Medical and legal inspectors used these shorthand codes to tag immigrants for detainment.\n\nReturn Line Strategy\nThe queue for the return ferry to Manhattan gets brutal after 3:00 PM. You can monitor the line length from the large museum windows; if it stretches far past the outdoor awning, wait inside where it is climate-controlled.\n\nRealistic Time Budget\nDo not rely on the standard \"1-2 hour\" estimate if you actually want to absorb the history. Budget an absolute minimum of 2.5 to 3 hours just for Ellis Island, especially if you are following the audio tour.\n\nThe Quietest Exhibits\nThe 3rd-floor galleries, such as \"Restoring a Landmark\" and the dormitory recreations, are frequently ignored by large tour groups. Head up here when the main floors become overwhelmingly loud.",
+        "summary": "A historic gateway where millions of immigrants began their American journey, now preserved through original spaces, exhibits and personal stories.",
+        "image": "images/3.jpg",
+        "cost": null,
+        "packageId": "pkg-1788129485954n4a8xunrpce",
+        "lat": 40.7035183,
+        "lng": -74.0169254,
+        "website": "https://statuecitycruises.com/"
+      },
+      {
+        "id": "1788470186066",
+        "name": "Charging bull statue",
+        "category": "sightseeing",
+        "day": "",
+        "address": "Charging Bull, Bowling Green, New York, NY 10004, United States",
+        "desc": "The 7:00 AM Rule\nBy 9:00 AM, the line to take a picture at the front of the statue is massive. Arrive before 7:00 AM if you want a clean, crowd-free shot.\n\nThe Good Luck Tradition\nYes, the rear of the bull is gleaming because millions of tourists rub the bronze testicles for financial luck. There is a completely separate queue just for this photo.\n\nThe Traffic Hazard\nThe statue sits on a small cobblestone median surrounded by active, aggressive bus traffic. Never step backward off the curb into the street to get a wider camera angle.\n\nThe Aggressive Angle\nGet as low to the ground as possible with a wide-angle lens. Shooting upward makes the 7,100-pound bronze statue look exponentially more massive and aggressive.\n\nThe Missing Girl\nThe famous \"Fearless Girl\" statue is no longer facing the bull. She was permanently relocated a few blocks away, standing directly in front of the New York Stock Exchange.\n\nThe Guerrilla Origins\nThe statue was never officially commissioned. Artist Arturo Di Modica illegally dropped it in front of the NYSE in the middle of the night in 1989 before the city moved it here.\n\nFree Museum Restrooms\nDirectly behind the bull is the stunning Alexander Hamilton U.S. Custom House. It is completely free to enter and houses pristine public restrooms on the ground floor.\n\nThe Bowling Green Exit\nThe absolute fastest way to get there is to take the 4 or 5 train to Bowling Green. The station exit staircase literally pops you out right at the tail of the bull.\n\nThe Stone Street Pivot\nAfter your photo, walk five minutes to Stone Street. It is a historic, pedestrian-only cobblestone alley packed with outdoor pubs frequented by the local Wall Street crowd.\n\nThe Free Ferry Combo\nPair this visit with the Staten Island Ferry. The terminal is a short walk south, completely free, and offers the absolute best close-up views of the Statue of Liberty.\n\nThe Canyon Wind Tunnel\nThe towering skyscrapers of the Financial District create massive wind tunnels. It is always significantly colder and windier at the bull than in midtown Manhattan.\n\nSkip the Paid Tours\nDo not buy a guided Wall Street walking tour just to see the bull. The plaza is entirely public, free, and incredibly easy to navigate on your own.\n\nThe Midnight Glow\nIf you cannot wake up early, visit after midnight. The tourist mobs vanish entirely, and the overhead streetlights bounce beautifully off the polished bronze muscles.\n\nThe Summer Heat Warning\nIn the peak of July and August, the dark bronze absorbs massive amounts of heat. Test the surface carefully before leaning your full body weight on it or putting a child on top.\n\nThe Barricade Crop\nDuring peak afternoon hours, the NYPD frequently sets up ugly metal barricades to control the sprawling lines. Frame your photos tightly to crop out the steel fencing.",
+        "summary": "Charging Bull is a famous Wall Street sculpture symbolizing strength, optimism, and prosperity near Bowling Green in Lower Manhattan.",
+        "image": "images/37.jpg",
+        "cost": 0,
+        "packageId": null,
+        "website": "https://arturodimodica.com",
+        "lat": 40.7059882,
+        "lng": -74.0131226,
+        "rating": null
+      },
+      {
+        "id": "1788723795881",
+        "name": "Fearless Girl Statue",
+        "category": "sightseeing",
+        "day": "",
+        "address": "The Fearless Girl, 2-26 Broad St, New York, NY 10005, United States",
+        "desc": "The Relocation Reality\nDo not look for her at Bowling Green. In late 2018, the statue was permanently moved to the pedestrian plaza on Broad Street, specifically placed to stare directly at the New York Stock Exchange.\n\nThe Ghost Footprints\nIf you visit her original location facing the Charging Bull, look down at the pavement. A commemorative plaque featuring her bronze footprints marks the exact spot where she stood for her first 18 months.\n\nThe 50-Inch Scale\nThe statue is surprisingly small, standing only 50 inches tall. You must get incredibly low to the ground to make the figure look imposing or heroic in your photographs.\n\nLow-Angle Framing\nRest your camera directly on the cobblestones pointing upward. This dramatic low angle perfectly frames the defiant figure against the massive, towering neoclassical columns of the Stock Exchange behind her.\n\nPre-Market Exclusivity\nBroad Street becomes a chaotic, impassable mob of tourists and finance workers by 9:00 AM. Arrive before 7:30 AM on a weekday to capture clean, unobstructed photos without waiting in a long queue.\n\nThe Weekend Ghost Town\nBecause the Financial District exists almost entirely to serve corporate commuters, the area surrounding the statue is remarkably desolate, quiet, and easy to photograph on Saturday and Sunday mornings.\n\nStrict Security Zone\nThe statue sits directly inside the heavily fortified NYSE security perimeter. Heavily armed NYPD counter-terrorism units are always present; drones are strictly banned, and deploying a large tripod will draw immediate scrutiny.\n\nPortrait Lens Compression\nDitch the ultra-wide-angle lens. Use a 50mm or 85mm prime lens to compress the background, keeping the statue sharp while throwing the chaotic Wall Street crowds and building facades into a soft, cinematic blur.\n\nThe Golden Hand Patina\nLook closely at her hands and elbows. The dark bronze has been polished to a bright, shiny gold by the friction of millions of tourists grabbing and posing with the statue over the years.\n\nThe Corporate Origin\nWhile widely viewed as a grassroots feminist icon, the statue was originally commissioned by the financial firm State Street Global Advisors as an advertising campaign to promote their gender-diverse index fund.\n\nOvercast Illumination\nBecause the narrow canyon of Broad Street blocks most direct sunlight, bright days cast harsh, unpredictable shadows. Shoot on a cloudy, overcast day for even, diffused light across the dark bronze features.\n\nCobblestone Ankle Hazard\nThe pedestrian zone surrounding the statue is paved with deeply uneven, historic cobblestones. Be highly aware of your footing if you are walking backward while staring through a camera viewfinder.\n\nThe Event Tent Ruin\nBe aware that the NYSE frequently sets up massive, unsightly white event tents directly behind the statue for corporate IPO celebrations. If one is up, you will have to shoot from a tight side angle to hide it.\n\nThe Federal Hall Pivot\nOnce you capture your shots, simply turn around. The statue sits immediately across the street from Federal Hall and the towering bronze statue of George Washington on the building's front steps.\n\nThe Subway Approach\nTake the J or Z train directly to the Broad Street station. You will emerge from the underground stairwell literally steps away from the back of the statue.",
+        "summary": "Fearless Girl is a bronze statue near Wall Street symbolizing courage, female empowerment, and leadership, standing opposite the Charging Bull.",
+        "image": "images/67.jpg",
+        "cost": 0,
+        "packageId": null,
+        "website": "",
+        "lat": 40.7061876,
+        "lng": -74.0112443,
+        "rating": null
+      },
+      {
+        "id": "1788895772155",
+        "name": "The Oldest Fence in New York",
+        "category": "sightseeing",
+        "day": "",
+        "address": "PX3P+XG Bowling Green, Broadway, New York, NY 10004, United States",
+        "desc": "The Exact Coordinates\nDo not wander aimlessly around the Financial District. The fence completely encircles Bowling Green, a small teardrop-shaped park directly at the intersection of Broadway and Whitehall Street.\n\nThe 1771 Origin\nThis is officially the oldest fence in the city that remains in its original location. It was shipped from England and installed in 1771 specifically to protect a massive, gilded lead equestrian statue of King George III.\n\nThe Royal Target\nThe fence was not decorative; it was a physical barrier. Anti-British sentiment was boiling over, and locals frequently vandalized the king's statue, forcing the British to erect this heavy iron perimeter.\n\nThe July 9 Riot\nOn July 9, 1776, immediately after hearing the first public reading of the Declaration of Independence, an angry mob of soldiers and citizens stormed the park and tore the massive statue down.\n\nThe Missing Crowns\nLook closely at the very top of the fence posts. You will notice they are completely flat. The mob violently sawed off the solid cast-iron crowns that originally topped every single post.\n\nThe Tactile History\nThere are no glass cases or velvet ropes here. You can walk right up and physically run your hand over the tops of the posts to feel the jagged, uneven saw marks left by the 1776 revolutionaries.\n\nThe Musket Ball Transformation\nThe 4,000-pound lead King George statue was completely chopped up, shipped to Connecticut, and melted down into exactly 42,088 musket balls to be fired back at the British army.\n\nThe Original Iron\nDespite centuries of massive street-level renovations, subway construction, and the September 11th attacks just blocks away, the heavy wrought iron you are touching is the exact, authentic 18th-century metal.\n\nThe Oldest Park\nThe fence encircles historical ground. Bowling Green itself was designated in 1733, officially making the tiny patch of grass and fountain the oldest public park in New York City.\n\nThe Macro Lens Opportunity\nDo not just take wide shots of the park. Use a macro lens or get your smartphone camera extremely close to photograph the rusted, sawed-off finials to capture the physical scars of the Revolution.\n\nThe Charging Bull Distraction\nMost tourists completely ignore the historic ironwork because Arturo Di Modica’s massive bronze Charging Bull sits directly at the northern tip of the enclosure, constantly surrounded by a crushing mob.\n\nThe Traffic Hazard\nThe tiny park acts as a massive traffic island completely surrounded by aggressive Lower Manhattan drivers. Use the designated crosswalks, as cars speed blindly around the curve of the teardrop.\n\nThe Midnight Quiet\nThe Financial District aggressively empties out after dark. Visit after 10:00 PM to inspect the fence and photograph the bull in absolute silence without fighting the daytime tourist gridlock.\n\nThe Battery Park Pivot\nOnce you finish examining the saw marks, use this as your gateway to the harbor. Walk exactly two minutes straight south down Whitehall Street to hit Battery Park and the Staten Island Ferry Terminal.\n\nThe Subway Approach\nTransit is completely effortless. Take the 4 or 5 train directly to the Bowling Green station. You will emerge from the escalators staring directly at the historic ironwork.",
+        "summary": "The Oldest Fence in New York is a historic iron fence in Greenwich Village, dating to the 1770s and offering a glimpse into the city’s colonial past.",
+        "image": "images/97.jpg",
+        "cost": 0,
+        "packageId": null,
+        "website": "https://www.nycgovparks.org/parks/bowling-green",
+        "lat": 40.7045091,
+        "lng": -74.0140946,
+        "rating": null
+      },
+      {
+        "id": "1788983946017",
+        "name": "New York Stock Exchange",
+        "category": "sightseeing",
+        "day": "",
+        "address": "New York Stock Exchange, 11 Wall St, New York, NY 10005, United States",
+        "desc": "The Exact Coordinates\nDo not wander the entire Financial District. The iconic neoclassical facade dominates the pedestrian-only intersection of Wall Street and Broad Street.\n\nThe Roman Temple\nDesigned in 1903 by George B. Post, the building features a massive pediment supported by six towering Corinthian columns, built to project absolute, unshakeable financial stability.\n\nThe Digital Reality\nDo not expect a chaotic, screaming trading pit. The massive volume of market data feeding into a custom APEX paper trading terminal actually originates from quiet, refrigerated server farms in Mahwah, New Jersey, leaving the physical floor largely a television set.\n\nThe Buttonwood Origins\nThe world's largest exchange did not start in a stone palace. It was founded in 1792 by 24 brokers who signed a foundational agreement while standing outside under a buttonwood tree at 68 Wall Street.\n\nInterior Inaccessibility\nYou cannot go inside. Following the September 11th attacks, the massive trading floor and the visitor gallery were completely and permanently closed to the general public.\n\nThe Bell Balcony\nLook for the small, ornate balcony protruding directly over the trading floor entrance on the Broad Street side. This is the exact spot where executives and celebrities stand to ring the opening and closing bells.\n\nThe Fearless Girl\nLook directly across the cobblestones from the main facade. The famous bronze Fearless Girl statue was permanently relocated here in 2018, staring directly up at the exchange's front doors.\n\nThe 1920 Scars\nTurn around and look at the limestone facade of 23 Wall Street directly opposite the exchange. You can still clearly see the massive, unpatched craters blasted into the stone by the deadly 1920 Wall Street wagon bombing.\n\nThe Financial Canyon\nBecause the surrounding skyscrapers are incredibly tall and the streets are so narrow, direct sunlight rarely hits the pavement. Visit exactly at high noon to ensure the facade is actually illuminated for photography.\n\nThe Ultra-Wide Necessity\nYou cannot capture the entire building from the immediate sidewalk. Equip an ultra-wide 14mm lens, back up as far as you can against the opposite buildings on Broad Street, and shoot strictly in portrait orientation.\n\nThe Federal Hall Contrast\nLook directly to your right. The Greek Revival architecture and massive George Washington statue of Federal Hall provide a stark, patriotic contrast to the aggressive capitalism of the exchange.\n\nThe Fortress Perimeter\nExpect intense, federal-grade security. The entire intersection is permanently blocked to vehicular traffic by heavy steel bollards, K-9 units, and heavily armed NYPD counter-terrorism officers.\n\nThe Flag Scale\nLook for the massive American flag draped between the massive stone columns. The flag is so colossal that it requires specialized rigging and a dedicated team just to prevent the heavy fabric from tearing in the wind.\n\nThe Trinity Pivot\nOnce you finish photographing the columns, walk exactly three blocks west up the gentle incline of Wall Street to seamlessly explore the historic, towering Gothic spire and graveyard of Trinity Church.\n\nThe Subway Approach\nTransit drops you directly into the security zone. Take the J or Z train to the Broad Street station, and you will emerge from the subway stairs directly in front of the massive facade.",
+        "summary": "New York Stock Exchange is a historic Wall Street landmark, housed in a grand neoclassical building and central to global financial markets.",
+        "image": "images/111.jpg",
+        "cost": 0,
+        "packageId": null,
+        "website": "https://www.nyse.com",
+        "lat": 40.7071407,
+        "lng": -74.010865,
+        "rating": null
       }
     ]
   }

@@ -59,7 +59,7 @@ let tourMapReady = false;    // true once the current MapLibre style has loaded
 /* ---- Small helpers ---- */
 function hasCoords(p) { return !!p && typeof p.lat === 'number' && typeof p.lng === 'number'; }
 function tourIndexOf(id) { return tourIds.indexOf(id); }
-function findPlace(id) { return places.find(p => p.id === id); }
+function findPlace(id) { return findMapEntry(id); } // understands branch ids (locations.js)
 function getTourPlaces() { return tourIds.map(findPlace).filter(Boolean); }
 
 // Drops route entries whose stop was deleted, edited so it lost its coordinates, or replaced
@@ -159,8 +159,8 @@ function startTourFromSelect() {
   if (!query) { showToast('Choose a starting stop first'); return; }
   const pool = getTourPool().filter(hasCoords);
   const lower = query.toLowerCase();
-  const match = pool.find(p => (p.name || '').toLowerCase() === lower) ||
-    pool.find(p => (p.name || '').toLowerCase().includes(lower));
+  const match = pool.find(p => entryTitle(p).toLowerCase() === lower) ||
+    pool.find(p => entryTitle(p).toLowerCase().includes(lower));
   if (!match) { showToast("Couldn't find that stop — pick one from the suggestions"); return; }
   startTour(match.id);
 }
@@ -206,9 +206,11 @@ function autoCompleteTour() {
 async function applyTourOrder() {
   const ordered = getTourPlaces();
   if (ordered.length < 2) { showToast('Add at least two stops first'); return; }
-  const inRoute = new Set(ordered.map(p => p.id));
+  const orderedStops = [];                                   // route entries -> their stops, once each
+  ordered.forEach(e => { const b = places.find(p => p.id === baseIdOf(e.id)); if (b && !orderedStops.includes(b)) orderedStops.push(b); });
+  const inRoute = new Set(orderedStops.map(p => p.id));
   undoSnapshot = JSON.stringify(places);
-  places = [...ordered, ...places.filter(p => !inRoute.has(p.id))];
+  places = [...orderedStops, ...places.filter(p => !inRoute.has(p.id))];
   renderPlaces();
   await persistPlaces();
   showUndoToast(`Trip order updated to your ${ordered.length}-stop route`);
@@ -318,8 +320,8 @@ function renderTourPanel() {
 
   if (tourPlaces.length === 0) {
     // Searchable text input (backed by a <datalist>): the browser filters suggestions as you type.
-    const sortedLocated = located.slice().sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-    const dataOptions = sortedLocated.map(p => `<option value="${escapeHtml(p.name)}"></option>`).join('');
+    const sortedLocated = located.slice().sort((a, b) => entryTitle(a).localeCompare(entryTitle(b)));
+    const dataOptions = sortedLocated.map(p => `<option value="${escapeHtml(entryTitle(p))}"></option>`).join('');
     panelHtml = `
       <div class="tour-head">
         <div class="tour-title">${TOUR_ICON_SVG}Route helper</div>
@@ -353,7 +355,7 @@ function renderTourPanel() {
     const suggestHtml = sugg.length
       ? `<div class="tour-suggest-list">${sugg.map((s, i) => `
           <button type="button" class="tour-suggest${i === 0 ? ' is-closest' : ''}" onclick="addToTour('${s.place.id}')" title="Add to the route and go there">
-            <span class="tour-suggest-name"><span class="tour-suggest-dot" style="background:${categoryDotColor(s.place.category) || 'var(--accent)'}"></span>${escapeHtml(s.place.name)}</span>
+            <span class="tour-suggest-name"><span class="tour-suggest-dot" style="background:${categoryDotColor(s.place.category) || 'var(--accent)'}"></span>${escapeHtml(entryTitle(s.place))}</span>
             <span class="tour-suggest-meta">${i === 0 ? '<span class="tour-closest-tag">Closest</span>' : ''}${escapeHtml(tourFmtLeg(cur, s.place))}</span>
           </button>`).join('')}</div>`
       : `<p class="tour-note">${getTourPool().some(p => hasCoords(p)) ? 'Every located stop on the map is now on your route.' : 'No other located stops on the map.'} Change the map filters to widen the choice.</p>`;
@@ -366,14 +368,14 @@ function renderTourPanel() {
       </div>
       <ol class="tour-route" aria-label="Your route so far">${tourPlaces.map((p, i) => `
         <li><button type="button" class="tour-stop" onclick="flyToPlace('${p.id}')" title="Show on map">
-          <span class="tour-stop-num">${i + 1}</span><span class="tour-stop-name">${escapeHtml(p.name)}</span>${i > 0 ? `<span class="tour-stop-leg">${escapeHtml(tourFmtLeg(tourPlaces[i - 1], p, true))}</span>` : ''}
+          <span class="tour-stop-num">${i + 1}</span><span class="tour-stop-name">${escapeHtml(entryTitle(p))}</span>${i > 0 ? `<span class="tour-stop-leg">${escapeHtml(tourFmtLeg(tourPlaces[i - 1], p, true))}</span>` : ''}
         </button></li>`).join('')}</ol>
       ${unlocatedNote}`;
 
     // Compact card on the map: where you are, the closest next stops, and the route actions.
     cardHtml = `
       <div class="tour-card-head">
-        <p class="tour-now">You're at <strong>${tourPlaces.length}. ${escapeHtml(cur.name)}</strong><span class="tour-summary"> · ${escapeHtml(summary)}</span></p>
+        <p class="tour-now">You're at <strong>${tourPlaces.length}. ${escapeHtml(entryTitle(cur))}</strong><span class="tour-summary"> · ${escapeHtml(summary)}</span></p>
         <button type="button" class="icon-only-btn tour-card-toggle" onclick="toggleTourCard()" title="Collapse / expand" aria-label="Collapse or expand the route card">
           <svg width="14" height="14" viewBox="0 0 10 10" fill="none"><path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
@@ -423,7 +425,7 @@ function decorateTourMarker(place, refreshPopup) {
   const dot = el.querySelector('.map-pin-dot');
   if (dot) dot.innerHTML = idx >= 0
     ? `<span class="map-pin-num">${idx + 1}</span>`
-    : (isInMyList(place.id) ? MYLIST_PIN_BADGE_SVG : '');
+    : (isInMyList(baseIdOf(place.id)) ? MYLIST_PIN_BADGE_SVG : '');
   if (refreshPopup) {
     const popup = marker.getPopup();
     if (popup) popup.setHTML(buildPopupHtml(place));

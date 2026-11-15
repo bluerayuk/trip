@@ -70,12 +70,42 @@ function queueGeocode(place) {
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-// Bias (not restrict) results to the NYC / Long Island / north-NJ area so a
-// name-only fallback like "Burlington" can't land in Vermont.
-const NOMINATIM_VIEWBOX = '-74.45,40.45,-73.35,41.10';
+// Where to look depends on the trip. The default trip is the NYC / Long Island
+// sample, so it keeps its fixed box (results outside are rejected, so a
+// name-only fallback like "Burlington" can't land in Vermont). Any other trip
+// derives a bias box from the stops it already has located; with none yet it
+// searches worldwide. Results are only ever rejected for the default trip.
+const NY_GEO = {
+  viewbox: [-74.45, 40.45, -73.35, 41.10],       // west, south, east, north (bias)
+  accept:  { minLat: 40.3, maxLat: 41.3, minLng: -74.5, maxLng: -72.9 },
+  center:  { lat: 40.73, lng: -73.95 },
+  countrycodes: 'us',
+  defaultCity: 'New York', defaultState: 'NY'
+};
+
+function getGeoContext() {
+  if (typeof currentTripId !== 'undefined' && currentTripId === 'trip-default') return NY_GEO;
+  const pts = [];
+  places.forEach(p => {
+    if (typeof p.lat === 'number' && typeof p.lng === 'number') pts.push(p);
+    (Array.isArray(p.locations) ? p.locations : []).forEach(l => {
+      if (l && typeof l.lat === 'number' && typeof l.lng === 'number') pts.push(l);
+    });
+  });
+  if (!pts.length) return { viewbox: null, accept: null, center: null, countrycodes: null, defaultCity: '', defaultState: '' };
+  const lats = pts.map(p => p.lat), lngs = pts.map(p => p.lng);
+  const pad = 0.25; // degrees (~25 km) of slack around the stops so the bias isn't razor-thin
+  return {
+    viewbox: [Math.min(...lngs) - pad, Math.min(...lats) - pad, Math.max(...lngs) + pad, Math.max(...lats) + pad],
+    accept: null, // bias only: never reject a result for a custom trip
+    center: { lat: (Math.min(...lats) + Math.max(...lats)) / 2, lng: (Math.min(...lngs) + Math.max(...lngs)) / 2 },
+    countrycodes: null, defaultCity: '', defaultState: ''
+  };
+}
 
 const PHOTON_URL = 'https://photon.komoot.io/api/';
-const inNyArea = (lat, lng) => !(lat < 40.3 || lat > 41.3 || lng < -74.5 || lng > -72.9);
+const inGeoArea = (geo, lat, lng) => !geo.accept ||
+  !(lat < geo.accept.minLat || lat > geo.accept.maxLat || lng < geo.accept.minLng || lng > geo.accept.maxLng);
 
 // Remember which provider is currently working so a blocked one isn't retried
 // for every single stop (that was what made 75 stops all hang on "Locating...").
@@ -83,7 +113,11 @@ let geocoderOrder = ['nominatim', 'photon'];
 const demote = (name) => { geocoderOrder = [...geocoderOrder.filter(n => n !== name), name]; };
 
 async function nominatimSearch(q) {
-  const url = `${NOMINATIM_URL}?format=jsonv2&limit=1&countrycodes=us&viewbox=${NOMINATIM_VIEWBOX}&bounded=0&q=${encodeURIComponent(q)}`;
+  const geo = getGeoContext();
+  const url = `${NOMINATIM_URL}?format=jsonv2&limit=1` +
+    (geo.countrycodes ? `&countrycodes=${geo.countrycodes}` : '') +
+    (geo.viewbox ? `&viewbox=${geo.viewbox.join(',')}&bounded=0` : '') +
+    `&q=${encodeURIComponent(q)}`;
   for (let attempt = 0; attempt < 2; attempt++) {
     const res = await fetch(url, { headers: { Accept: 'application/json' } }); // TypeError if blocked / no CORS headers
     if (res.status === 429 || res.status >= 500) { await sleep(2000 * (attempt + 1)); continue; }
@@ -91,21 +125,25 @@ async function nominatimSearch(q) {
     const data = await res.json();
     if (!Array.isArray(data) || !data.length) return null;
     const lat = parseFloat(data[0].lat), lng = parseFloat(data[0].lon);
-    return inNyArea(lat, lng) ? { lat, lng } : null;
+    return inGeoArea(geo, lat, lng) ? { lat, lng } : null;
   }
   throw new Error('The geocoder is rate-limiting requests - try again in a minute');
 }
 
 // Fallback geocoder (OpenStreetMap data, CORS-enabled, no key).
 async function photonSearch(q) {
-  const url = `${PHOTON_URL}?limit=1&lat=40.73&lon=-73.95&bbox=-74.45,40.45,-73.35,41.10&q=${encodeURIComponent(q)}`;
+  const geo = getGeoContext();
+  const url = `${PHOTON_URL}?limit=1` +
+    (geo.center ? `&lat=${geo.center.lat}&lon=${geo.center.lng}` : '') +
+    (geo.viewbox && geo.accept ? `&bbox=${geo.viewbox.join(',')}` : '') + // hard bbox only for the default trip
+    `&q=${encodeURIComponent(q)}`;
   const res = await fetch(url, { headers: { Accept: 'application/json' } });
   if (!res.ok) throw new Error(`The fallback geocoder returned ${res.status}`);
   const data = await res.json();
   const c = data && data.features && data.features[0] && data.features[0].geometry && data.features[0].geometry.coordinates;
   if (!c) return null;
   const lat = c[1], lng = c[0];
-  return inNyArea(lat, lng) ? { lat, lng } : null;
+  return inGeoArea(geo, lat, lng) ? { lat, lng } : null;
 }
 
 const GEOCODERS = { nominatim: nominatimSearch, photon: photonSearch };
@@ -143,8 +181,10 @@ function buildGeocodeQueries(place) {
 
   // City / state / ZIP, when the address ends like "..., East Meadow, NY 11554"
   const m = addr.match(/(?:^|,)\s*([^,]+?),\s*([A-Z]{2})\s*(\d{5})?\s*$/);
-  const city = m ? m[1] : 'New York';
-  const state = m ? m[2] : 'NY';
+  const geo = getGeoContext();
+  const city = m ? m[1] : geo.defaultCity;
+  const state = m ? m[2] : geo.defaultState;
+  const where = [city, state].filter(Boolean).join(', ');
   const zip = m && m[3] ? m[3] : '';
 
   // 1) the address exactly as typed
@@ -163,11 +203,13 @@ function buildGeocodeQueries(place) {
 
   // 3) the place's name in the same town
   const bareName = (place.name || '').replace(/\(.*?\)/g, ' ');
-  add(`${bareName}, ${city}, ${state}`);
+  add(where ? `${bareName}, ${where}` : bareName);
 
   // 4) last resort: the ZIP code / town centre (approximate)
-  if (zip) add(`${city}, ${state} ${zip}`, true);
-  else add(`${city}, ${state}`, true);
+  if (city) {
+    if (zip) add(`${city}, ${state} ${zip}`, true);
+    else add(where, true);
+  }
 
   return queries;
 }
@@ -207,6 +249,7 @@ let mapResizeObserver = null;
 let hiddenMapCategories = new Set();
 let mapFitMode = 'all';        // 'all' | 'manhattan'
 let currentMapPlaces = [];     // the `visible` list for the current render
+let currentMapIds = new Set();   // ids of the entries currently on the map (kept in sync with currentMapPlaces)
 let mapControlsEl = null;
 let mapMyListOnly = false;    // "My list only" toggle
 // Stops that already failed to geocode this session. Without this, every map
@@ -241,13 +284,13 @@ const MYLIST_PIN_BADGE_SVG = '<svg width="13" height="13" viewBox="0 0 16 16" fi
 // Shortlisted ("My attractions") stops get a larger pin with a bookmark badge
 // so they stand out from the rest of the trip.
 function buildMarkerEl(place) {
-  const inList = isInMyList(place.id);
+  const inList = isInMyList(baseIdOf(place.id));
   const el = document.createElement('div');
   el.className = 'map-pin-icon' + (inList ? ' is-mylist' : '');
   const color = categoryDotColor(place.category) || 'var(--accent)';
   el.innerHTML = `
     <span class="map-pin-dot" style="background:${color}">${inList ? MYLIST_PIN_BADGE_SVG : ''}</span>
-    <span class="map-pin-label">${escapeHtml(place.name)}</span>
+    <span class="map-pin-label">${escapeHtml(entryTitle(place))}</span>
   `;
   return el;
 }
@@ -278,9 +321,10 @@ function getNearestFood(place, count = NEARBY_FOOD_COUNT) {
   if (!place || place.category === FOOD_CATEGORY || !located(place)) return [];
   const pool = currentMapPlaces.length ? currentMapPlaces : places;
   return pool
-    .filter(p => p.category === FOOD_CATEGORY && p.id !== place.id && located(p))
+    .filter(p => p.category === FOOD_CATEGORY && baseIdOf(p.id) !== baseIdOf(place.id) && located(p))
     .map(p => ({ place: p, km: foodDistanceKm(place, p) }))
     .sort((a, b) => a.km - b.km)
+    .filter((f, i, arr) => arr.findIndex(g => baseIdOf(g.place.id) === baseIdOf(f.place.id)) === i) // one row per stop: its nearest branch
     .slice(0, count);
 }
 
@@ -290,10 +334,20 @@ function nearbyFoodPopupHtml(place) {
   return `<div class="map-popup-food">
     <div class="map-popup-food-title">Nearest food</div>
     ${list.map(f => `<button type="button" class="map-popup-food-item" onclick="flyToPlace('${f.place.id}')">
-      <span class="map-popup-food-name">${escapeHtml(f.place.name)}</span>
+      <span class="map-popup-food-name">${escapeHtml(entryTitle(f.place))}</span>
       <span class="map-popup-food-leg">${escapeHtml(fmtFoodLeg(f.km))}</span>
     </button>`).join('')}
   </div>`;
+}
+
+// "Also at: ..." chips in a popup, so a multi-location stop's other pins are one tap away.
+function branchSwitcherHtml(place) {
+  const base = findMapEntry(baseIdOf(place.id));
+  if (!base) return '';
+  const others = mapEntriesOf(base).filter(e => e.id !== place.id && typeof e.lat === 'number' && typeof e.lng === 'number');
+  if (!others.length) return '';
+  return `<div class="map-popup-branches"><span>Also at</span>${others.map(e =>
+    `<button type="button" class="map-popup-branch-btn" onclick="flyToPlace('${e.id}')">${escapeHtml(e.isBranch ? (e.branchLabel || e.address) : (e.branchLabel || 'Main'))}</button>`).join('')}</div>`;
 }
 
 function buildPopupHtml(place) {
@@ -302,10 +356,12 @@ function buildPopupHtml(place) {
     <div class="map-popup">
       <div class="map-popup-category" style="color:${categoryDotColor(place.category) || 'inherit'}">${escapeHtml(categoryLabel(place.category))}</div>
       <div class="map-popup-title">${escapeHtml(place.name)}</div>
+      ${place.isBranch && place.branchLabel ? `<div class="map-popup-branch">${escapeHtml(place.branchLabel)}</div>` : ''}
+      ${branchSwitcherHtml(place)}
       ${place.approxLocation ? '<div class="map-popup-approx">Approximate location - use Fix address for an exact pin</div>' : ''}
-      ${isInMyList(place.id) ? '<div class="map-popup-mylist">In My attractions</div>' : ''}
+      ${isInMyList(baseIdOf(place.id)) ? '<div class="map-popup-mylist">In My attractions</div>' : ''}
       ${place.address ? `<div class="map-popup-address">${escapeHtml(place.address)}</div>` : ''}
-      ${place.desc ? `<button type="button" class="map-popup-details" onclick="openDetailModal('${place.id}')">View insider tips</button>` : ''}
+      ${place.desc ? `<button type="button" class="map-popup-details" onclick="openDetailModal('${baseIdOf(place.id)}')">View insider tips</button>` : ''}
       ${nearbyFoodPopupHtml(place)}
       ${typeof tourPopupHtml === 'function' ? tourPopupHtml(place) : ''}
       ${dirUrl ? `<a class="map-popup-directions" href="${dirUrl}" target="_blank" rel="noopener">Directions in Google Maps ↗</a>` : ''}
@@ -338,7 +394,7 @@ function fitPopupToMap(popup) {
 
 function addOrUpdateMarker(place) {
   if (markerById[place.id]) { markerById[place.id].remove(); }
-  const popup = new maplibregl.Popup({ offset: isInMyList(place.id) ? 20 : 14, closeButton: true }).setHTML(buildPopupHtml(place));
+  const popup = new maplibregl.Popup({ offset: isInMyList(baseIdOf(place.id)) ? 20 : 14, closeButton: true }).setHTML(buildPopupHtml(place));
   popup.on('open', () => {
     popup.setHTML(buildPopupHtml(place));   // refresh: more food pins may have been located since
     selectMapPin(place.id, true);
@@ -364,7 +420,7 @@ const MANHATTAN_BOUNDS = { south: 40.695, north: 40.885, west: -74.03, east: -73
 // "My list only" is on and the stop isn't shortlisted.
 function isPlaceHiddenOnMap(place) {
   if (hiddenMapCategories.has(place.category)) return true;
-  return mapMyListOnly && !isInMyList(place.id);
+  return mapMyListOnly && !isInMyList(baseIdOf(place.id));
 }
 
 function inManhattanBounds(ll) {
@@ -376,7 +432,7 @@ function inManhattanBounds(ll) {
 function visibleMarkers() {
   return Object.entries(markerById)
     .filter(([id]) => {
-      const p = places.find(x => x.id === id);
+      const p = findMapEntry(id);
       return p && !isPlaceHiddenOnMap(p);
     })
     .map(([, m]) => m);
@@ -406,7 +462,7 @@ function fitToMarkers(animate) {
 // pins that just disappeared, then syncs the legend chips.
 function applyCategoryVisibility() {
   Object.entries(markerById).forEach(([id, marker]) => {
-    const p = places.find(x => x.id === id);
+    const p = findMapEntry(id);
     const hidden = !p || isPlaceHiddenOnMap(p);
     marker.getElement().style.display = hidden ? 'none' : '';
     if (hidden) {
@@ -465,6 +521,7 @@ document.addEventListener('keydown', (e) => {
 
 function buildMapControls(visible, wrap, mapEl) {
   currentMapPlaces = visible;
+  currentMapIds = new Set(visible.map(p => p.id));
   const myCount = getMyListPlaces().length;
   if (myCount === 0) mapMyListOnly = false; // nothing shortlisted -> can't stay filtered to it
   const counts = {};
@@ -537,7 +594,7 @@ let unlocatedDetailsOpen = false;
 function renderUnlocatedPanel() {
   if (!unlocatedPanelEl) return;
   const stillUnresolved = unresolvedIds
-    .map(id => places.find(p => p.id === id))
+    .map(id => findMapEntry(id))
     .filter(p => p && !(typeof p.lat === 'number' && typeof p.lng === 'number'));
 
   if (!stillUnresolved.length) {
@@ -570,12 +627,12 @@ function renderUnlocatedPanel() {
       ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.address)}`
       : null;
     return `<li class="map-unlocated-item" data-id="${p.id}">
-      <span class="map-unlocated-name">${escapeHtml(p.name)}</span>
+      <span class="map-unlocated-name">${escapeHtml(entryTitle(p))}</span>
       <span class="map-unlocated-address">${p.address ? escapeHtml(p.address) : 'No address saved'}</span>
       ${reason ? `<span class="map-unlocated-status">${escapeHtml(reason)}</span>` : ''}
       <span class="map-unlocated-actions">
         ${p.address ? `<button type="button" class="icon-text-btn map-locate-btn" onclick="retryGeocode('${p.id}')">Locate</button>` : ''}
-        <button type="button" class="icon-text-btn map-locate-btn" onclick="startEdit('${p.id}')" title="Edit the address, or paste a Google Maps link for an exact pin">Fix address</button>
+        <button type="button" class="icon-text-btn map-locate-btn" onclick="startEdit('${baseIdOf(p.id)}')" title="Edit the address, or paste a Google Maps link for an exact pin">Fix address</button>
         ${searchUrl ? `<a class="map-unlocated-fallback" href="${searchUrl}" target="_blank" rel="noopener">Google Maps ↗</a>` : ''}
       </span>
     </li>`;
@@ -600,6 +657,7 @@ function toggleUnlocatedDetails() {
 }
 
 async function geocodeAndPlace(place, renderId) {
+  const addrAtStart = place.address;   // detect edits made while the lookup is in flight
   pendingGeocodeIds.add(place.id);
   failedGeocodeIds.delete(place.id);
   renderUnlocatedPanel();
@@ -607,6 +665,11 @@ async function geocodeAndPlace(place, renderId) {
     const coords = await queueGeocode(place);
     if (renderId !== mapRenderId) return; // this render is gone; a newer one owns the map now
     pendingGeocodeIds.delete(place.id);
+    // The address changed, or exact coordinates were set, while we waited: this result is stale.
+    if (place.address !== addrAtStart || (typeof place.lat === 'number' && typeof place.lng === 'number')) {
+      renderUnlocatedPanel();
+      return;
+    }
     if (!coords) {
       failedGeocodeIds.add(place.id);
       noteGeocodeFailure(place, 'Address not found');
@@ -619,10 +682,11 @@ async function geocodeAndPlace(place, renderId) {
     if (coords.approx) place.approxLocation = true; else delete place.approxLocation;
     permanentlyFailed.delete(failKey(place));
     delete geocodeFailureReason[place.id];
-    addOrUpdateMarker(place);
+    if (currentMapIds.has(place.id)) addOrUpdateMarker(place);
     if (typeof refreshTour === 'function') refreshTour(); // newly located stops join the suggestions (nearest.js)
     if (mapAutoFit) fitToMarkers();
     tryPendingFocus();
+    if (typeof resortSplitListByProximity === 'function') resortSplitListByProximity(); // newly located stop moves into place (proximity.js)
     renderUnlocatedPanel();
     await persistPlaces(); // save it so this address is never geocoded again
   } catch (err) {
@@ -641,13 +705,13 @@ async function geocodeAndPlace(place, renderId) {
 // first time around — nothing else here auto-retries.
 function retryAllGeocodes() {
   unresolvedIds
-    .map(id => places.find(p => p.id === id))
+    .map(id => findMapEntry(id))
     .filter(p => p && p.address && !(typeof p.lat === 'number' && typeof p.lng === 'number') && !pendingGeocodeIds.has(p.id))
     .forEach(p => { permanentlyFailed.delete(failKey(p)); geocodeAndPlace(p, mapRenderId); });
 }
 
 function retryGeocode(id) {
-  const place = places.find(p => p.id === id);
+  const place = findMapEntry(id);
   if (!place || !place.address) return;
   permanentlyFailed.delete(failKey(place));
   geocodeAndPlace(place, mapRenderId);
@@ -665,7 +729,7 @@ const SPLIT_PLACEHOLDER_SVG = '<svg width="20" height="20" viewBox="0 0 24 24" f
 function getMapPlaces(visible) {
   const ids = new Set(visible.map(p => p.id));
   getMyListPlaces().forEach(p => ids.add(p.id));
-  return places.filter(p => ids.has(p.id));
+  return sortByProximity(expandMapEntries(places.filter(p => ids.has(p.id))));  // nearest-first when ticked (proximity.js)
 }
 
 function hasMapLocation(p) {
@@ -684,7 +748,7 @@ function selectMapPin(id, scrollList) {
   Object.entries(markerById).forEach(([mid, m]) => m.getElement().classList.toggle('is-selected', mid === id));
 
   // Ring the nearest food pins while a non-food pin is selected
-  const foodIds = new Set(id ? getNearestFood(places.find(p => p.id === id)).map(f => f.place.id) : []);
+  const foodIds = new Set(id ? getNearestFood(findMapEntry(id)).map(f => f.place.id) : []);
   Object.entries(markerById).forEach(([mid, m]) => m.getElement().classList.toggle('is-food-nearby', foodIds.has(mid)));
 
   const rows = [...document.querySelectorAll('.split-row')];
@@ -719,14 +783,14 @@ function closeAllPopups(exceptId) {
 
 // Returns true if the pin existed and we flew to it.
 function flyToPlace(id) {
-  const place = places.find(p => p.id === id);
+  const place = findMapEntry(id);
   const marker = markerById[id];
   if (!place || !marker || !maplibreMap) return false;
 
   // If a legend toggle / "My list only" is hiding this pin, undo just enough to show it.
   let changed = false;
   if (hiddenMapCategories.has(place.category)) { hiddenMapCategories.delete(place.category); changed = true; }
-  if (mapMyListOnly && !isInMyList(place.id)) { mapMyListOnly = false; changed = true; }
+  if (mapMyListOnly && !isInMyList(baseIdOf(place.id))) { mapMyListOnly = false; changed = true; }
   if (changed) applyCategoryVisibility();
 
   mapAutoFit = false;
@@ -758,7 +822,7 @@ function scrollMapIntoView() {
 // map is already showing it just flies there. opts.scroll === false skips
 // scrolling the page (used by split-view rows, which sit beside the map).
 function showOnMap(id, opts = {}) {
-  const place = places.find(p => p.id === id);
+  const place = findMapEntry(id);
   if (!place) return;
   if (!hasMapLocation(place)) { showToast('No address saved for this stop'); return; }
   pendingFocusId = id;
@@ -773,7 +837,7 @@ function showOnMap(id, opts = {}) {
 }
 
 function buildSplitRow(place) {
-  const inList = isInMyList(place.id);
+  const inList = isInMyList(baseIdOf(place.id));
   const pkg = place.packageId ? packages.find(pk => pk.id === place.packageId) : null;
   const costVal = pkg ? (parseFloat(pkg.cost) || 0)
     : (place.cost != null && place.cost !== '' ? parseFloat(place.cost) : null);
@@ -792,7 +856,7 @@ function buildSplitRow(place) {
     <button type="button" class="split-row-main" aria-label="Show ${escapeHtml(place.name)} on the map">
       <span class="split-row-thumb">${place.image ? `<img src="${escapeHtml(place.image)}" alt="" loading="lazy" draggable="false" onerror="this.style.display='none'">` : SPLIT_PLACEHOLDER_SVG}</span>
       <span class="split-row-text">
-        <span class="split-row-title"><span class="split-row-name">${escapeHtml(place.name)}</span>${inList ? `<span class="split-row-bookmark" title="In My attractions">${MYLIST_PIN_BADGE_SVG.replace('fill="#fff"', 'fill="currentColor"')}</span>` : ''}</span>
+        <span class="split-row-title"><span class="split-row-name">${escapeHtml(entryTitle(place))}</span>${inList ? `<span class="split-row-bookmark" title="In My attractions">${MYLIST_PIN_BADGE_SVG.replace('fill="#fff"', 'fill="currentColor"')}</span>` : ''}</span>
         <span class="split-row-meta">
           <span class="split-row-dot" style="background:${color}"></span>
           <span>${escapeHtml(categoryLabel(place.category))}</span>
@@ -817,7 +881,7 @@ function buildSplitRow(place) {
   const routeBtn = row.querySelector('.split-row-route');
   if (routeBtn) routeBtn.addEventListener('click', (e) => { e.stopPropagation(); tourPick(place.id); });
   const det = row.querySelector('.split-row-details');
-  if (det) det.addEventListener('click', (e) => { e.stopPropagation(); openDetailModal(place.id); });
+  if (det) det.addEventListener('click', (e) => { e.stopPropagation(); openDetailModal(baseIdOf(place.id)); });
   return row;
 }
 
@@ -892,6 +956,74 @@ function updateMapHeight() {
   document.documentElement.style.setProperty('--map-h', h + 'px');
 }
 window.addEventListener('resize', updateMapHeight);
+
+// Applies the current search/category filter to the map that is already on screen:
+// markers are added/removed and the split list rebuilt, but the MapLibre instance,
+// tiles, camera and open route are left alone. Returns false when the caller should
+// do a full renderPlaces() instead (no live map, empty state, brand-new category).
+function updateMapInPlace() {
+  if (currentView !== 'map' && currentView !== 'split') return false;
+  if (!maplibreMap || !mapControlsEl || !maplibreMap.getContainer().isConnected) return false;
+
+  // My attractions tab shows only the list's stops and ignores search on the map.
+  const visible = activeTab === 'mylist' ? [] : getVisiblePlaces();
+  if (activeTab !== 'mylist' && visible.length === 0 && getMyListPlaces().length === 0) return false; // empty state
+
+  const mapPlaces = getMapPlaces(visible);
+
+  // A category with no legend chip yet needs the controls rebuilt: fall back.
+  const chipCats = new Set([...mapControlsEl.querySelectorAll('.map-legend-chip')].map(c => c.dataset.cat));
+  if (mapPlaces.some(p => !chipCats.has(p.category))) return false;
+
+  const newIds = new Set(mapPlaces.map(p => p.id));
+  currentMapPlaces = mapPlaces;
+  currentMapIds = newIds;
+
+  // 1) Drop markers that no longer match
+  Object.keys(markerById).forEach(id => {
+    if (!newIds.has(id)) { markerById[id].remove(); delete markerById[id]; }
+  });
+  if (selectedMapId && !newIds.has(selectedMapId)) selectMapPin(null);
+
+  // 2) Add markers for newly matching stops (geocode the ones without coordinates)
+  unresolvedIds = unresolvedIds.filter(id => newIds.has(id));
+  mapPlaces.forEach(p => {
+    if (markerById[p.id]) return;
+    if (typeof p.lat === 'number' && typeof p.lng === 'number') {
+      addOrUpdateMarker(p);
+    } else if (p.address) {
+      if (!unresolvedIds.includes(p.id)) unresolvedIds.push(p.id);
+      if (!pendingGeocodeIds.has(p.id) && !permanentlyFailed.has(failKey(p))) geocodeAndPlace(p, mapRenderId);
+    }
+  });
+
+  // 3) Legend counts (hide chips with nothing in them), status text, route suggestions
+  const counts = {};
+  mapPlaces.forEach(p => { counts[p.category] = (counts[p.category] || 0) + 1; });
+  mapControlsEl.querySelectorAll('.map-legend-chip').forEach(chip => {
+    const n = counts[chip.dataset.cat] || 0;
+    const el = chip.querySelector('.map-legend-count');
+    if (el) el.textContent = n;
+    chip.style.display = n ? '' : 'none';
+  });
+  applyCategoryVisibility();   // also calls updateMapControlsUi() and refreshTour()
+  renderUnlocatedPanel();
+
+  // 4) Split view: rebuild only the rows, keep the list element (and the map beside it)
+  const list = document.querySelector('.split-list');
+  if (list) {
+    list.querySelectorAll('.split-row').forEach(r => r.remove());
+    const head = list.querySelector('.split-list-head');
+    if (head) head.textContent = `${mapPlaces.length} stop${mapPlaces.length !== 1 ? 's' : ''} · click one to fly to it`;
+    mapPlaces.forEach(p => list.appendChild(buildSplitRow(p)));
+    if (typeof decorateSplitRows === 'function') decorateSplitRows();  // also reorders for an active route
+    if (selectedMapId) selectMapPin(selectedMapId);
+  }
+
+  // 5) Reframe only if the user hasn't panned/zoomed or flown somewhere
+  if (mapAutoFit) fitToMarkers(true);
+  return true;
+}
 
 function renderMapView(container, visible) {
   const renderId = ++mapRenderId;
@@ -999,7 +1131,7 @@ function renderMapView(container, visible) {
     // Geocode every address-only stop, one at a time (queueGeocode enforces
     // the gap between requests) so a big trip doesn't hammer Nominatim.
     unresolvedIds.forEach(id => {
-      const place = places.find(p => p.id === id);
+      const place = findMapEntry(id);
       if (place && !permanentlyFailed.has(failKey(place))) geocodeAndPlace(place, renderId);
     });
   };

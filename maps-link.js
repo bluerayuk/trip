@@ -14,19 +14,16 @@
 //   - Exposed to app.js / index.html: parseGoogleMapsLink, handleAddressPaste,
 //     and the `pendingCoords` state (owned here; submitForm reads and resets it).
 //
-// Note: stops store lat/lng, but nothing in the app currently reads them back
-// (see the NOTE below). What users see today is the link -> clean name swap.
+// The captured lat/lng are saved on the stop and drive its map pin (map-view.js)
+// and the route helper (nearest.js); a stop with exact coords is never geocoded.
 
 /* ---- Parsing ---- */
-// NOTE: this was originally built to feed Citymapper's `endcoord` param
-// (now removed). Nothing currently reads place.lat/place.lng — they're
-// still captured and stored below, but purely as leftover plumbing.
-// This app runs inside a Claude.ai artifact, and artifacts run in a
-// sandboxed iframe that blocks fetch() to arbitrary third-party domains
-// (like a geocoding API), so we can't resolve coordinates over the
-// network. Instead: if the address field contains a Google Maps link
-// (Share -> Copy link on a place), we pull the lat/lng straight out of
-// the URL itself — that's pure string parsing, no network call needed.
+// Exact coordinates matter: map-view.js and nearest.js use place.lat/lng for
+// pins and distances, and a stop that already has them skips geocoding.
+// Artifacts run in a sandboxed iframe that may block fetch() to third-party
+// geocoders, so when the address field contains a Google Maps link
+// (Share -> Copy link on a place) we pull lat/lng straight out of the URL
+// itself — pure string parsing, no network call needed.
 //
 // Works with links like:
 //   https://www.google.com/maps/place/Statue+of+Liberty/@40.6892,-74.0445,17z/data=...!3d40.6892494!4d-74.0445004...
@@ -35,10 +32,9 @@
 // only reveal real coordinates after a server redirect we can't follow.
 function parseGoogleMapsLink(text) {
   const t = (text || '').trim();
-  if (!/^https?:\/\//i.test(t) || !/google\.[a-z.]+\/maps|maps\.google\./i.test(t)) return null;
-  if (/maps\.app\.goo\.gl|goo\.gl\/maps/i.test(t)) {
-    return { shortened: true };
-  }
+  if (!/^https?:\/\//i.test(t)) return null;
+  if (/maps\.app\.goo\.gl|goo\.gl\/maps/i.test(t)) return { shortened: true };
+  if (!/google\.[a-z.]+\/maps|maps\.google\./i.test(t)) return null;
   // Prefer the precise pin coords (!3d<lat>!4d<lng>) over the map's
   // camera-center coords (@<lat>,<lng>) since the latter can drift once
   // you've panned/zoomed before copying the link.

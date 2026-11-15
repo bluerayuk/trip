@@ -1,7 +1,7 @@
 /* ============ Reorder: drag & drop (+ keyboard move) ============ */
 // Everything that changes the order of stops:
 //   - Mouse/touch drag & drop in Grid view (incl. moving a stop between day
-//     groups when "Group by day" is on) and in Route view.
+//     groups when "Group by day" is on).
 //   - moveStop(): the keyboard equivalent (Alt + Arrow Up/Down), called from
 //     handleCardKeydown in app.js.
 //
@@ -13,8 +13,7 @@
 //     lastFocusId, getVisiblePlaces, renderPlaces, persistPlaces, announce,
 //     showUndoToast.
 //   - Exposed to app.js: moveStop, buildEndDropZone, handleDragStart,
-//     handleDragEnd, handleContainerDragOver, handleContainerDrop,
-//     handleRouteContainerDragOver.
+//     handleDragEnd, handleContainerDragOver, handleContainerDrop.
 
 /* ---- Drag state ---- */
 let draggedId = null;
@@ -23,6 +22,7 @@ let dragStartSnapshot = null; // places order when the drag began, for cancel/un
 let dropHappened = false;     // did a drop actually complete this drag?
 
 async function moveStop(id, direction) {
+  if (orderLocked()) { showToast('Set the order to "Trip order" and turn off "Nearest first" to reorder'); return; }
   const visible = getVisiblePlaces();
   const idx = visible.findIndex(p => p.id === id);
   const newIdx = idx + direction;
@@ -61,51 +61,31 @@ function setDragOver(el) {
   if (el) el.classList.add('drag-over');
 }
 
-// Finds the drop target within a container by locating the *nearest*
-// card/item to the cursor (by center-point distance) and deciding
-// before/after relative to that one card. This is more robust than
-// scanning row-by-row: a sparse last row (fewer cards than columns) or a
-// cursor that's dropped past every card's bounding box still always
-// resolves to *some* real target — in particular, hovering below/right
-// of the last card reliably resolves to "after the last card" instead
-// of occasionally falling through unresolved.
-// Two orientations:
-// - 'grid' (default): nearest card by 2D distance; before/after decided
-//   by which side of that card's horizontal midpoint the cursor is on.
-// - 'list': nearest item by vertical distance only (used for the
-//   single-column Route view); before/after decided by the item's
-//   vertical midpoint.
-// Returns null only when the container has no other items to compare
-// against — callers treat that as "drop at the end of this container".
-function findDropTarget(containerEl, clientX, clientY, opts = {}) {
-  const selector = opts.itemSelector || '.card';
-  const orientation = opts.orientation || 'grid';
-  const items = [...containerEl.querySelectorAll(selector)].filter(el => el.dataset.id !== draggedId);
+// Finds the drop target within a container by locating the *nearest* card to
+// the cursor (by center-point distance) and deciding before/after relative to
+// that one card (left/right of its horizontal midpoint). Hovering below/right
+// of the last card still resolves to "after the last card".
+// Returns null only when the container has no other cards to compare against;
+// callers treat that as "drop at the end of this container".
+function findDropTarget(containerEl, clientX, clientY) {
+  const items = [...containerEl.querySelectorAll('.card')].filter(el => baseIdOf(el.dataset.id) !== draggedId);
   if (items.length === 0) return null;
 
   let nearestEl = null, nearestRect = null, nearestDist = Infinity;
   for (const el of items) {
     const rect = el.getBoundingClientRect();
-    const cx = rect.left + rect.width / 2;
-    const cy = rect.top + rect.height / 2;
-    const dx = orientation === 'list' ? 0 : clientX - cx;
-    const dy = clientY - cy;
+    const dx = clientX - (rect.left + rect.width / 2);
+    const dy = clientY - (rect.top + rect.height / 2);
     const dist = dx * dx + dy * dy;
     if (dist < nearestDist) { nearestDist = dist; nearestEl = el; nearestRect = rect; }
   }
-
-  if (orientation === 'list') {
-    const mid = nearestRect.top + nearestRect.height / 2;
-    return { targetId: nearestEl.dataset.id, after: clientY >= mid, el: nearestEl };
-  }
   const midX = nearestRect.left + nearestRect.width / 2;
-  return { targetId: nearestEl.dataset.id, after: clientX >= midX, el: nearestEl };
+  return { targetId: baseIdOf(nearestEl.dataset.id), after: clientX >= midX, el: nearestEl };
 }
 
 // If the dragged place's "day" doesn't match groupKey, updates it so the
 // stop now belongs to whichever day-group container it was dropped into.
-// No-op when groupKey is undefined (grid isn't grouped by day, or this is
-// the Route view, neither of which has a day-group concept for D&D).
+// No-op when groupKey is undefined (the grid isn't grouped by day).
 function applyGroupKey(place, groupKey) {
   if (groupKey === undefined || !place) return;
   const current = (place.day && place.day.trim()) ? place.day.trim() : UNSCHEDULED_KEY;
@@ -167,7 +147,7 @@ function handleContainerDragOver(e) {
   if (!draggedEl) return;
 
   const groupKey = this.dataset.groupKey; // undefined when grid isn't grouped by day
-  const result = findDropTarget(this, e.clientX, e.clientY, { itemSelector: '.card', orientation: 'grid' });
+  const result = findDropTarget(this, e.clientX, e.clientY);
 
   if (result) {
     setDragOver(result.el);
@@ -216,29 +196,6 @@ async function handleContainerDrop(e) {
   } catch (err) {
     console.error('[waypoint] reorder failed:', err);
   }
-}
-
-// ---- Route view drag & drop (flat list, no day-group concept) ----
-function handleRouteContainerDragOver(e) {
-  if (!draggedId) return;
-  e.preventDefault();
-  if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
-
-  const draggedEl = this.querySelector(`.route-item[data-id="${draggedId}"]`);
-  if (!draggedEl) return;
-
-  const result = findDropTarget(this, e.clientX, e.clientY, { itemSelector: '.route-item', orientation: 'list' });
-  if (!result) { setDragOver(null); return; }
-
-  setDragOver(result.el);
-  if (result.el === draggedEl) return;
-  const alreadyInPlace = result.after
-    ? draggedEl.previousElementSibling === result.el
-    : draggedEl.nextElementSibling === result.el;
-  if (!alreadyInPlace) {
-    if (result.after) result.el.after(draggedEl); else result.el.before(draggedEl);
-  }
-  reorderPlacesArray(result.targetId, result.after);
 }
 
 function buildEndDropZone() {

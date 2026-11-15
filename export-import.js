@@ -3,6 +3,7 @@
 //   - exportJson():      download the current trip as a .json file
 //   - importJson(evt):   replace the current trip's stops from a .json file
 //                        (accepts this app's export format or a bare array of stops)
+//   - exportCsv():       download every stop (or My attractions) with its category as a .csv
 //   - copyItinerary():   copy the currently visible stops to the clipboard as text
 //   - exportMyListJson(): download just the "My attractions" shortlist as a .json file
 //   - copyMyList():       copy just the "My attractions" shortlist to the clipboard as text
@@ -77,6 +78,7 @@ function importJson(event) {
       const parsed = JSON.parse(reader.result);
       const result = parsed.delta ? applyDelta(parsed.delta) : applyParsedTrip(parsed);
       if (!window.confirm(`Import ${result.places.length} stop(s)? This will replace the current trip's stops.`)) return;
+      await takeSnapshot('Before import', serializeTrip(currentTrip()));
       undoSnapshot = JSON.stringify(places);
       undoPackagesSnapshot = JSON.stringify(packages);
       undoMyListSnapshot = JSON.stringify(myList);
@@ -92,6 +94,80 @@ function importJson(event) {
   };
   reader.readAsText(file);
 }
+
+/* ---- CSV export: attractions + categories ---- */
+// One row per stop. Exports the "My attractions" shortlist when that tab is
+// showing, otherwise every stop in the trip (ignoring filters, so nothing is
+// silently left out). Opens cleanly in Excel / Google Sheets / Numbers.
+function csvCell(v) {
+  const s = (v == null) ? '' : String(v);
+  return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+
+function exportCsv() {
+  try {
+    const onMyList = (typeof activeTab !== 'undefined' && activeTab === 'mylist' && typeof getMyListPlaces === 'function');
+    const list = onMyList ? getMyListPlaces() : places;
+    if (!list || list.length === 0) { showToast('Nothing to export'); return; }
+    const trip = currentTrip();
+    const header = ['Name', 'Category', 'Day', 'Address', 'Cost', 'Rating', 'Package', 'Website', 'Summary'];
+    const rows = list.map(p => {
+      const pkg = p.packageId ? packages.find(pk => pk.id === p.packageId) : null;
+      return [
+        p.name,
+        categoryLabel(p.category),
+        p.day || '',
+        p.address || '',
+        (p.cost != null && p.cost !== '') ? p.cost : '',
+        (p.rating != null && p.rating !== '') ? p.rating : '',
+        pkg ? pkg.name : '',
+        p.website || '',
+        p.summary || ''
+      ];
+    });
+    const body = [header, ...rows].map(r => r.map(csvCell).join(',')).join('\r\n');
+    const base = `${trip ? trip.name : 'trip'}${onMyList ? '-my-attractions' : '-attractions'}`;
+    const filename = `${base.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}.csv`;
+    showToast(`Exporting ${list.length} attraction${list.length === 1 ? '' : 's'}...`);
+    try {
+      const blob = new Blob(['\ufeff' + body], { type: 'text/csv;charset=utf-8' }); // BOM so Excel reads UTF-8
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (dlErr) {
+      // Downloads can be blocked (sandboxed preview, in-app browser): copy the CSV instead
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(body).then(
+          () => showToast('Download blocked - CSV copied to clipboard instead'),
+          () => showToast('Download blocked and copy failed'));
+      } else {
+        showToast('Download blocked in this browser');
+      }
+    }
+  } catch (err) {
+    console.error('exportCsv failed', err);
+    showToast('CSV export failed: ' + (err && err.message ? err.message : err));
+  }
+}
+window.exportCsv = exportCsv;
+
+// Safety net: if the page's HTML doesn't have an Export CSV button yet, add one next to Export JSON.
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('button').forEach(btn => {
+    if (btn.textContent.trim() !== 'Export JSON') return;
+    const next = btn.nextElementSibling;
+    if (next && /exportCsv/.test(next.getAttribute('onclick') || '')) return;
+    const copy = btn.cloneNode(true);
+    copy.textContent = 'Export CSV';
+    copy.setAttribute('onclick', btn.getAttribute('onclick').replace('exportJson()', 'exportCsv()'));
+    btn.after(copy);
+  });
+});
 
 /* ---- Copy to clipboard (full trip) ---- */
 function copyItinerary() {
